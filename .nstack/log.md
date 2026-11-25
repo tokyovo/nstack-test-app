@@ -283,3 +283,11 @@
 - Decision: catch only to show the alert; `unstable_rethrow(error)` first so a redirect (expired session) or not-found still navigates (plan fresh-reader answer).
 - Decision: the error state is a string, set once per finished move (`moved ? null : message`), so "one alert at a time, cleared by the next success" falls out of one assignment (principle 3).
 - Evidence: both AC29 tests red first (no alert); clear test red with the clear-on-success removed (alert still shown); full chain at the commit, see verify.md T20.
+
+## 2026-11-25 Continue: slice 6 build (controller)
+- Read: go/SKILL.md, build/SKILL.md, verify/SKILL.md; state files.
+- Orient: found builder worktrees from the previous session with no live agents: nstack/t19 (d8c8daf, committed), nstack/t20 (4445de2, committed), nstack/t22 (uncommitted draft: playwright.config.ts + e2e/global-teardown.ts). No open PRs; main == origin/main.
+- [x] merge T19, T20 into nstack/board-feedback: T19 fast-forward; T20 conflict in log.md only (kept both entries). lint + typecheck pass after merge. Removed both worktrees and branches.
+- [ ] T21: builder dispatched (worktree, branch nstack/t21 from 45dce39)
+- [ ] T22: builder dispatched to prove/finish the draft in its existing worktree
+- [ ] ticket-scope verify T19, T20, T21, T22 (on the slice branch, after merges)
