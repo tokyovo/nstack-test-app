@@ -153,3 +153,9 @@
 - needs-human: only open item is the optional `origin/nstack/ci` cleanup; `git ls-remote` shows it still exists (10384bb). Left for the user.
 - Improve: no code change since the last improve pass (research + UX pass today), so they were not redone. New evidence: the CI log warns that Node 20 is deprecated for actions/checkout@v4 and setup-node@v4; rescored that item 6 -> 8, still below the bar of 9. Stopping: goal met, verify green, nothing above the bar.
 - Decision: this log entry is a local commit on main, not pushed; it rides along with the next real PR instead of opening a state-only PR each run.
+
+## 2026-11-25 Continue: ship stranded state commit; nothing above the bar (controller)
+- Orient: local main was 1 ahead of origin/main (ad92a68, state-only). Moved it to branch nstack/state-continue-3 and reset main to origin/main (67f5043). lint + typecheck pass. CI on main at 67f5043 green (run 45553194725).
+- Correction: the previous run's decision to leave a local-only commit on main breaks the state rule (never leave a default-branch commit off the remote). State changes now ship by PR even when state-only.
+- needs-human: optional `origin/nstack/ci` cleanup still open; `git ls-remote` shows 10384bb still there. Left for the user.
+- Improve: no code change since the last improve pass (research + UX pass today); backlog best is still 8, below the bar of 9. Stopping: goal met, verify green, nothing above the bar.
