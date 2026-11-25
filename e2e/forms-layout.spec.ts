@@ -63,3 +63,44 @@ test("AC24: project, task, invite and comment form labels sit above their fields
   await expectLabelsAboveFields(formWith(a.page, "Save changes"), taskFields);
   await expectLabelsAboveFields(formWith(a.page, "Add comment"), ["Comment"]);
 });
+
+/** Widths of the text inputs, textareas and selects in a form (hidden inputs excluded). */
+async function fieldWidths(form: Locator) {
+  return form.evaluate((el) =>
+    [...el.querySelectorAll("input:not([type=hidden]), textarea, select")].map((field) => ({
+      name: field.getAttribute("name"),
+      width: field.getBoundingClientRect().width,
+    })),
+  );
+}
+
+async function expectTaskFieldWidths(form: Locator) {
+  const widths = await fieldWidths(form);
+  expect(widths.map((w) => w.name)).toEqual(["title", "description", "assigneeId", "dueDate"]);
+  for (const { name, width } of widths) {
+    expect(width, `${name} width`).toBeGreaterThanOrEqual(280);
+    expect(width, `${name} width`).toBeLessThanOrEqual(512);
+  }
+}
+
+test("AC25: task form fields are 280-512px wide with a 60+ char member email; the edit Title shows 40 chars", async ({ browser }) => {
+  const page = await (await browser.newContext({ viewport: DESKTOP })).newPage();
+  const longEmail = `long-address-${"x".repeat(40)}-${newEmail()}`;
+  expect(longEmail.length).toBeGreaterThanOrEqual(60);
+  await signUp(page, longEmail);
+  await expect(page).toHaveURL("/projects");
+  const url = await createProject(page, "Widths");
+
+  const title = "Prepare the launch checklist for Q3 2026";
+  expect(title).toHaveLength(40);
+  const taskUrl = await addTask(page, url, title);
+  await expectTaskFieldWidths(formWith(page, "Add task"));
+
+  await page.goto(taskUrl);
+  const edit = formWith(page, "Save changes");
+  await expectTaskFieldWidths(edit);
+  const titleInput = edit.getByLabel("Title");
+  await expect(titleInput).toHaveValue(title);
+  const { scrollWidth, clientWidth } = await titleInput.evaluate((input) => ({ scrollWidth: input.scrollWidth, clientWidth: input.clientWidth }));
+  expect(scrollWidth).toBeLessThanOrEqual(clientWidth);
+});
