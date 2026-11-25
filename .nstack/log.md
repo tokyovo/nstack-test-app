@@ -252,3 +252,9 @@
 
 - Review: one reviewer -> pass, no important findings; two cosmetic nits logged in backlog.md. Board-pushed-below-fold tradeoff (seen in board-1280) logged in backlog.md.
 - Not verified: none.
+
+## 2026-11-25 Slice 5 shipped; improve: nothing at the bar (controller)
+- Ship: PR https://github.com/tokyovo/nstack-test-app/pull/8, CI green (runs 45567398138, 45567405499; 71 passed). Merged under `merge: auto` as c30759b. On main after pull: lint + typecheck pass.
+- Improve: bar 8 (goal.md). research.md from today; UX pass = T18 screens (/tmp/t18-shots/); `npm audit` 0; no issues. Top three: 7 (no nav back to Projects), 7 (failed move reverts silently), 7 (search not in URL). New: 6 (board below the fold at 1280). None at the bar.
+- needs-human: `origin/nstack/ci` still exists (10384bb); optional, left for the user.
+- Stopping: goal met, verify green, nothing at or above the bar.
