@@ -283,3 +283,9 @@
 - Decision: catch only to show the alert; `unstable_rethrow(error)` first so a redirect (expired session) or not-found still navigates (plan fresh-reader answer).
 - Decision: the error state is a string, set once per finished move (`moved ? null : message`), so "one alert at a time, cleared by the next success" falls out of one assignment (principle 3).
 - Evidence: both AC29 tests red first (no alert); clear test red with the clear-on-success removed (alert still shown); full chain at the commit, see verify.md T20.
+
+## 2026-11-25 T21 search and assignee filter live in the URL (builder)
+- Did: page.tsx reads `searchParams` and passes `initialQuery` / `initialAssignee` (first entry of a repeated key, "" when missing) to Board. Board seeds its state from them (an unknown `for` becomes "all") and, on each search keystroke or filter change, calls `replaceUrl`, which writes `?q=&for=` with `history.replaceState` (q as typed, left out when it trims to empty; for left out when "all"). Three AC30 e2e tests.
+- Decision: `for` is validated in Board, not page.tsx: the filter values live in the client module and page already passes members (principle 6 boundary is the props; one check, `isAssignee`).
+- Decision: `replaceUrl` builds a fresh query (no other keys exist on the board URL), smaller than merging into location.search (principle 2).
+- Evidence: red first (q/for null); `for=bogus` red without validation; history checks red with pushState; full chain 80 passed, see verify.md T21. One full run was accidentally made with the pushState mutant still in place (2 AC30 failures, 78 passed); the restored code was then rerun clean.

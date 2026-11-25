@@ -73,3 +73,65 @@ test("AC21: My tasks means the viewer's own tasks for each member", async ({ bro
   await b.page.getByLabel("Show tasks for").selectOption({ label: "My tasks" });
   await expect(cardTitles(b.page)).toHaveText(["For B"]);
 });
+
+function query(page: Page, key: string) {
+  return new URL(page.url()).searchParams.get(key);
+}
+
+test("AC30: the assignee filter lives in the URL with the search, without adding history; a reload keeps both", async ({
+  browser,
+}) => {
+  const a = await newUser(browser);
+  const b = await newUser(browser);
+  const url = await createProject(a.page, "Shareable filter");
+  await a.page.goto(url);
+  await invite(a.page, b.email);
+  await addTask(a.page, "Mine", a.email, "release notes");
+  await addTask(a.page, "Theirs one", b.email, "release plan");
+  await addTask(a.page, "Theirs two", b.email);
+  await a.page.goto(url);
+  const historyLength = await a.page.evaluate(() => history.length);
+  const filter = a.page.getByLabel("Show tasks for");
+  const bId = await filter.locator("option", { hasText: b.email }).getAttribute("value");
+
+  await filter.selectOption({ label: b.email });
+  await expect.poll(() => query(a.page, "for")).toBe(bId);
+  await a.page.getByLabel("Search tasks").fill("release");
+  await expect.poll(() => query(a.page, "q")).toBe("release");
+  expect(query(a.page, "for")).toBe(bId);
+  expect(await a.page.evaluate(() => history.length)).toBe(historyLength);
+  await expect(cardTitles(a.page)).toHaveText(["Theirs one"]);
+
+  await a.page.reload();
+  await expect(a.page.getByLabel("Show tasks for")).toHaveValue(bId!);
+  await expect(a.page.getByLabel("Search tasks")).toHaveValue("release");
+  await expect(cardTitles(a.page)).toHaveText(["Theirs one"]);
+
+  await a.page.getByLabel("Show tasks for").selectOption({ label: "My tasks" });
+  await expect.poll(() => query(a.page, "for")).toBe("mine");
+  await expect(cardTitles(a.page)).toHaveText(["Mine"]);
+  await a.page.getByLabel("Show tasks for").selectOption({ label: "All" });
+  await expect.poll(() => query(a.page, "for")).toBeNull();
+  expect(query(a.page, "q")).toBe("release");
+  expect(await a.page.evaluate(() => history.length)).toBe(historyLength);
+});
+
+test("AC30: an unknown for value shows all tasks and is dropped on the next change", async ({ browser }) => {
+  const a = await newUser(browser);
+  const url = await createProject(a.page, "Bogus filter");
+  await a.page.goto(url);
+  await addTask(a.page, "Mine", a.email);
+  await addTask(a.page, "Nobody's", "Unassigned");
+
+  await a.page.goto(`${url}?for=bogus`);
+  await expect(a.page.getByLabel("Show tasks for")).toHaveValue("all");
+  await expect(cardTitles(a.page)).toHaveCount(2);
+
+  await a.page.goto(`${url}?for=999999`);
+  await expect(a.page.getByLabel("Show tasks for")).toHaveValue("all");
+  await expect(cardTitles(a.page)).toHaveCount(2);
+  await a.page.getByLabel("Search tasks").fill("Mine");
+  await expect.poll(() => query(a.page, "q")).toBe("Mine");
+  expect(query(a.page, "for")).toBeNull();
+  await expect(cardTitles(a.page)).toHaveText(["Mine"]);
+});
