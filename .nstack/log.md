@@ -328,3 +328,50 @@
 - [x] review: one reviewer at 8d017f5 -> pass, no findings. Its runs: full chain via check:e2e-temp 80 passed, 0 temp files; mutant (alert not cleared on success) -> AC29 test red; drove the app on 3470 (deleted task + ArrowRight -> alert, card gone, ?q kept, no overflow at 390/1280). Second reviewer not started: no auth, payments, migrations or public API changes.
 - [x] seed-test timeout (T22 builder, twice): 16.7s on an idle machine; both timeouts came from two suites running at once on 2 CPUs. Lesson (rule 9, second time e2e load hurt a parallel run): the fact is now at the top of verify.md, so the next dispatch sees it; the backlog item (score 5, seed test headroom) stays.
 - [x] plan.md: T19-T22 ticked, slice 6 marked done.
+
+## 2026-11-25 Slice 6 shipped; improve: slice 7 planned (controller)
+- Ship (read ship/SKILL.md): PR https://github.com/tokyovo/nstack-test-app/pull/10, CI green (runs 45617130310, 45617165810; 80 passed). Merged under `merge: auto` as 85d592e. On main after pull: lint + typecheck pass. CI on main 85d592e: run 45617827969 (result in the next entry).
+- Read: improve/SKILL.md, plan/SKILL.md.
+- [x] 1 broken things: none (slice 6 verify + PR CI green)
+- [x] 2 known problems: `gh issue list` empty; backlog.md read; slice 6 items shipped
+- [x] 3 goal gaps: none
+- [x] 4 outside demand: research.md dated today
+- [x] 5 risk: `npm audit` 0 vulnerabilities
+- [x] 6 UX: slice 6 screens (/tmp/s6-shots/), new items in backlog.md (header link hint + 404 font, 4)
+- [x] 7 code health: nothing slowing the work
+- [x] decide: only CSV/JSON export (7) meets bar 7. Planned slice 7 (T23-T24, AC32-35) on nstack/export.
+- [x] plan check: fresh reader (Explore) asked 15 questions; answered in plan.md "Fresh-reader answers"
+- [x] T23 build + verify: builder 4e7825c (CSV route, lib/export.ts, Export CSV link; JSON link deferred to T24 so the board never links a 400). Controller at 4e7825c: lint, typecheck, build pass; `check:e2e-temp -- e2e/export.spec.ts` 2 passed, 0 files left; quote-doubling mutant -> 1 failed, restored, tree clean. Main CI on 85d592e: run 45617827969 success, 80 passed.
+- [x] T24 build + verify: builder 67908d4 + 8d73c8d (JSON in lib/export.ts, route takes json, Export JSON link); covered by the slice verify below.
+## 2026-11-25 T23 CSV export route and board link (builder)
+- Did: new GET route `app/projects/[id]/export/route.ts`: getCurrentUser (else 307 to /login), integer id + getProject (else plain `Not found` 404), `format=csv` (else `Unknown format` 400), then `tasksToCsv(listTasks(...))` with Content-Type, attachment Content-Disposition and `Cache-Control: no-store`. New `lib/export.ts`: BOM, header, one row per task, formula guard (`'` before leading `=+-@`, tab, CR) then RFC 4180 quoting, CRLF after every row. Board page: `<p className="export-links">` with a plain `<a href=... download>Export CSV</a>` under the `<h2>`. New e2e/export.spec.ts (2 tests).
+- Decision: T23 adds only the "Export CSV" link; "Export JSON" comes with T24, so the board never links to a format the route rejects with 400 (principle 11).
+- Decision: CSV code in lib/export.ts, route stays a list of checks (principle 3); T24's JSON goes beside it.
+- Evidence: both tests red first (no link; route 404). Mutants each red: formula guard removed, quote doubling removed, BOM removed (AC32/33 test); membership check replaced by a stub project, format check disabled (AC35 test). Full chain via check:e2e-temp: exit 0, 82 passed, 0 temp files left, no `data/`.
+## 2026-11-25 T24 JSON export (builder)
+- Did: `lib/export.ts` `tasksToJson(project, tasks)`: compact JSON `{ project: { id, name }, tasks: [{ id, title, description, status, assignee, dueDate }] }`, stored status key, email or null, date or null. Route accepts `format=json` beside csv (same auth, 404, 400 order), Content-Type `application/json; charset=utf-8`, filename `.json`. Board: "Export JSON" link (`download`) next to "Export CSV". e2e/export.spec.ts: +2 tests (AC34 download, AC35 json request checks).
+- Decision: route picks content type and body with one ternary rather than a format table (principle 2: two formats do not need a lookup structure).
+- Decision: AC34 test project name has quotes and non-ASCII to check JSON escaping and UTF-8; first byte checked as `{` (no BOM, plan decision).
+- Evidence: both tests red first (no "Export JSON" link; route 400 for json). Mutant (JSON status as column name) -> AC34 red, restored. Full chain at 67908d4: `rm -rf .next; lint && typecheck && build && E2E_PORT=3124 npm run check:e2e-temp` exit 0, 84 passed, 0 temp files left, no `data/`.
+
+## 2026-11-25 Slice 7 verify (controller)
+- Read: verify/SKILL.md.
+
+| Claim | Command | Result |
+|---|---|---|
+| clean tree at 8d73c8d | git status; git rev-parse | clean |
+| all checks | `rm -rf .next; lint && typecheck && build && E2E_PORT=3190 npm run check:e2e-temp` | exit 0, 84 passed, 0 skipped, 0 build warnings, 0 temp files, no `data/` |
+| AC32 quoting bites | quote doubling removed (T23 verify) | 1 failed |
+| AC33/AC35 bite | formula guard off + membership check replaced by a stub project | all 4 export tests failed; restored, tree clean |
+| AC34 bites | builder: JSON status as column name | AC34 failed |
+| real downloads | isolated server :3400 + seed, clicked Export CSV / Export JSON in Chromium | project-1-tasks.csv: BOM, CRLF, header, 4 rows, comma-title quoted, "To do"/"In progress"/"Done"; project-1-tasks.json: project + 4 tasks, status keys, null assignee/due; kept in /tmp/s7-shots/ |
+| screens | `npm run screens` exit 0; /tmp/s7-shots/board-1280.png, board-390.png | "Export CSV Export JSON" under the project title, fits at 390, no overflow |
+| nothing weaker | git diff main...HEAD | no deleted/skipped tests, no any/ts-ignore/eslint-disable |
+
+- Not verified: leading tab/CR formula prefixes end to end (the server trims them before storage; plan answer). None else.
+
+## 2026-11-25 Slice 7 review + record (controller)
+- Read: review/SKILL.md, ship/SKILL.md.
+- [x] review: reviewer 1 at 5005a44 -> pass, two nits (export link spacing; formula after leading spaces), both in backlog.md. Its runs: full chain 84 passed, 0 temp files; mutant (no `@` in guard) red; screens at 1280/390.
+- [x] security reviewer (export exposes project data) at 5005a44 -> pass, no findings. Its runs: 84 passed; mutant (no `-` in guard) red; spoofed Host on the logged-out redirect not reflected; HEAD -> 307. Run after reviewer 1, not alongside (2-CPU note in verify.md).
+- [x] plan.md: T23-T24 ticked, slice 7 marked done.
