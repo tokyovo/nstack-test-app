@@ -50,3 +50,5 @@ Acceptance criteria (each a Playwright test in `e2e/`):
 - [x] T10 Base stylesheet: side-by-side columns, responsive at 390px, word-wrap long text, 200-char title cap. Proof: e2e AC15. Needs: none
 - [x] T11 Overdue flag on cards. Proof: e2e AC16. Needs: T10 (same board files)
 - [x] T12 Edit and delete tasks. Proof: e2e AC17. Needs: T11
+
+Slice 2 shipped: PR #2 merged to main as 5f950cf; CI on main green (run 45552549785, 56 passed).

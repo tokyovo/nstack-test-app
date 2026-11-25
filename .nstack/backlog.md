@@ -6,9 +6,9 @@ Scored 2026-11-25 (value + risk + cost, cost 5 = cheapest). Bar for a ticket: 9.
 - 9 (v3 r1 c5) Past-due tasks look identical to future ones; flag overdue on the board. Research "see overdue at a glance" (4 sources). (UX + research) -> T11
 - 9 (v4 r2 c3) Tasks cannot be edited or deleted after creation (title, description, assignee, due date). Core flow gap. (UX) -> T12
 - 8 (v2 r2 c4) Sessions never expire; add expiry (and `secure` cookie flag in production). (T2 security review)
-- 8 (v3 r1 c4) Forms lose typed values after a validation error (email on signup/login, description/assignee on add task). (UX)
+- 8 (v3 r1 c4) Forms lose typed values after a validation error (email on signup/login; all fields on the new-task and edit-task forms, React form-action reset). (UX, T12) Rescored 2026-11-25 after slice 2: still 8.
 - 8 (v3 r1 c4) Filter board by assignee / "my tasks". Evidence: 3 sources, research.md
-- 7 (v2 r1 c4) No navigation back to Projects from a board / 404 page; header not a link. (UX)
+- 7 (v2 r1 c4) No navigation back to Projects from a board / 404 page; header not a link. (UX; still true in the 2026-11-25 post-slice-2 UX pass)
 - 7 (v2 r1 c4) A failed move reverts the card silently, no error shown. (T6)
 - 7 (v2 r1 c4) Board search query is not in the URL. (T8)
 - 7 (v1 r1 c5) e2e temp SQLite files left in the OS temp dir; add a globalTeardown.
@@ -25,5 +25,4 @@ Scored 2026-11-25 (value + risk + cost, cost 5 = cheapest). Bar for a ticket: 9.
 - 3 (v1 r1 c1... cosmetic, cheap but no user value) favicon.ico 404 in console.
 - Rejected: login timing leaks whether an email exists (signup/invite reveal it by design, AC2/AC7).
 - Needs human (changes the goal's fixed three columns): custom columns / swimlanes, research.md.
-- 5 (v2 r1 c2) (T12) Task forms reset to their defaults after a failed submit (React form-action reset), so a validation error loses the user's edits on both the new-task and edit-task forms. Fix: return the submitted values in FormState or use controlled inputs.
-- 2026-11-25 (review nit, slice 2) `deleteTaskAction` (app/projects/actions.ts) does nothing visible when the delete is refused, e.g. the task was already deleted in another tab; the edit path shows "Task not found". Show the same error or redirect to the board.
+- 6 (v2 r1 c3) (review nit, slice 2) `deleteTaskAction` (app/projects/actions.ts) does nothing visible when the delete is refused, e.g. the task was already deleted in another tab; the edit path shows "Task not found". Show the same error or redirect to the board.
