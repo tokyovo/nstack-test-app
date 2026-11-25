@@ -133,3 +133,30 @@ Slice 6 done 2026-11-25: T19-T22 merged on nstack/board-feedback, slice verify +
 - [x] T20 Failed move shows an alert and the card stays put (AC29). Proof: e2e in e2e/move.spec.ts (second page deletes the task, first page drags and keyboard-moves it), red first; full chain. Needs: none
 - [x] T21 Search and assignee filter live in the URL (AC30). Proof: e2e in e2e/search.spec.ts and e2e/assignee-filter.spec.ts (type, check URL, reload, check board and inputs; history length unchanged; `for=bogus` shows all), red first; full chain. Needs: T20 (same file, board.tsx)
 - [x] T22 e2e run removes its temp SQLite files (AC31). Proof: after `npm run test:e2e`, no file named for that run (taskboard-e2e-<pid>-*) remains in the temp dir (red first: 1+ without the teardown); full chain. Needs: none
+
+# Plan: slice 7 "export" (from improve, 2026-11-25, bar 7)
+Branch: nstack/export
+
+## Spec
+Evidence: backlog.md 7 (v3 r1 c3), research.md candidate 8 (4 sources: planka #670, kanboard #4795, TRELLO-1064, ...): users want a project's tasks out of the app for backup or a spreadsheet.
+
+What changes for the user: on a board, "Export CSV" and "Export JSON" links download every task in the project.
+
+Design: one GET route handler `app/projects/[id]/export/route.ts` taking `?format=csv|json`, reusing `getCurrentUser` and `listTasks` (which already returns [] for non-members) plus `getProject` for the 404. Alternative considered: a server action returning a string the client turns into a Blob: rejected, more client code and no plain URL to test with a request.
+
+Acceptance criteria (Playwright e2e unless stated):
+32. The board shows links "Export CSV" and "Export JSON" (`download` attribute). Clicking "Export CSV" downloads `project-<id>-tasks.csv`: UTF-8 with a BOM, rows end in CRLF, header `id,title,description,status,assignee,due_date`, then one row per task in id order. `status` is the column name (To do / In progress / Done); no assignee or due date is an empty cell; a value containing a comma, double quote, CR or LF is wrapped in double quotes with inner quotes doubled (RFC 4180).
+33. In the CSV, a value that starts with `=`, `+`, `-`, `@`, tab or CR is prefixed with a single quote `'` (spreadsheet formula injection).
+34. Clicking "Export JSON" downloads `project-<id>-tasks.json`, which parses to `{"project":{"id":<n>,"name":"..."},"tasks":[{"id","title","description","status","assignee","dueDate"}]}` in id order; `status` is the stored key (todo / in_progress / done); `assignee` is the email or null; `dueDate` is `YYYY-MM-DD` or null.
+35. (Request checks via Playwright `request`) Logged out: 307 with Location ending in `/login`. Logged in but not a member, or an unknown project id: 404 and the body contains none of the project's task titles. `format` missing or other than csv/json: 400. Both formats send `Cache-Control: no-store` and `Content-Disposition: attachment; filename="project-<id>-tasks.<ext>"`; Content-Type `text/csv; charset=utf-8` / `application/json; charset=utf-8`.
+
+Out of scope: comments, members, importing, exporting only the filtered tasks, other formats.
+
+Decision: export ignores the board's search and filter (backup is the main use; a filtered export can come later).
+Decision: CSV gets a BOM so Excel reads non-ASCII titles correctly; JSON does not.
+Decision: filename uses the project id, not the name, so no escaping of user text in a header.
+Decision: logged out redirects to /login like every page (requireUser), rather than 401.
+
+## Tickets
+- [ ] T23 CSV export route and board links (AC32, AC33, AC35 for csv). Proof: new e2e/export.spec.ts (download event, read file; tasks with comma/quote/newline/leading `=`/non-ASCII; request checks), red first; full chain. Needs: none
+- [ ] T24 JSON export (AC34, AC35 for json). Proof: e2e in e2e/export.spec.ts, red first; full chain. Needs: T23 (same route file)
