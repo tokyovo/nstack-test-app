@@ -63,6 +63,17 @@
   - Action takes taskId/status as `unknown` and validates (integer, known status): they arrive from the client.
 - Lesson: `.bind(null, projectId)` args travel in plain text in the action request body (`[projectId, taskId, status]`); a string replace on the body hit projectId first, so the first tamper test passed with guards removed. Parse the JSON args and wait for the response (route.fetch + fulfill).
 
+## 2026-11-25 T5+T6 review + verify (controller)
+- Did: reviewed T5+T6 together (decision: fewer review rounds for the sequential board tickets). Reviewer passed; fixed both nits (no-op arrow key stole focus later; tamper tests for task-create and invite bound projectId).
+- Evidence:
+| Claim | Command | Result |
+|---|---|---|
+| all checks at d89f021 | rm -rf .next; lint && typecheck && build && test:e2e | exit 0, 34 passed |
+| focus test bites | builder: ran before fix | red, then green |
+| create/invite tamper tests bite | builder: removed each getProject guard, rebuilt | red each; restored |
+- Correction: `.bind` args to server actions are NOT encrypted by Next (my T3 note was wrong); every action re-checks membership server-side.
+- Not verified: CI (parked).
+
 ## Needs human
 - 2026-11-25 Run `gh auth refresh -h github.com -s workflow` (adds `workflow` scope to the gh token). Then: `git push -u origin nstack/ci`, rebase `nstack/task-board` onto it (or merge both), open the PR, and nstack can wait for CI and merge. Changing credentials is a hard stop for nstack.
 
