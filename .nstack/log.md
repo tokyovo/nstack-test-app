@@ -375,3 +375,11 @@
 - [x] review: reviewer 1 at 5005a44 -> pass, two nits (export link spacing; formula after leading spaces), both in backlog.md. Its runs: full chain 84 passed, 0 temp files; mutant (no `@` in guard) red; screens at 1280/390.
 - [x] security reviewer (export exposes project data) at 5005a44 -> pass, no findings. Its runs: 84 passed; mutant (no `-` in guard) red; spoofed Host on the logged-out redirect not reflected; HEAD -> 307. Run after reviewer 1, not alongside (2-CPU note in verify.md).
 - [x] plan.md: T23-T24 ticked, slice 7 marked done.
+
+## 2026-11-25 Slice 7 shipped; improve: nothing at the bar; stop (controller)
+- Ship: PR https://github.com/tokyovo/nstack-test-app/pull/11, CI green (runs 45625803739, 45625838808; 84 passed). Merged under `merge: auto` as 60f49fc. On main after pull: lint + typecheck pass; CI on main run 45626440811 success, 84 passed. Slice 6 main CI (85d592e, run 45617827969): success, 80 passed.
+- Improve: sources as in the slice 7 planning entry (same day, no change since but the export feature). Top three: 6 (silent feedback), 6 (labels), 6 (duplicate task); none at bar 7.
+- needs-human retried: `origin/nstack/ci` still exists (optional, user's call).
+- Hand-off audit: every step entry this run has its checklist ticked; skill files read per step (named in entries). Servers: none listening (ss). Removed all stale `/tmp/taskboard-e2e-*` files from earlier runs (570; T22 stops new ones). Worktrees: none left; stale `worktree-agent-*` branches deleted.
+- Slowed down: a previous session ended with three builders in flight, so this run started by finding and merging their work; two parallel e2e suites on 2 CPUs timed out the seed test (now a note at the top of verify.md).
+- Stopping: goal met, full checks green on main, nothing in improve meets bar 7.
