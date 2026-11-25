@@ -26,7 +26,7 @@ Out of scope: see goal.md.
 - [~] T1 Harness: Next.js app scaffold, SQLite db module with schema bootstrap, Playwright config (starts the built app on a temp DB), one smoke e2e test, npm scripts (lint, typecheck, build, test:e2e), GitHub Actions CI. Proof: `npm run lint && npm run typecheck && npm run build && npm run test:e2e` pass locally; CI green on the PR. Needs: none. Built+verified locally (4cb449f); CI push parked: token lacks workflow scope, see log 2026-11-25
 - [x] T2 Auth: signup, login, logout, session cookie, redirect guard. Proof: e2e for AC 1-4. Needs: T1
 - [x] T3 Projects: create, rename, delete, member-only visibility + 404 for non-members. Proof: e2e for AC 5-6. Needs: T2
-- [ ] T4 Invite existing user by email. Proof: e2e for AC 7. Needs: T3
+- [x] T4 Invite existing user by email. Proof: e2e for AC 7. Needs: T3
 - [ ] T5 Tasks: create with fields; three-column board. Proof: e2e for AC 8. Needs: T4 (assignee needs members)
 - [ ] T6 Move tasks by drag-and-drop and by keyboard. Proof: e2e for AC 9-10. Needs: T5
 - [ ] T7 Comments on a task. Proof: e2e for AC 11. Needs: T5

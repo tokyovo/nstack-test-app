@@ -46,3 +46,29 @@ export function renameProject(userId: number, projectId: number, name: string): 
 export function deleteProject(userId: number, projectId: number): boolean {
   return getDb().prepare(`DELETE FROM projects WHERE id = ? AND ${MEMBER_CHECK}`).run(projectId, userId).changes > 0;
 }
+
+export type Member = { id: number; email: string };
+
+/** Members of the project, oldest first; empty if the user is not a member. */
+export function listMembers(userId: number, projectId: number): Member[] {
+  if (!getProject(userId, projectId)) return [];
+  return getDb()
+    .prepare(
+      "SELECT users.id, users.email FROM users JOIN project_members ON project_members.user_id = users.id WHERE project_members.project_id = ? ORDER BY users.id",
+    )
+    .all(projectId) as Member[];
+}
+
+export type InviteResult = "invited" | "not-found" | "no-user" | "already-member";
+
+/** Adds the existing user with that email to the project, if the inviter is a member. */
+export function inviteMember(userId: number, projectId: number, email: string): InviteResult {
+  if (!getProject(userId, projectId)) return "not-found";
+  const db = getDb();
+  const invitee = db.prepare("SELECT id FROM users WHERE email = ?").get(email) as { id: number } | undefined;
+  if (!invitee) return "no-user";
+  const { changes } = db
+    .prepare("INSERT INTO project_members (project_id, user_id) VALUES (?, ?) ON CONFLICT DO NOTHING")
+    .run(projectId, invitee.id);
+  return changes ? "invited" : "already-member";
+}

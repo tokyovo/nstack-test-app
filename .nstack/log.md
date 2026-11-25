@@ -45,3 +45,10 @@
   - Delete has no confirm dialog: v1, easy to add; dialogs complicate e2e.
   - Non-member, missing, and non-numeric project ids all give the same 404 so B cannot tell A's project exists.
   - Empty names are ignored silently (input is `required` client-side).
+
+## 2026-11-25 T4 invite
+- Did: inviteMember/listMembers in lib/projects.ts (inviter must be a member), inviteMemberAction bound to the project id, InviteForm client component (useActionState), Members list on /projects/[id]. e2e/invite.spec.ts covers AC7.
+- Decisions:
+  - Existing-member error text "That user is already a member" (spec names no text); inviting yourself gives the same.
+  - Email match is case-insensitive (users.email is COLLATE NOCASE).
+  - Invite form lives on the project page next to the Members list; FormState type reused from auth-actions.
