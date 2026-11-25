@@ -59,3 +59,5 @@ Run from the repo root. Needs Node 24, `npm ci`, and Chromium for Playwright 1.6
 ## Proof chain (T14)
 - `rm -rf .next; npm run lint && npm run typecheck && npm run build && E2E_PORT=3114 npm run test:e2e` — 2026-11-25 T14: exit 0, 59 passed (e2e/session-expiry.spec.ts AC19 + earlier); no `data/` dir. 31-day and cookie-expiry tests shown red (session accepted; cookie had no expiry) before the code. `E2E_SECURE_COOKIES=1 npx playwright test e2e/session-expiry.spec.ts e2e/auth.spec.ts`: 13 passed (Secure cookie in the production build, auth flows still work on localhost); cookie test shown red with `secure` forced false.
 - `E2E_PORT` (default 3100) picks the e2e server port; `E2E_SECURE_COOKIES=1` drops the webServer's `INSECURE_COOKIES=1`.
+## Proof chain (T15)
+- `rm -rf .next; npm run lint && npm run typecheck && npm run build && npm run test:e2e` — 2026-11-25 T15: exit 0, 61 passed (e2e/keep-values.spec.ts AC20 + earlier); no `data/` dir. AC20 tests shown red (fields cleared or reset) before the code; assignee check shown red without the select key.

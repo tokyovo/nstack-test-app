@@ -173,3 +173,9 @@
 - Decision: the expired cookie is not cleared on rejection (server components cannot set cookies); with its row deleted it is inert and the browser drops it at maxAge.
 - Decision: added `E2E_PORT` to playwright.config.ts because a parallel worktree's run held port 3100; default unchanged, so CI is unaffected.
 - Decision: added `E2E_SECURE_COOKIES=1` so `secure: true` in the production build is proven by e2e (Chromium accepts Secure cookies on http://localhost); the default run asserts secure=false (the opt-out).
+## 2026-11-25 T15 forms keep typed values after an error (builder)
+- Did: signup/login actions return the typed email with the error (`CredentialsState`); `CredentialsForm` uses it as the email default; the password is never returned. Task create/update actions return the raw typed fields (`TaskFormState.values`) on every error; `TaskForm` defaults to them, else to the task (edit) or empty (new). AC20 tests in e2e/keep-values.spec.ts.
+- Decision: values come back from the server in action state (uncontrolled inputs, defaultValue) rather than controlled inputs: smallest diff, same pattern as the existing error state.
+- Decision: the Assignee `<select>` is keyed on its default; without the key React's post-action form reset kept "Unassigned" (test red), text inputs did not need it.
+- Decision: the server-only error used for task forms is a spaces-only title (passes the browser `required` check); kept title is the raw typed value, not trimmed.
+- Evidence: tests red first (fields empty / original values), then green; full chain exit 0, 61 passed, no `data/`.
