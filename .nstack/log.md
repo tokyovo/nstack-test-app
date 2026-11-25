@@ -98,3 +98,11 @@
   - Fix the cause (no refocus request on a no-op key) rather than also clearing the ref in the effect: smallest change, the effect's behavior for real moves is unchanged.
   - Tamper helper rewrites both places the bound id appears (field "0" call args `[id,{},"$K1"]` and `$ACTION_<n>:1` bound list `[id,{}]`) and asserts both were rewritten, so a body-format change fails loudly instead of passing silently.
   - Removed all three resolved backlog items (invite tamper, task-create tamper, the T6 `.bind` encryption note), not only the invite one: all are covered now.
+
+## 2026-11-25 T7 comments
+- Did: getTask in lib/tasks.ts, lib/comments.ts (listComments, addComment; member + task-in-project via getTask), addCommentAction bound to [projectId, taskId], task page /projects/[id]/tasks/[taskId] (details, Comments list, CommentForm), card titles on the board link there. e2e/comments.spec.ts covers AC11, 404s, two tamper tests.
+- Decisions:
+  - Task details on their own route, not a modal: server-rendered, linkable, no client state; fewest moving parts.
+  - Non-member, task in another project, and missing task all 404, like projects.
+  - Empty comment -> "Comment is required" (server check plus HTML `required`); comments oldest first, show author email and created_at as stored.
+  - Generalized the tamper helper to `tamperBoundIds` (several bound ids, null keeps one); it now keys on the `next-action` header and requires field "0" rewritten, because a form reached by client-side navigation sends no `$ACTION_` fields.

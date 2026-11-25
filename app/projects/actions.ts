@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import type { FormState } from "@/app/auth-actions";
 import { requireUser } from "@/lib/auth";
 import { createProject, deleteProject, inviteMember, renameProject } from "@/lib/projects";
+import { addComment } from "@/lib/comments";
 import { isStatus } from "@/lib/statuses";
 import { createTask, moveTask } from "@/lib/tasks";
 
@@ -84,4 +85,18 @@ export async function moveTaskAction(projectId: number, taskId: unknown, status:
   const user = await requireUser();
   if (!Number.isInteger(taskId) || !isStatus(status)) return;
   if (moveTask(user.id, projectId, taskId as number, status)) revalidatePath(`/projects/${projectId}`);
+}
+
+export async function addCommentAction(
+  projectId: number,
+  taskId: number,
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const user = await requireUser();
+  const body = String(formData.get("body") ?? "").trim();
+  if (!body) return { error: "Comment is required" };
+  if (!addComment(user.id, projectId, taskId, body)) return { error: "Task not found" };
+  revalidatePath(`/projects/${projectId}/tasks/${taskId}`);
+  return {};
 }

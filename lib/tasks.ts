@@ -56,3 +56,16 @@ export function moveTask(userId: number, projectId: number, taskId: number, stat
     .run(status, taskId, projectId);
   return result.changes > 0;
 }
+
+/** The task if it is in the project and the user is a member; null otherwise. */
+export function getTask(userId: number, projectId: number, taskId: number): Task | null {
+  if (!getProject(userId, projectId)) return null;
+  const row = getDb()
+    .prepare(
+      `SELECT tasks.id, tasks.title, tasks.description, tasks.status, tasks.due_date AS dueDate, users.email AS assigneeEmail
+       FROM tasks LEFT JOIN users ON users.id = tasks.assignee_id
+       WHERE tasks.id = ? AND tasks.project_id = ?`,
+    )
+    .get(taskId, projectId) as Task | undefined;
+  return row ?? null;
+}

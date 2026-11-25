@@ -53,22 +53,33 @@ export function cards(page: Page, name: ColumnName) {
 }
 
 /**
- * Rewrites the project id bound (`.bind(null, projectId)`) into the next form-action request
- * sent from `page` to `projectId`. The bound args travel as plain JSON in the multipart body:
- * the call args in field "0" (`[id,{},"$K1"]`) and the bound list in `$ACTION_<n>:1` (`[id,{}]`).
+ * Rewrites the leading ids bound (`.bind(null, projectId, ...)`) into the next server-action request
+ * sent from `page`; a null entry keeps that id. The bound args travel as plain JSON in the multipart
+ * body: the call args in field "0" (`[id,...,{},"$K1"]`) and, when the form was server-rendered, also
+ * the bound list in `$ACTION_<n>:1` (`[id,...,{}]`). Every copy is rewritten; field "0" must be found.
  * Returns a function that resolves once the tampered request has been answered.
  */
-export async function tamperBoundProjectId(page: Page, projectId: number): Promise<() => Promise<void>> {
+export async function tamperBoundIds(page: Page, ids: (number | null)[]): Promise<() => Promise<void>> {
   let answered = false;
-  await page.route("**/projects/*", async (route) => {
-    const body = route.request().method() === "POST" ? route.request().postData() : null;
-    if (!body?.includes("$ACTION_")) return route.continue();
-    const tampered = body.replace(/(name="(?:0|[^"]*\$ACTION_\d+:1)"\r\n\r\n\[)\d+,/g, `$1${projectId},`);
-    expect(tampered.match(new RegExp(`\\r\\n\\r\\n\\[${projectId},`, "g"))).toHaveLength(2);
+  const leading = new RegExp(`(name="(0|[^"]*\\$ACTION_\\d+:1)"\r\n\r\n\\[)${ids.map(() => "(\\d+),").join("")}`, "g");
+  await page.route("**/projects/**", async (route) => {
+    const body = route.request().headers()["next-action"] ? route.request().postData() : null;
+    if (!body) return route.continue();
+    const fields: string[] = [];
+    const tampered = body.replace(leading, (_match, head: string, field: string, ...rest: string[]) => {
+      fields.push(field);
+      return head + ids.map((id, i) => `${id ?? rest[i]},`).join("");
+    });
+    expect(fields).toContain("0");
     const response = await route.fetch({ postData: tampered });
     await route.fulfill({ response });
     answered = true;
-    await page.unroute("**/projects/*");
+    await page.unroute("**/projects/**");
   });
   return () => expect.poll(() => answered).toBe(true);
+}
+
+/** Rewrites the bound project id of the next form-action request; see `tamperBoundIds`. */
+export function tamperBoundProjectId(page: Page, projectId: number): Promise<() => Promise<void>> {
+  return tamperBoundIds(page, [projectId]);
 }

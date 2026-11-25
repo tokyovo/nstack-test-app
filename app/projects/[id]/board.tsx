@@ -1,19 +1,20 @@
 "use client";
 
+import Link from "next/link";
 import { startTransition, useEffect, useOptimistic, useRef, type DragEvent, type KeyboardEvent } from "react";
 import { COLUMN_NAMES, STATUSES, neighborStatus, type Status } from "@/lib/statuses";
 import type { Task } from "@/lib/tasks";
 
-type Props = { tasks: Task[]; move: (taskId: number, status: Status) => Promise<void> };
+type Props = { projectId: number; tasks: Task[]; move: (taskId: number, status: Status) => Promise<void> };
 type Move = { id: number; status: Status };
 
 const KEY_STEPS: Record<string, -1 | 1> = { ArrowLeft: -1, ArrowRight: 1 };
 
 /**
  * The project's tasks in three columns, one per status. Drag a card to another column,
- * or focus it and press ArrowLeft / ArrowRight, to move it.
+ * or focus it and press ArrowLeft / ArrowRight, to move it. A card's title links to the task page.
  */
-export function Board({ tasks, move }: Props) {
+export function Board({ projectId, tasks, move }: Props) {
   const [shown, applyMove] = useOptimistic(tasks, (current: Task[], { id, status }: Move) =>
     current.map((task) => (task.id === id ? { ...task, status } : task)),
   );
@@ -77,7 +78,9 @@ export function Board({ tasks, move }: Props) {
                     onDragStart={(event) => event.dataTransfer.setData("text/plain", String(task.id))}
                     onKeyDown={(event) => onKeyDown(event, task)}
                   >
-                    <strong>{task.title}</strong>
+                    <strong>
+                      <Link href={`/projects/${projectId}/tasks/${task.id}`}>{task.title}</Link>
+                    </strong>
                     <p>{task.assigneeEmail ?? "Unassigned"}</p>
                     <p>{task.dueDate ? `Due ${task.dueDate}` : "No due date"}</p>
                   </li>
