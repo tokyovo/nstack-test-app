@@ -167,3 +167,9 @@
 - Decision: session lifetime 30 days (common default), fixed from creation (no sliding renewal): simplest, easy to change.
 - Decision: `secure` cookie in production, opt-out via `INSECURE_COOKIES=1` for the http e2e/CI server, so tests cover the production build.
 - Decision: assignee filter is client-side like search (board already has all tasks), not in the URL (search isn't either; that's a separate backlog item).
+
+## 2026-11-25 T14 session expiry (builder)
+- Did: getCurrentUser rejects sessions with created_at <= now - 30 days and deletes the row; cookie gets maxAge 30d and `secure` when NODE_ENV=production unless INSECURE_COOKIES=1; Playwright webServer sets INSECURE_COOKIES=1. e2e/session-expiry.spec.ts (AC19: 31 days rejected + row gone, 29 days works, cookie ~30d/httpOnly/Lax/secure matches mode). Full chain 59 passed.
+- Decision: the expired cookie is not cleared on rejection (server components cannot set cookies); with its row deleted it is inert and the browser drops it at maxAge.
+- Decision: added `E2E_PORT` to playwright.config.ts because a parallel worktree's run held port 3100; default unchanged, so CI is unaffected.
+- Decision: added `E2E_SECURE_COOKIES=1` so `secure: true` in the production build is proven by e2e (Chromium accepts Secure cookies on http://localhost); the default run asserts secure=false (the opt-out).
