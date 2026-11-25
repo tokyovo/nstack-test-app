@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { cards, createProject, newUser } from "./helpers";
+import { cards, createProject, newUser, persistedMove } from "./helpers";
 
 // Far from today, so the outcome never depends on when (or in which time zone) the test runs.
 const PAST = "2000-01-15";
@@ -26,8 +26,8 @@ test("AC16: a past-due task not in Done is marked overdue; future and done ones 
 
   // Move "Finished task" to Done with the keyboard (To do -> In progress -> Done).
   await card(a.page, "Finished task").focus();
-  await a.page.keyboard.press("ArrowRight");
-  await a.page.keyboard.press("ArrowRight");
+  await persistedMove(a.page, () => a.page.keyboard.press("ArrowRight"));
+  await persistedMove(a.page, () => a.page.keyboard.press("ArrowRight"));
   await expect(cards(a.page, "Done")).toHaveCount(1);
 
   await a.page.reload();

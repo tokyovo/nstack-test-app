@@ -48,6 +48,7 @@ Run from the repo root. Needs Node 24, `npm ci`, and Chromium for Playwright 1.6
 
 ## Proof chain (T11)
 - `rm -rf .next; npm run lint && npm run typecheck && npm run build && npm run test:e2e` — 2026-11-25 T11: exit 0, 47 passed (e2e/overdue.spec.ts AC16 + earlier); no `data/` dir. AC16 test shown red (no "Overdue") before the code; shown red with the Done exclusion removed from isOverdue.
+- 2026-11-25 T11 review fix: that test was flaky (reviewer saw 54 passed / 1 failed under full-suite load: "Finished task" still Overdue after reload). Cause: it reloaded after the optimistic Done count, before the second move's server action had been stored. Reproduced deterministically by delaying the Done move request 1.5s (same failure). Fix: `persistedMove` in e2e/helpers.ts waits for each move's server-action response; used in overdue.spec.ts and every move-then-reload in move.spec.ts. Same delayed run then passed; `npx playwright test e2e/overdue.spec.ts e2e/move.spec.ts --repeat-each=10 --workers=4`: 60 passed.
 
 ## Proof chain (T12)
 - `rm -rf .next; npm run lint && npm run typecheck && npm run build && npm run test:e2e` — 2026-11-25 T12: exit 0, 55 passed (e2e/edit-task.spec.ts AC17 + earlier); no `data/` dir. Edit and delete tests shown red (no form/button) before the code; each tamper test shown red with its own guard removed (getProject check, task-in-project condition) in updateTask and deleteTask.

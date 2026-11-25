@@ -91,3 +91,16 @@ export async function tamperBoundIds(page: Page, ids: (number | null)[]): Promis
 export function tamperBoundProjectId(page: Page, projectId: number): Promise<() => Promise<void>> {
   return tamperBoundIds(page, [projectId]);
 }
+
+/**
+ * Runs `move`, which must move one card on the board, and waits until the server has answered the
+ * move's server action. The board updates optimistically, so the card shows in its new column before
+ * the move is stored; a reload straight after that can beat the request and show the old column.
+ */
+export async function persistedMove(page: Page, move: () => Promise<void>) {
+  const answered = page.waitForResponse(
+    (response) => response.request().method() === "POST" && !!response.request().headers()["next-action"],
+  );
+  await move();
+  await (await answered).finished();
+}

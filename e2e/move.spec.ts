@@ -1,5 +1,5 @@
 import { expect, test, type Browser, type Page } from "@playwright/test";
-import { cards, column, createProject, newUser } from "./helpers";
+import { cards, column, createProject, newUser, persistedMove } from "./helpers";
 
 async function projectWithTask(page: Page, projectName: string, title: string): Promise<string> {
   const url = await createProject(page, projectName);
@@ -18,14 +18,14 @@ test("AC9: dragging a card to In progress, then Done, moves it and persists", as
   const a = await newUser(browser);
   await projectWithTask(a.page, "Drag", "Ship it");
 
-  await card(a.page, "Ship it").dragTo(column(a.page, "In progress"));
+  await persistedMove(a.page, () => card(a.page, "Ship it").dragTo(column(a.page, "In progress")));
   await expect(cards(a.page, "In progress")).toContainText(["Ship it"]);
   await expect(cards(a.page, "To do")).toHaveCount(0);
   await a.page.reload();
   await expect(cards(a.page, "In progress")).toContainText(["Ship it"]);
   await expect(cards(a.page, "To do")).toHaveCount(0);
 
-  await card(a.page, "Ship it").dragTo(column(a.page, "Done"));
+  await persistedMove(a.page, () => card(a.page, "Ship it").dragTo(column(a.page, "Done")));
   await expect(cards(a.page, "Done")).toContainText(["Ship it"]);
   await a.page.reload();
   await expect(cards(a.page, "Done")).toContainText(["Ship it"]);
@@ -37,21 +37,21 @@ test("AC10: ArrowRight moves a focused card one column right, ArrowLeft one left
   await projectWithTask(a.page, "Keys", "Review PR");
 
   await card(a.page, "Review PR").focus();
-  await a.page.keyboard.press("ArrowRight");
+  await persistedMove(a.page, () => a.page.keyboard.press("ArrowRight"));
   await expect(cards(a.page, "In progress")).toContainText(["Review PR"]);
   await expect(card(a.page, "Review PR")).toBeFocused();
   await a.page.reload();
   await expect(cards(a.page, "In progress")).toContainText(["Review PR"]);
 
   await card(a.page, "Review PR").focus();
-  await a.page.keyboard.press("ArrowRight");
+  await persistedMove(a.page, () => a.page.keyboard.press("ArrowRight"));
   await expect(cards(a.page, "Done")).toContainText(["Review PR"]);
   await a.page.keyboard.press("ArrowRight");
   await a.page.reload();
   await expect(cards(a.page, "Done")).toContainText(["Review PR"]);
 
   await card(a.page, "Review PR").focus();
-  await a.page.keyboard.press("ArrowLeft");
+  await persistedMove(a.page, () => a.page.keyboard.press("ArrowLeft"));
   await expect(cards(a.page, "In progress")).toContainText(["Review PR"]);
   await a.page.reload();
   await expect(cards(a.page, "In progress")).toContainText(["Review PR"]);
