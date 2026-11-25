@@ -38,12 +38,18 @@ button {
   max-width: 100%;
 }
 
-/* Capping the label lets max-width: 100% on its control resolve, so a <select> sized by a long
-   option (e.g. a member's email) cannot widen the page. */
-form label {
-  display: inline-block;
+/* Each label sits above its field, and fields share the form's left edge. A fixed field width
+   (capped by the container) keeps a <select> from growing to its longest option, e.g. a long email. */
+label {
+  display: block;
   max-width: 100%;
-  margin: 0 0.5rem 0.5rem 0;
+  margin: 0 0 0.75rem;
+}
+
+label > :is(input, select, textarea) {
+  display: block;
+  width: min(100%, 32rem);
+  margin-top: 0.25rem;
 }
 
 .board {
