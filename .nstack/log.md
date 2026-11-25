@@ -348,3 +348,8 @@
 - Decision: T23 adds only the "Export CSV" link; "Export JSON" comes with T24, so the board never links to a format the route rejects with 400 (principle 11).
 - Decision: CSV code in lib/export.ts, route stays a list of checks (principle 3); T24's JSON goes beside it.
 - Evidence: both tests red first (no link; route 404). Mutants each red: formula guard removed, quote doubling removed, BOM removed (AC32/33 test); membership check replaced by a stub project, format check disabled (AC35 test). Full chain via check:e2e-temp: exit 0, 82 passed, 0 temp files left, no `data/`.
+## 2026-11-25 T24 JSON export (builder)
+- Did: `lib/export.ts` `tasksToJson(project, tasks)`: compact JSON `{ project: { id, name }, tasks: [{ id, title, description, status, assignee, dueDate }] }`, stored status key, email or null, date or null. Route accepts `format=json` beside csv (same auth, 404, 400 order), Content-Type `application/json; charset=utf-8`, filename `.json`. Board: "Export JSON" link (`download`) next to "Export CSV". e2e/export.spec.ts: +2 tests (AC34 download, AC35 json request checks).
+- Decision: route picks content type and body with one ternary rather than a format table (principle 2: two formats do not need a lookup structure).
+- Decision: AC34 test project name has quotes and non-ASCII to check JSON escaping and UTF-8; first byte checked as `{` (no BOM, plan decision).
+- Evidence: both tests red first (no "Export JSON" link; route 400 for json). Mutant (JSON status as column name) -> AC34 red, restored. Full chain at 67908d4: `rm -rf .next; lint && typecheck && build && E2E_PORT=3124 npm run check:e2e-temp` exit 0, 84 passed, 0 temp files left, no `data/`.

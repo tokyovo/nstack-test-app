@@ -100,3 +100,6 @@ How an agent runs and uses the app on its own, without touching anyone's data. E
 
 ## Proof chain (T23)
 - `rm -rf .next; npm run lint && npm run typecheck && npm run build && E2E_PORT=3123 npm run check:e2e-temp` — 2026-11-25 T23: exit 0, 82 passed (e2e/export.spec.ts AC32/33/35-csv + earlier), 0 temp files left; no `data/` dir. Export tests shown red (no link, route 404) before the code; red with each of: formula guard, quote doubling, BOM, membership check, format check removed.
+
+## Proof chain (T24)
+- `rm -rf .next; npm run lint && npm run typecheck && npm run build && E2E_PORT=3124 npm run check:e2e-temp` — 2026-11-25 T24 at 67908d4: exit 0, 84 passed (e2e/export.spec.ts AC34 + AC35-json + earlier), 0 temp files left; no `data/` dir. JSON tests shown red (no link, route 400) before the code; AC34 red with status written as the column name.
