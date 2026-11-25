@@ -26,3 +26,4 @@ Scored 2026-11-25 (value + risk + cost, cost 5 = cheapest). Bar for a ticket: 9.
 - Rejected: login timing leaks whether an email exists (signup/invite reveal it by design, AC2/AC7).
 - Needs human (changes the goal's fixed three columns): custom columns / swimlanes, research.md.
 - 5 (v2 r1 c2) (T12) Task forms reset to their defaults after a failed submit (React form-action reset), so a validation error loses the user's edits on both the new-task and edit-task forms. Fix: return the submitted values in FormState or use controlled inputs.
+- 2026-11-25 (review nit, slice 2) `deleteTaskAction` (app/projects/actions.ts) does nothing visible when the delete is refused, e.g. the task was already deleted in another tab; the edit path shows "Task not found". Show the same error or redirect to the board.

@@ -136,3 +136,7 @@
 - Decision: extended `tamperBoundIds` to also rewrite a bare JSON body (`[projectId,taskId]`), which is what Next sends for a bound action with no form fields (the delete form).
 - Decision: e2e/layout.spec.ts long-description locator scoped to the `dl`; the edit textarea now also holds the text (strict-mode clash). Assertion unchanged.
 - Evidence: full chain exit 0 (see verify.md T12). Bite checks: getProject guard removed from updateTask+deleteTask -> 2 non-member tamper tests red; `project_id` condition removed from both -> 2 other-task tamper tests red; restored.
+
+## 2026-11-25 Continue: slice 2 review (controller)
+- Orient: on nstack/usable-board at d7a00a0, T9-T12 marked done, lint + typecheck pass. No logged review pass for the slice (only the T11 flaky-test fix), so reviewing T9-T12 now before ship. needs-human: only the optional `origin/nstack/ci` cleanup is open.
+- Review: one reviewer (correctness + security, T9-T12) -> pass, no important findings. Its own run: `rm -rf .next; lint && typecheck && build && test:e2e` exit 0, 55 passed, no `data/`. One nit (silent refused delete) logged in backlog.md. Its mutation check was blocked by the permission classifier; tamper-test bite rests on the builder's recorded bite checks (verify.md T12).
