@@ -369,3 +369,9 @@
 | nothing weaker | git diff main...HEAD | no deleted/skipped tests, no any/ts-ignore/eslint-disable |
 
 - Not verified: leading tab/CR formula prefixes end to end (the server trims them before storage; plan answer). None else.
+
+## 2026-11-25 Slice 7 review + record (controller)
+- Read: review/SKILL.md, ship/SKILL.md.
+- [x] review: reviewer 1 at 5005a44 -> pass, two nits (export link spacing; formula after leading spaces), both in backlog.md. Its runs: full chain 84 passed, 0 temp files; mutant (no `@` in guard) red; screens at 1280/390.
+- [x] security reviewer (export exposes project data) at 5005a44 -> pass, no findings. Its runs: 84 passed; mutant (no `-` in guard) red; spoofed Host on the logged-out redirect not reflected; HEAD -> 307. Run after reviewer 1, not alongside (2-CPU note in verify.md).
+- [x] plan.md: T23-T24 ticked, slice 7 marked done.
