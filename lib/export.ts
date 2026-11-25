@@ -1,5 +1,6 @@
 import "server-only";
 import { COLUMN_NAMES } from "@/lib/statuses";
+import type { Project } from "@/lib/projects";
 import type { Task } from "@/lib/tasks";
 
 const CSV_HEADER = ["id", "title", "description", "status", "assignee", "due_date"];
@@ -29,4 +30,19 @@ export function tasksToCsv(tasks: Task[]): string {
     ]),
   ];
   return "\uFEFF" + rows.map((row) => row.map(csvCell).join(",") + "\r\n").join("");
+}
+
+/** The project and its tasks as compact JSON (stored status keys, null for no assignee or due date). */
+export function tasksToJson(project: Project, tasks: Task[]): string {
+  return JSON.stringify({
+    project: { id: project.id, name: project.name },
+    tasks: tasks.map((task) => ({
+      id: task.id,
+      title: task.title,
+      description: task.description,
+      status: task.status,
+      assignee: task.assigneeEmail,
+      dueDate: task.dueDate,
+    })),
+  });
 }

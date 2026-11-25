@@ -148,3 +148,70 @@ test("AC35: export CSV request checks: auth, membership, format, headers", async
     expect(await response.text(), query).not.toContain("Secret roadmap item");
   }
 });
+
+test("AC34: Export JSON downloads the project and every task with stored status keys", async ({ browser }) => {
+  const { page, email } = await newUser(browser);
+  const url = await createProject(page, 'Exported "JSON" ü');
+  const id = projectId(url);
+  await page.goto(url);
+  await addTask(page, { title: "Plain task" });
+  await addTask(page, { title: "Assigned, dated", description: 'Line "one"\nline two', assignee: email, dueDate: "2999-01-02" });
+  await addTask(page, { title: "Café 日本 ü" });
+  await page.getByRole("listitem").filter({ hasText: "Assigned, dated" }).focus();
+  await persistedMove(page, () => page.keyboard.press("ArrowRight"));
+  await page.getByRole("listitem").filter({ hasText: "Café 日本 ü" }).focus();
+  await persistedMove(page, () => page.keyboard.press("ArrowRight"));
+  await page.getByRole("listitem").filter({ hasText: "Café 日本 ü" }).focus();
+  await persistedMove(page, () => page.keyboard.press("ArrowRight"));
+  await expect(cards(page, "Done")).toContainText(["Café 日本 ü"]);
+
+  const link = page.getByRole("link", { name: "Export JSON" });
+  await expect(link).toHaveAttribute("download", "");
+  const [download] = await Promise.all([page.waitForEvent("download"), link.click()]);
+  expect(download.suggestedFilename()).toBe(`project-${id}-tasks.json`);
+  const bytes = await readFile((await download.path())!);
+  expect(bytes[0], "no BOM").toBe("{".charCodeAt(0));
+
+  const stored = storedTasks(id);
+  const [plain, assigned, cafe] = stored.map((task) => task.id);
+  expect(stored[1].description).toMatch(/^Line "one"\r?\nline two$/);
+  expect(JSON.parse(bytes.toString("utf-8"))).toEqual({
+    project: { id, name: 'Exported "JSON" ü' },
+    tasks: [
+      { id: plain, title: "Plain task", description: "", status: "todo", assignee: null, dueDate: null },
+      { id: assigned, title: "Assigned, dated", description: stored[1].description, status: "in_progress", assignee: email, dueDate: "2999-01-02" },
+      { id: cafe, title: "Café 日本 ü", description: "", status: "done", assignee: null, dueDate: null },
+    ],
+  });
+});
+
+test("AC35: export JSON request checks: auth, membership, headers", async ({ browser }) => {
+  const a = await newUser(browser);
+  const b = await newUser(browser);
+  const url = await createProject(a.page, "Private JSON export");
+  const id = projectId(url);
+  await a.page.goto(url);
+  await addTask(a.page, { title: "Secret JSON item" });
+
+  const ok = await a.page.request.get(`${url}/export?format=json`);
+  expect(ok.status()).toBe(200);
+  expect(ok.headers()["content-type"]).toBe("application/json; charset=utf-8");
+  expect(ok.headers()["cache-control"]).toBe("no-store");
+  expect(ok.headers()["content-disposition"]).toBe(`attachment; filename="project-${id}-tasks.json"`);
+  expect(await ok.text()).toContain("Secret JSON item");
+
+  const loggedOut = await request.newContext({ baseURL: test.info().project.use.baseURL });
+  const response = await loggedOut.get(`${url}/export?format=json`, { maxRedirects: 0 });
+  expect(response.status()).toBe(307);
+  expect(new URL(response.headers()["location"], "http://x").pathname).toBe("/login");
+  await loggedOut.dispose();
+
+  for (const path of [`${url}/export?format=json`, "/projects/999999/export?format=json", "/projects/abc/export?format=json"]) {
+    const response = await b.page.request.get(path, { maxRedirects: 0 });
+    expect(response.status(), path).toBe(404);
+    expect(await response.text(), path).not.toContain("Secret JSON item");
+  }
+
+  const upper = await a.page.request.get(`${url}/export?format=JSON`, { maxRedirects: 0 });
+  expect(upper.status()).toBe(400);
+});

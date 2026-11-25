@@ -30,6 +30,9 @@ export default async function ProjectPage({ params, searchParams }: PageProps<"/
         {/* A plain link, not next/link: a download from a route handler, no prefetch or client navigation. */}
         <a href={`/projects/${project.id}/export?format=csv`} download>
           Export CSV
+        </a>{" "}
+        <a href={`/projects/${project.id}/export?format=json`} download>
+          Export JSON
         </a>
       </p>
       <TaskForm action={createTaskAction.bind(null, project.id)} members={members} />
