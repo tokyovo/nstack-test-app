@@ -27,3 +27,36 @@ export async function requireUser(): Promise<User> {
   if (!user) redirect("/login");
   return user;
 }
+
+const SCRYPT_KEYLEN = 64;
+
+function scrypt(password: string, salt: string): Promise<string> {
+  return new Promise((resolve, reject) =>
+    crypto.scrypt(password, salt, SCRYPT_KEYLEN, (err, key) =>
+      err ? reject(err) : resolve(key.toString("hex")),
+    ),
+  );
+}
+
+/** Creates a user with a scrypt-hashed password; returns null if the email is taken. */
+export async function createUser(email: string, password: string): Promise<User | null> {
+  const salt = crypto.randomBytes(16).toString("hex");
+  const hash = await scrypt(password, salt);
+  const result = getDb()
+    .prepare(
+      "INSERT INTO users (email, password_hash, password_salt) VALUES (?, ?, ?) ON CONFLICT (email) DO NOTHING",
+    )
+    .run(email, hash, salt);
+  return result.changes ? { id: Number(result.lastInsertRowid), email } : null;
+}
+
+/** Starts a session for the user and sets the httpOnly, SameSite=Lax session cookie. */
+export async function startSession(userId: number): Promise<void> {
+  const token = crypto.randomBytes(32).toString("hex");
+  getDb().prepare("INSERT INTO sessions (token, user_id) VALUES (?, ?)").run(token, userId);
+  (await cookies()).set(SESSION_COOKIE, token, {
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+  });
+}

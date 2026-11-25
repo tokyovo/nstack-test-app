@@ -27,3 +27,28 @@ test("AC1: visiting / while logged out redirects to /login", async ({ page }) =>
   await expect(page).toHaveURL("/login");
   await expect(page.getByRole("button", { name: "Log in" })).toBeVisible();
 });
+
+test("AC2: a new user signs up, lands on /projects and sees their email", async ({ page }) => {
+  const email = newEmail();
+  await signUp(page, email);
+  await expect(page).toHaveURL("/projects");
+  await expect(page.getByTestId("current-user")).toHaveText(email);
+});
+
+test("AC2: signing up with an already-used email shows an error", async ({ browser }) => {
+  const email = newEmail();
+  const first = await browser.newPage();
+  await signUp(first, email);
+  await expect(first).toHaveURL("/projects");
+
+  const second = await (await browser.newContext()).newPage();
+  await signUp(second, email, "another-password");
+  await expect(second.locator("form").getByRole("alert")).toHaveText("An account with that email already exists");
+  await expect(second).toHaveURL("/signup");
+});
+
+test("AC2: a password shorter than 8 characters is rejected", async ({ page }) => {
+  await signUp(page, newEmail(), "short7c");
+  await expect(page.locator("form").getByRole("alert")).toHaveText("Password must be at least 8 characters");
+  await expect(page).toHaveURL("/signup");
+});
