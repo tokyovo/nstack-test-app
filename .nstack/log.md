@@ -179,3 +179,9 @@
 - Decision: the Assignee `<select>` is keyed on its default; without the key React's post-action form reset kept "Unassigned" (test red), text inputs did not need it.
 - Decision: the server-only error used for task forms is a spaces-only title (passes the browser `required` check); kept title is the raw typed value, not trimmed.
 - Evidence: tests red first (fields empty / original values), then green; full chain exit 0, 61 passed, no `data/`.
+
+## 2026-11-25 T16 assignee filter on the board (builder)
+- Did: `Board` gets `members` and the viewer's `userId`; a "Show tasks for" select (All, My tasks, Unassigned, each member's email in member order) filters cards client-side, ANDed with the search box. Page passes the already-loaded members. AC21 tests in e2e/assignee-filter.spec.ts.
+- Decision: label is "Show tasks for", not "...assignee...": existing tests use page-level `getByLabel("Assignee")`, which would match two controls.
+- Decision: filter is client-side state like search (not a URL param): smallest diff, same pattern; not persisted across reloads.
+- Evidence: tests red first (no filter control); mutant with search OR filter instead of AND made both tests red; full chain exit 0, 66 passed, no `data/`.
