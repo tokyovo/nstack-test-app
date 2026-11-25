@@ -9,6 +9,7 @@ Run from the repo root. Needs Node 24, `npm ci`, and Chromium for Playwright 1.6
 ## Full checks
 - `npm run build` — `next build` (production). 2026-11-25 T1: pass.
 - `npm run test:e2e` — Playwright, Chromium headless. Starts `next start -p 3100` on the existing build (run `npm run build` first) with `DATABASE_PATH` set to a fresh temp SQLite file per run; tests read the same file via `process.env.E2E_DATABASE_PATH`. 2026-11-25 T1: 2 passed (e2e/smoke.spec.ts).
+- `npm run check:e2e-temp [-- <playwright args>]` — runs `playwright test`, then exits 1 if any `taskboard-e2e-<that run's pid>-*` file (db, -wal, -shm) is left in the OS temp dir (AC31); else the suite's exit code. 2026-11-25 T22: 0 left.
 
 ## Proof chain (T1)
 - `npm run lint && npm run typecheck && npm run build && npm run test:e2e` — 2026-11-25 T1: exit 0; no `data/` dir created (tests isolated from dev DB).
@@ -75,6 +76,9 @@ Run from the repo root. Needs Node 24, `npm ci`, and Chromium for Playwright 1.6
 ## Proof chain (T18)
 - `rm -rf .next; npm run lint && npm run typecheck && npm run build && E2E_PORT=3118 npm run test:e2e` — 2026-11-25 T18: exit 0, 71 passed (e2e/forms-layout.spec.ts AC24-26 + earlier, AC15 layout tests unchanged and green); no `data/` dir. AC24 and AC26 tests shown red (label text bottom 163 > field top 138; row centers 27px apart) before the code; AC25 shown red with the field width rule removed (title 160px < 280) and with selects left out of it (assignee 719px > 512, long-email member).
 - AC27 screens: isolated `next start -p 3418` + mktemp DB, `BASE_URL=http://localhost:3418 npm run screens -- $D/shots`: exit 0, 10 non-empty PNGs (kept in /tmp/tmp.gH28IFPH9w/shots/). Reviewed login/signup/projects/board/task at 1280 and 390: labels above fields, fields 512px (full width at 390), project rows on one line at 1280 (wrap under the link at 390), no overflow.
+
+## Proof chain (T22)
+- `rm -rf .next; npm run lint && npm run typecheck && npm run build && E2E_PORT=3122 npm run test:e2e` — 2026-11-25 T22: exit 0, 71 passed; no `data/` dir. AC31: `E2E_PORT=3122 npm run check:e2e-temp -- e2e/smoke.spec.ts` red with playwright.config.ts at HEAD (exit 1, .db/-shm/-wal of the run left), green with the teardown (0 left, exit 0). Full suite via `check:e2e-temp` twice: 0 left both times, but exit 1 from one AC22 seed timeout each (30s limit, test takes 19-29s on this 2-CPU box at load 8 with a parallel builder; passes alone, see backlog). Teardown runs after a failed test too. Caller-set `E2E_DATABASE_PATH` kept.
 
 ## Drive
 How an agent runs and uses the app on its own, without touching anyone's data. Each value below was run on 2026-11-25 (d298d27) unless marked "T17".

@@ -10,7 +10,8 @@
     "typecheck": "next typegen && tsc --noEmit",
     "test:e2e": "playwright test",
     "seed": "node scripts/seed.mts",
-    "screens": "node scripts/screens.mts"
+    "screens": "node scripts/screens.mts",
+    "check:e2e-temp": "node scripts/e2e-temp-check.mts"
   },
   "repository": {
     "type": "git",
