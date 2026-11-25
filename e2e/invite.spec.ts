@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { createProject, newEmail, newUser } from "./helpers";
+import { createProject, newEmail, newUser, tamperBoundProjectId } from "./helpers";
 
 async function invite(page: Page, projectUrl: string, email: string) {
   await page.goto(projectUrl);
@@ -45,4 +45,23 @@ test("AC7: inviting an existing member shows an error", async ({ browser }) => {
 
   await invite(a.page, url, a.email);
   await expect(inviteError(a.page)).toHaveText("That user is already a member");
+});
+
+test("AC7: an invite request naming a project the user is not a member of adds no member there", async ({ browser }) => {
+  const a = await newUser(browser);
+  const b = await newUser(browser);
+  const urlA = await createProject(a.page, "Private");
+  const urlB = await createProject(b.page, "Mine");
+
+  await b.page.goto(urlB);
+  const answered = await tamperBoundProjectId(b.page, Number(urlA.split("/").pop()));
+  await b.page.getByLabel("Invite by email").fill(b.email);
+  await b.page.getByRole("button", { name: "Invite" }).click();
+  await answered();
+
+  const response = await b.page.goto(urlA);
+  expect(response?.status()).toBe(404);
+  await a.page.goto(urlA);
+  await expect(a.page.getByRole("list", { name: "Members" })).toBeVisible();
+  await expect(a.page.getByRole("list", { name: "Members" }).getByText(b.email)).toHaveCount(0);
 });

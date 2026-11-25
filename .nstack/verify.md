@@ -30,3 +30,6 @@ Run from the repo root. Needs Node 24, `npm ci`, and Chromium for Playwright 1.6
 
 ## CI
 - `.github/workflows/ci.yml`: on push and pull_request, ubuntu-latest, Node 24: npm ci, playwright install --with-deps chromium, lint, typecheck, build, test:e2e. Not yet run (branch not pushed).
+
+## Proof chain (T6 review fixes)
+- `rm -rf .next; npm run lint && npm run typecheck && npm run build && npm run test:e2e` — 2026-11-25: exit 0, 34 passed; no `data/` dir. Focus test shown red before the fix; task-create and invite tamper tests each shown red with their own getProject guard removed.

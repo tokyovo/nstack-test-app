@@ -80,3 +80,10 @@
   - Existing-member error text "That user is already a member" (spec names no text); inviting yourself gives the same.
   - Email match is case-insensitive (users.email is COLLATE NOCASE).
   - Invite form lives on the project page next to the Members list; FormState type reused from auth-actions.
+
+## 2026-11-25 T6 review fixes
+- Did: Board sets `refocusId` only when a key press actually moves the card (e2e/move.spec.ts "moves nothing" test, red before). Tamper tests for createTaskAction and inviteMemberAction (e2e/tasks.spec.ts, e2e/invite.spec.ts) via `tamperBoundProjectId` in e2e/helpers.ts; each shown red with its own getProject guard removed.
+- Decisions:
+  - Fix the cause (no refocus request on a no-op key) rather than also clearing the ref in the effect: smallest change, the effect's behavior for real moves is unchanged.
+  - Tamper helper rewrites both places the bound id appears (field "0" call args `[id,{},"$K1"]` and `$ACTION_<n>:1` bound list `[id,{}]`) and asserts both were rewritten, so a body-format change fails loudly instead of passing silently.
+  - Removed all three resolved backlog items (invite tamper, task-create tamper, the T6 `.bind` encryption note), not only the invite one: all are covered now.

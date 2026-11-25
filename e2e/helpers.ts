@@ -51,3 +51,24 @@ export function column(page: Page, name: ColumnName) {
 export function cards(page: Page, name: ColumnName) {
   return column(page, name).getByRole("listitem");
 }
+
+/**
+ * Rewrites the project id bound (`.bind(null, projectId)`) into the next form-action request
+ * sent from `page` to `projectId`. The bound args travel as plain JSON in the multipart body:
+ * the call args in field "0" (`[id,{},"$K1"]`) and the bound list in `$ACTION_<n>:1` (`[id,{}]`).
+ * Returns a function that resolves once the tampered request has been answered.
+ */
+export async function tamperBoundProjectId(page: Page, projectId: number): Promise<() => Promise<void>> {
+  let answered = false;
+  await page.route("**/projects/*", async (route) => {
+    const body = route.request().method() === "POST" ? route.request().postData() : null;
+    if (!body?.includes("$ACTION_")) return route.continue();
+    const tampered = body.replace(/(name="(?:0|[^"]*\$ACTION_\d+:1)"\r\n\r\n\[)\d+,/g, `$1${projectId},`);
+    expect(tampered.match(new RegExp(`\\r\\n\\r\\n\\[${projectId},`, "g"))).toHaveLength(2);
+    const response = await route.fetch({ postData: tampered });
+    await route.fulfill({ response });
+    answered = true;
+    await page.unroute("**/projects/*");
+  });
+  return () => expect.poll(() => answered).toBe(true);
+}

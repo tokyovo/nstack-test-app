@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import Database from "better-sqlite3";
-import { cards, column, createProject, newUser } from "./helpers";
+import { cards, column, createProject, newUser, tamperBoundProjectId } from "./helpers";
 
 function taskError(page: Page) {
   return page.locator("form").filter({ has: page.getByRole("button", { name: "Add task" }) }).getByRole("alert");
@@ -118,5 +118,22 @@ test("AC8: a tampered form cannot assign a non-member or store a bad due date", 
   await expect(taskError(a.page)).toHaveText("Due date must be a date");
 
   await a.page.reload();
+  await expect(cards(a.page, "To do")).toHaveCount(0);
+});
+
+test("AC8: a create request naming a project the user is not a member of adds no task there", async ({ browser }) => {
+  const a = await newUser(browser);
+  const b = await newUser(browser);
+  const urlA = await createProject(a.page, "Private");
+  const urlB = await createProject(b.page, "Mine");
+
+  await b.page.goto(urlB);
+  const answered = await tamperBoundProjectId(b.page, Number(urlA.split("/").pop()));
+  await b.page.getByLabel("Title").fill("Planted");
+  await b.page.getByRole("button", { name: "Add task" }).click();
+  await answered();
+
+  await a.page.goto(urlA);
+  await expect(column(a.page, "To do")).toBeVisible();
   await expect(cards(a.page, "To do")).toHaveCount(0);
 });
