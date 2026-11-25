@@ -22,5 +22,8 @@ Run from the repo root. Needs Node 24, `npm ci`, and Chromium for Playwright 1.6
 ## Proof chain (T4)
 - `rm -rf .next; npm run lint && npm run typecheck && npm run build && npm run test:e2e` — 2026-11-25 T4: exit 0, 21 passed (e2e/invite.spec.ts AC7 + earlier); no `data/` dir. Invite tests shown red (no invite form) before the code.
 
+## Proof chain (T5)
+- `rm -rf .next; npm run lint && npm run typecheck && npm run build && npm run test:e2e` — 2026-11-25 T5: exit 0, 27 passed (e2e/tasks.spec.ts AC8 + earlier); no `data/` dir. Task tests shown red (no board/form) before the code; tamper test shown red with the assignee member check disabled.
+
 ## CI
 - `.github/workflows/ci.yml`: on push and pull_request, ubuntu-latest, Node 24: npm ci, playwright install --with-deps chromium, lint, typecheck, build, test:e2e. Not yet run (branch not pushed).

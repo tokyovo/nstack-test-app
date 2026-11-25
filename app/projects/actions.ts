@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import type { FormState } from "@/app/auth-actions";
 import { requireUser } from "@/lib/auth";
 import { createProject, deleteProject, inviteMember, renameProject } from "@/lib/projects";
+import { createTask } from "@/lib/tasks";
 
 function readName(formData: FormData): string {
   return String(formData.get("name") ?? "").trim();
@@ -45,6 +46,34 @@ export async function inviteMemberAction(projectId: number, _prev: FormState, fo
   if (!email) return { error: "Email is required" };
   const result = inviteMember(user.id, projectId, email);
   if (result !== "invited") return { error: INVITE_ERRORS[result] };
+  revalidatePath(`/projects/${projectId}`);
+  return {};
+}
+
+/** A plain calendar date (YYYY-MM-DD) that exists, e.g. not 2026-02-30. */
+function isDate(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const date = new Date(`${value}T00:00:00Z`);
+  return !Number.isNaN(date.getTime()) && date.toISOString().startsWith(value);
+}
+
+const TASK_ERRORS = {
+  "not-found": "Project not found",
+  "not-member": "Assignee must be a project member",
+} as const;
+
+export async function createTaskAction(projectId: number, _prev: FormState, formData: FormData): Promise<FormState> {
+  const user = await requireUser();
+  const title = String(formData.get("title") ?? "").trim();
+  if (!title) return { error: "Title is required" };
+  const description = String(formData.get("description") ?? "").trim();
+  const assignee = String(formData.get("assigneeId") ?? "");
+  const assigneeId = assignee ? Number(assignee) : null;
+  if (assigneeId !== null && !Number.isInteger(assigneeId)) return { error: TASK_ERRORS["not-member"] };
+  const dueDate = String(formData.get("dueDate") ?? "").trim() || null;
+  if (dueDate !== null && !isDate(dueDate)) return { error: "Due date must be a date" };
+  const result = createTask(user.id, projectId, { title, description, assigneeId, dueDate });
+  if (result !== "created") return { error: TASK_ERRORS[result] };
   revalidatePath(`/projects/${projectId}`);
   return {};
 }

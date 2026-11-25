@@ -27,7 +27,7 @@ Out of scope: see goal.md.
 - [x] T2 Auth: signup, login, logout, session cookie, redirect guard. Proof: e2e for AC 1-4. Needs: T1
 - [x] T3 Projects: create, rename, delete, member-only visibility + 404 for non-members. Proof: e2e for AC 5-6. Needs: T2
 - [x] T4 Invite existing user by email. Proof: e2e for AC 7. Needs: T3
-- [ ] T5 Tasks: create with fields; three-column board. Proof: e2e for AC 8. Needs: T4 (assignee needs members)
+- [x] T5 Tasks: create with fields; three-column board. Proof: e2e for AC 8. Needs: T4 (assignee needs members)
 - [ ] T6 Move tasks by drag-and-drop and by keyboard. Proof: e2e for AC 9-10. Needs: T5
 - [ ] T7 Comments on a task. Proof: e2e for AC 11. Needs: T5
 - [ ] T8 Search tasks in a project. Proof: e2e for AC 12. Needs: T5
