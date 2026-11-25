@@ -15,4 +15,4 @@ A team task board web app: users sign up / log in with email + password, create 
 - merge: auto
 - branch: main
 - evolve: yes
-- bar: 8
+- bar: 7
