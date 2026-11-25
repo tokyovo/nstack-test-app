@@ -7,7 +7,7 @@ import { createProject, deleteProject, inviteMember, renameProject } from "@/lib
 import { addComment } from "@/lib/comments";
 import { MAX_TITLE_LENGTH } from "@/lib/limits";
 import { isStatus } from "@/lib/statuses";
-import { createTask, moveTask } from "@/lib/tasks";
+import { createTask, moveTask, updateTask, type NewTask } from "@/lib/tasks";
 
 function readName(formData: FormData): string {
   return String(formData.get("name") ?? "").trim();
@@ -65,8 +65,8 @@ const TASK_ERRORS = {
   "not-member": "Assignee must be a project member",
 } as const;
 
-export async function createTaskAction(projectId: number, _prev: FormState, formData: FormData): Promise<FormState> {
-  const user = await requireUser();
+/** Reads and validates the task form fields shared by create and edit; an error message if invalid. */
+function readTask(formData: FormData): NewTask | { error: string } {
   const title = String(formData.get("title") ?? "").trim();
   if (!title) return { error: "Title is required" };
   if (title.length > MAX_TITLE_LENGTH) return { error: `Title must be at most ${MAX_TITLE_LENGTH} characters` };
@@ -76,9 +76,32 @@ export async function createTaskAction(projectId: number, _prev: FormState, form
   if (assigneeId !== null && !Number.isInteger(assigneeId)) return { error: TASK_ERRORS["not-member"] };
   const dueDate = String(formData.get("dueDate") ?? "").trim() || null;
   if (dueDate !== null && !isDate(dueDate)) return { error: "Due date must be a date" };
-  const result = createTask(user.id, projectId, { title, description, assigneeId, dueDate });
+  return { title, description, assigneeId, dueDate };
+}
+
+export async function createTaskAction(projectId: number, _prev: FormState, formData: FormData): Promise<FormState> {
+  const user = await requireUser();
+  const task = readTask(formData);
+  if ("error" in task) return task;
+  const result = createTask(user.id, projectId, task);
   if (result !== "created") return { error: TASK_ERRORS[result] };
   revalidatePath(`/projects/${projectId}`);
+  return {};
+}
+
+export async function updateTaskAction(
+  projectId: number,
+  taskId: number,
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const user = await requireUser();
+  const task = readTask(formData);
+  if ("error" in task) return task;
+  const result = updateTask(user.id, projectId, taskId, task);
+  if (result !== "updated") return { error: result === "not-found" ? "Task not found" : TASK_ERRORS[result] };
+  revalidatePath(`/projects/${projectId}`);
+  revalidatePath(`/projects/${projectId}/tasks/${taskId}`);
   return {};
 }
 

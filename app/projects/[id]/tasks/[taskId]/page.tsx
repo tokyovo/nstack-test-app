@@ -2,10 +2,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { listComments } from "@/lib/comments";
-import { getProject } from "@/lib/projects";
+import { getProject, listMembers } from "@/lib/projects";
 import { COLUMN_NAMES } from "@/lib/statuses";
 import { getTask } from "@/lib/tasks";
-import { addCommentAction } from "../../../actions";
+import { addCommentAction, updateTaskAction } from "../../../actions";
+import { TaskForm } from "../../task-form";
 import { CommentForm } from "./comment-form";
 
 export const dynamic = "force-dynamic";
@@ -18,6 +19,7 @@ export default async function TaskPage({ params }: PageProps<"/projects/[id]/tas
   const task = project && Number.isInteger(Number(taskId)) ? getTask(user.id, project.id, Number(taskId)) : null;
   if (!project || !task) notFound();
   const comments = listComments(user.id, project.id, task.id);
+  const members = listMembers(user.id, project.id);
   return (
     <main>
       <p>
@@ -34,6 +36,15 @@ export default async function TaskPage({ params }: PageProps<"/projects/[id]/tas
         <dt>Description</dt>
         <dd>{task.description || "No description"}</dd>
       </dl>
+      <section>
+        <h3>Edit task</h3>
+        <TaskForm
+          action={updateTaskAction.bind(null, project.id, task.id)}
+          members={members}
+          task={task}
+          submitLabel="Save changes"
+        />
+      </section>
       <section>
         <h3>Comments</h3>
         <ul aria-label="Comments">
