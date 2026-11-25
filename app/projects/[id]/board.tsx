@@ -40,8 +40,10 @@ export function Board({ tasks, move }: Props) {
     const step = KEY_STEPS[event.key];
     if (!step) return;
     event.preventDefault();
+    const status = neighborStatus(task.status, step);
+    if (!status) return; // already in the end column: nothing moves, nothing to refocus
     refocusId.current = task.id;
-    moveTo(task, neighborStatus(task.status, step));
+    moveTo(task, status);
   }
 
   function onDrop(event: DragEvent, status: Status) {

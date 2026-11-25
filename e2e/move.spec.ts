@@ -58,6 +58,22 @@ test("AC10: ArrowRight moves a focused card one column right, ArrowLeft one left
   await expect(cards(a.page, "Done")).toHaveCount(0);
 });
 
+test("AC10: an arrow key that moves nothing does not pull focus back to the card later", async ({ browser }) => {
+  const a = await newUser(browser);
+  await projectWithTask(a.page, "Edge", "First");
+
+  await card(a.page, "First").focus();
+  await a.page.keyboard.press("ArrowLeft");
+  await expect(cards(a.page, "To do")).toContainText(["First"]);
+
+  const title = a.page.getByLabel("Title");
+  await title.fill("Second");
+  await title.press("Enter");
+  await expect(cards(a.page, "To do")).toHaveCount(2);
+  await expect(title).toBeFocused();
+  await expect(card(a.page, "First")).not.toBeFocused();
+});
+
 /**
  * B, who is not a member of A's project, presses ArrowRight on B's own card while the move
  * request's arguments ([projectId, taskId, status]) are rewritten by `tamper`. A's task must stay put.
