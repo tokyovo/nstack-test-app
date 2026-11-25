@@ -111,3 +111,8 @@
 ## 2026-11-25 Continue: orient + improve rerun (controller)
 - Orient: main ahead of origin/main by 1 (local state commit 780fe09), origin/main e2ecb58; lint + typecheck pass; CI on main green (run 45541011124). needs-human: only open item is optional `origin/nstack/ci` cleanup; branch still exists (git ls-remote), left for the user.
 - Correction: the previous run skipped `research` with "goal is a fixed spec"; improve forbids that reason. Rerunning improve with research (step 4) and a UX pass (step 6).
+
+## 2026-11-25 T9 confirm before project delete (builder)
+- Did: `ConfirmButton` client component (native `window.confirm`, preventDefault on cancel) used for the project Delete button. AC14 tests in e2e/projects.spec.ts; the existing delete and tamper tests now accept the dialog.
+- Decision: native confirm() over a custom modal: no deps, accessible by default, smallest diff; easy to swap later.
+- Evidence: full chain exit 0, 42 passed.

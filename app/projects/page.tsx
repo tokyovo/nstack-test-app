@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { listProjects } from "@/lib/projects";
 import { createProjectAction, deleteProjectAction, renameProjectAction } from "./actions";
+import { ConfirmButton } from "./confirm-button";
 
 export const dynamic = "force-dynamic";
 
@@ -28,7 +29,7 @@ export default async function ProjectsPage() {
             </form>
             <form action={deleteProjectAction}>
               <input type="hidden" name="projectId" value={project.id} />
-              <button type="submit">Delete</button>
+              <ConfirmButton message={`Delete project "${project.name}"? This also deletes its tasks.`}>Delete</ConfirmButton>
             </form>
           </li>
         ))}

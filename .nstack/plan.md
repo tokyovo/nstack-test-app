@@ -46,7 +46,7 @@ Acceptance criteria (each a Playwright test in `e2e/`):
 17. A member can edit a task's title, description, assignee and due date from the task page; changes persist after reload and show on the board. A member can delete a task (with confirmation); it disappears from the board and its URL then 404s. Non-members cannot edit/delete (server-side check, tamper test).
 
 ## Tickets
-- [ ] T9 Confirm before project delete. Proof: e2e AC14. Needs: none
+- [x] T9 Confirm before project delete. Proof: e2e AC14. Needs: none
 - [ ] T10 Base stylesheet: side-by-side columns, responsive at 390px, word-wrap long text, 200-char title cap. Proof: e2e AC15. Needs: none
 - [ ] T11 Overdue flag on cards. Proof: e2e AC16. Needs: T10 (same board files)
 - [ ] T12 Edit and delete tasks. Proof: e2e AC17. Needs: T11
