@@ -24,5 +24,16 @@
   - Unknown email and wrong password give the same "Invalid email or password".
   - Error locators scoped to `form` because Next's route announcer also has role=alert.
 
+## 2026-11-25 T2 review + verify (controller)
+- Did: two reviewers (general, security) both passed with nits only. Added e2e test that a copied session cookie is rejected after logout (both flagged it).
+- Evidence:
+| Claim | Command | Result |
+|---|---|---|
+| all checks | rm -rf .next; npm run lint && npm run typecheck && npm run build && npm run test:e2e | exit 0, 12 passed |
+| logout test bites | removed DELETE FROM sessions in endSession, build, playwright -g "copied cookie" | 1 failed; restored, green |
+| tests isolated | ls data | absent |
+- Lesson: two verify chains in parallel collide on `.next` and port 3100 (a reviewer hit "Could not find a production build"). Run reviewers one at a time.
+- Not verified: CI (parked, see Needs human).
+
 ## Needs human
 - 2026-11-25 Run `gh auth refresh -h github.com -s workflow` (adds `workflow` scope to the gh token). Then: `git push -u origin nstack/ci`, rebase `nstack/task-board` onto it (or merge both), open the PR, and nstack can wait for CI and merge. Changing credentials is a hard stop for nstack.

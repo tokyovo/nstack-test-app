@@ -64,6 +64,20 @@ test("AC3: log out returns to /login and /projects is then guarded", async ({ pa
   await expect(page).toHaveURL("/login");
 });
 
+test("AC3: log out ends the session on the server, so a copied cookie stops working", async ({ page, context }) => {
+  await signUp(page, newEmail());
+  await expect(page).toHaveURL("/projects");
+  const copied = (await context.cookies()).filter((c) => c.name === "session");
+  expect(copied).toHaveLength(1);
+
+  await page.getByRole("button", { name: "Log out" }).click();
+  await expect(page).toHaveURL("/login");
+
+  await context.addCookies(copied);
+  await page.goto("/projects");
+  await expect(page).toHaveURL("/login");
+});
+
 test("AC3: logging back in with the right password works", async ({ page }) => {
   const email = newEmail();
   await signUp(page, email);
