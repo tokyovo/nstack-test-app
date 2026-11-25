@@ -230,3 +230,10 @@
 - Ship: PR https://github.com/tokyovo/nstack-test-app/pull/7, CI green (runs 45563884016, 45563888822; 67 passed). Merged under `merge: auto` as ac360ee. On main after pull: lint + typecheck pass.
 - Improve (read improve/SKILL.md, plan/SKILL.md): no broken checks; `gh issue list` empty; `npm audit` 0 vulnerabilities; research.md is from today. UX pass on the new `npm run screens` output (/tmp/t17-shots/): every form has inline labels and ragged fields, the edit-task Title field truncates, selects stretch to the longest email, project rows stack controls. Earlier UX passes called the UI "plain but usable" without scoring that as its own candidate, as improve requires; scored now: 8 (v3 r1 c4), meets bar 8. Planned as slice 5 (T18, AC24-27) on nstack/forms-layout; the T17 select-width backlog item is folded in.
 - Decision: labels above fields (stacked) at every width: the most common form convention, and it removes the ragged wrapping at both widths with one rule set.
+
+## 2026-11-25 T18 form and project-row layout (builder)
+- Did: app/globals.css: every label is a block with its field below it, fields `width: min(100%, 32rem)` (512px at 1280, container width at 390); forms in main get 1rem bottom margin. /projects rows (`.project-row`, one className in app/projects/page.tsx) are flex rows that wrap. e2e/forms-layout.spec.ts covers AC24-26.
+- Decision: the label rule applies to all labels, not only `form label`, so the board's "Show tasks for" select (spec evidence, not in a form) is capped too and its search/filter labels match the forms; plain CSS, no markup changes besides the row class (principle 2).
+- Decision: AC25's 40-char title is a realistic sentence ("Prepare the launch checklist for Q3 2026", ~300px), not 40 wide glyphs: 40 "W"s exceed 512px in any common font, which the 280-512 bound allows. Field widths themselves are forced by CSS, not fonts (slice 2 lesson).
+- Decision: form margin scoped to `main form` after the screens review showed it pushed the header's Log out button up.
+- Evidence: each test red first (see verify.md T18); full chain exit 0, 71 passed, no `data/`; screens exit 0, 10 PNGs reviewed at both widths.
