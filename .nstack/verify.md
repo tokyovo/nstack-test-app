@@ -64,15 +64,20 @@ Run from the repo root. Needs Node 24, `npm ci`, and Chromium for Playwright 1.6
 ## Proof chain (T16)
 - `rm -rf .next; npm run lint && npm run typecheck && npm run build && npm run test:e2e` — 2026-11-25 T16: exit 0, 66 passed (e2e/assignee-filter.spec.ts AC21 + earlier); no `data/` dir. AC21 tests shown red (no filter) before the code; both shown red with the search/filter AND changed to OR.
 
+## Proof chain (T17)
+- `rm -rf .next; npm run lint && npm run typecheck && npm run build && E2E_PORT=3117 npm run test:e2e` — 2026-11-25 T17: exit 0, 67 passed (e2e/seed.spec.ts AC22 + earlier); no `data/` dir. AC22 test red against a stub seed; red with the task-exists check removed (duplicate tasks) and with the overdue due date made future.
+- AC23: isolated server (`next start -p 3417`, mktemp DB), `BASE_URL=http://localhost:3417 npm run seed` twice (same output, exit 0), then `npm run screens -- $D/shots`: exit 0, `ls` 10 files, all non-empty. Mutant logging `console.error` on each page: exit 1 with the errors listed.
+- Scripts are `scripts/*.mts` run by Node 24 type stripping (`.mts`, so Node does not warn about a typeless package.json); tsconfig has `allowImportingTsExtensions` and includes `**/*.mts`, so lint and typecheck cover them.
+
 ## Proof chain (slice 3, controller)
 - `rm -rf .next; npm run lint && npm run typecheck && npm run build && npm run test:e2e` at 299a094 (T13-T16 merged) — 2026-11-25: exit 0, 66 passed; no `data/` dir.
 
 ## Drive
 How an agent runs and uses the app on its own, without touching anyone's data. Each value below was run on 2026-11-25 (d298d27) unless marked "T17".
 - **Start:** `npm run build`, then `D=$(mktemp -d); DATABASE_PATH=$D/app.db INSECURE_COOKIES=1 npx next start -p 3400` (any free port; `INSECURE_COOKIES=1` because it is http). Ready when `curl -s -o /dev/null -w '%{http_code}' localhost:3400/login` prints 200; `/` then gives 307 to /login.
-- **Seed:** T17 adds `BASE_URL=http://localhost:3400 npm run seed`. Until then, sign up and create data in the UI.
+- **Seed:** `BASE_URL=http://localhost:3400 npm run seed` (T17). Through the UI: demo@example.com / correct-horse-1 (signed up or logged in), a member with a long email, "Website relaunch" (2 To do incl. one overdue and one 200-char title, 1 In progress assigned, 1 Done with a comment) and empty "Team offsite". Prints `Sign in: ...` and `Board: <url>`. Idempotent: a second run changes nothing (T17: printed the same board URL). ~15s.
 - **Sign in:** sign up at /signup with any email and `correct-horse-1` (min 8 chars); lands on /projects. In tests, `e2e/helpers.ts` `signUp()` / `newUser()`. playwright-cli: `playwright-cli -s=drive open http://localhost:3400/signup`, `fill 'input[name=email]' ...`, `fill 'input[name=password]' ...`, `press Enter`.
 - **Screens:** /login, /signup, /projects, /projects/<id> (board), /projects/<id>/tasks/<taskId> (task page).
-- **Evidence:** `playwright-cli -s=drive screenshot --filename=<file>.png`; `playwright-cli -s=drive console` (expect only the favicon.ico 404). T17 adds `npm run screens -- <dir>`.
+- **Evidence:** `BASE_URL=http://localhost:3400 npm run screens -- <dir>` (T17): seeds, then writes login/signup/projects/board/task `-1280.png` and `-390.png` (10 full-page PNGs) into <dir>; exits 1 listing any console error or page error (favicon.ico 404 ignored). T17: exit 0, 10 non-empty files. One-off: `playwright-cli -s=drive screenshot --filename=<file>.png`; `playwright-cli -s=drive console` (expect only the favicon.ico 404).
 - **Isolate:** own port and own mktemp DB per copy; e2e uses `E2E_PORT` and its own temp DB.
 - **Clean up:** `kill $(ss -ltnp 'sport = :3400' | grep -o 'pid=[0-9]*' | cut -d= -f2)` (pkill -f matches the calling shell, avoid), then `rm -rf $D`; `playwright-cli -s=drive close`.
