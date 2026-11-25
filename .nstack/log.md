@@ -209,3 +209,19 @@
 - Decision: scripts are `.mts` (Node type stripping without the typeless-package.json warning; `"type": "module"` would change how Playwright loads e2e/*.ts). tsconfig: `allowImportingTsExtensions`, include `**/*.mts`.
 - Decision: the overdue task is due 7 days before today (realistic dates, still overdue in any time zone); the comment task is reached via the href on the board.
 - Note: headless Chromium did not log the favicon 404 during screens; the error check was shown to bite with a mutant that logs console.error on each page (exit 1).
+
+## 2026-11-25 Slice 4 verify + review (controller)
+- Read: verify/SKILL.md, review/SKILL.md, ship/SKILL.md.
+
+| Claim | Command | Result |
+|---|---|---|
+| clean tree at acd877b | git status; git log -1 | clean, acd877b |
+| all checks | `rm -rf .next; lint && typecheck && build && E2E_PORT=3121 test:e2e` | exit 0, 67 passed, 0 skipped, no warnings, no `data/` |
+| AC22 seed test bites | overdue task dueInDays -7 -> +7, ran e2e/seed.spec.ts | 1 failed (Overdue count 0), restored, 1 passed |
+| AC22/23 real run | isolated `next start -p 3422` + mktemp DB; `npm run seed`, `npm run screens -- $D/shots` | seed exit 0 (prints sign-in + board URL); screens exit 0, 10 non-empty PNGs |
+| AC23 console check bites | injected `console.error("bite")` in app/layout.tsx, rebuilt, ran screens | exit 1, lists each page with "bite"; restored + rebuilt, tree clean |
+| screens | /tmp/t17-shots/board-1280.png, board-390.png, task-390.png (all 10 kept there) | columns side by side / stacked, overdue card marked, long title and long email wrap, no overflow |
+| nothing weaker | git diff d298d27...HEAD | no deleted/skipped tests, no any/ts-ignore/eslint-disable |
+
+- Review: one reviewer -> pass, no findings. Its runs: e2e 67 passed; seed twice idempotent; screens 10 PNGs; mutant (comment-exists check removed) -> seed test red.
+- Not verified: the favicon-404 filter in screens (headless Chromium never requested favicon in these runs). It does no harm if never hit.
