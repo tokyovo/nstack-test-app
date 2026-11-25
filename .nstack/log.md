@@ -190,3 +190,9 @@
 - Verify: full chain at 299a094: exit 0, 66 passed, no `data/`.
 - Review: reviewer -> pass, no important findings. Its runs: e2e 66 passed; `E2E_SECURE_COOKIES=1` session/auth specs 13 passed; bite checks (expired-row DELETE removed; Unassigned matching viewer) each turned a test red. Nits: checkout/setup-node at v6 not latest v7 (meets AC18); AC18 needs CI.
 - Lesson: ESLint linted `.claude/worktrees/` (agent worktrees) -> errors. Encoded: `.claude/**` in eslint globalIgnores, `.claude/worktrees/` in .gitignore.
+
+## 2026-11-25 Slice 3 shipped; improve: nothing at the bar (controller)
+- Ship: PR https://github.com/tokyovo/nstack-test-app/pull/5, CI green (runs 45558869560, 45558876172; 66 passed; zero check-run annotations, so AC18's Node 20 warning is gone). Merged under `merge: auto` as 6d9be09. CI on main green: run 45559280150, 66 passed.
+- Backlog: removed shipped items (T9-T16). Top three left: 7 (no nav back to Projects), 7 (failed move reverts silently), 7 (search not in URL). All below bar 8. research.md is from today; no new UX pass, as slice 3 only added one board select, covered by e2e.
+- needs-human: `origin/nstack/ci` still exists (10384bb); optional, left for the user.
+- Stopping: goal met, verify green on main, nothing at or above the bar.
