@@ -160,3 +160,14 @@ Decision: logged out redirects to /login like every page (requireUser), rather t
 ## Tickets
 - [ ] T23 CSV export route and board links (AC32, AC33, AC35 for csv). Proof: new e2e/export.spec.ts (download event, read file; tasks with comma/quote/newline/leading `=`/non-ASCII; request checks), red first; full chain. Needs: none
 - [ ] T24 JSON export (AC34, AC35 for json). Proof: e2e in e2e/export.spec.ts, red first; full chain. Needs: T23 (same route file)
+
+Fresh-reader answers (2026-11-25):
+- Links: plain `<a href download>` (not next/link: no prefetch or client navigation of a route handler), in page.tsx next to the project `<h2>`, inside `<p className="export-links">`. Href `/projects/<id>/export?format=csv|json`; `download` with no value (filename from Content-Disposition).
+- Order of checks: auth first (307), then id/project (404), then format (400). So logged out + bad format = 307; unknown project + bad format = 404. A non-integer id is 404, same `Number.isInteger` check as page.tsx.
+- Logged out: `NextResponse.redirect(new URL("/login", request.url), 307)`; tests check status 307 and `new URL(location).pathname === "/login"`. 404 and 400 are plain-text responses (`Not found`, `Unknown format`), not the HTML 404 page.
+- BOM: the string starts with U+FEFF, encoded as UTF-8; the test checks the first three bytes of the file are EF BB BF and decodes the rest.
+- CRLF after every row including the last (file ends with CRLF). Values are written as stored (a description's newline stays as stored; the test expects the stored form, read back via the task page or by putting the same string in through the form and comparing after normalizing CRLF to LF on both sides is NOT allowed: assert the CSV cell contains a line break and round-trips through a simple RFC 4180 parse to the stored description from the JSON export or DB via E2E_DATABASE_PATH).
+- Formula guard: applied to every cell before RFC 4180 quoting (`'=x,y` is then quoted); a no-op for id, status and due_date. In e2e: comma/quote/newline cases in the description, `=`/`+`/`-`/`@` cases in titles. Leading tab/CR cannot survive the server's trim, so those two prefixes are covered by reading the code and the same function; not separately in e2e.
+- No unit runner: proof is e2e through the route only. CSV code may live in `lib/export.ts` if the route reads better that way (builder's call).
+- Requests: logged-in checks use `page.request` (shares the context cookie); logged-out uses a fresh `request` context with `maxRedirects: 0`. Add a helper for the project id to e2e/helpers.ts only if two specs need it.
+- JSON: compact `JSON.stringify({ project, tasks })`, key order as in AC34; `project.name` from `getProject` (current name). Test compares parsed values, not raw text.
