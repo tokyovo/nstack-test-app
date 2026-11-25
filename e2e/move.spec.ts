@@ -121,3 +121,56 @@ test("AC9: a move request naming a project the user is not a member of does not 
     args[args.length - 2] = a.taskId;
   });
 });
+
+/** Deletes the task from its own task page, in a second tab of the same user, leaving `page`'s board stale. */
+async function deleteInOtherTab(page: Page, title: string) {
+  const other = await page.context().newPage();
+  await other.goto(page.url());
+  await other.getByRole("link", { name: title, exact: true }).click();
+  other.once("dialog", (dialog) => void dialog.accept());
+  await other.getByRole("button", { name: "Delete task" }).click();
+  await expect(other.getByRole("link", { name: title, exact: true })).toHaveCount(0);
+  await other.close();
+}
+
+function moveAlert(page: Page) {
+  return page.locator(".board").getByRole("alert");
+}
+
+test("AC29: dragging a card deleted in another tab shows an alert and leaves it out of the target column", async ({
+  browser,
+}) => {
+  const a = await newUser(browser);
+  await projectWithTask(a.page, "Stale drag", "Gone task");
+  await deleteInOtherTab(a.page, "Gone task");
+
+  await card(a.page, "Gone task").dragTo(column(a.page, "In progress"));
+  await expect(moveAlert(a.page)).toHaveText('Could not move "Gone task"');
+  await expect(cards(a.page, "In progress")).toHaveCount(0);
+  await expect(cards(a.page, "To do")).toHaveCount(0); // the board refreshed: the deleted card is gone
+});
+
+test("AC29: ArrowRight on a card deleted in another tab shows an alert; the next successful move clears it", async ({
+  browser,
+}) => {
+  const a = await newUser(browser);
+  await projectWithTask(a.page, "Stale keys", "Gone task");
+  await a.page.getByLabel("Title").fill("Live task");
+  await a.page.getByRole("button", { name: "Add task" }).click();
+  await expect(cards(a.page, "To do")).toHaveCount(2);
+
+  await persistedMove(a.page, () => card(a.page, "Live task").dragTo(column(a.page, "In progress")));
+  await expect(cards(a.page, "In progress")).toContainText(["Live task"]);
+  await expect(moveAlert(a.page)).toHaveCount(0);
+
+  await deleteInOtherTab(a.page, "Gone task");
+  await card(a.page, "Gone task").focus();
+  await a.page.keyboard.press("ArrowRight");
+  await expect(moveAlert(a.page)).toHaveText('Could not move "Gone task"');
+  await expect(cards(a.page, "In progress")).toHaveText([/Live task/]);
+
+  await card(a.page, "Live task").focus();
+  await persistedMove(a.page, () => a.page.keyboard.press("ArrowRight"));
+  await expect(cards(a.page, "Done")).toContainText(["Live task"]);
+  await expect(moveAlert(a.page)).toHaveCount(0);
+});

@@ -88,3 +88,6 @@ How an agent runs and uses the app on its own, without touching anyone's data. E
 - **Evidence:** `BASE_URL=http://localhost:3400 npm run screens -- <dir>` (T17): seeds, then writes login/signup/projects/board/task `-1280.png` and `-390.png` (10 full-page PNGs) into <dir>; exits 1 listing any console error or page error (favicon.ico 404 ignored). T17: exit 0, 10 non-empty files. One-off: `playwright-cli -s=drive screenshot --filename=<file>.png`; `playwright-cli -s=drive console` (expect only the favicon.ico 404).
 - **Isolate:** own port and own mktemp DB per copy; e2e uses `E2E_PORT` and its own temp DB.
 - **Clean up:** `kill $(ss -ltnp 'sport = :3400' | grep -o 'pid=[0-9]*' | cut -d= -f2)` (pkill -f matches the calling shell, avoid), then `rm -rf $D`; `playwright-cli -s=drive close`.
+
+## Proof chain (T20)
+- `rm -rf .next; npm run lint && npm run typecheck && npm run build && E2E_PORT=3120 npm run test:e2e` — 2026-11-25 T20: see log.md T20 for the run at the commit. AC29 tests (e2e/move.spec.ts) shown red (no alert) before the code; the clear-on-success check shown red with the clear removed. e2e/move.spec.ts alone: 7 passed.

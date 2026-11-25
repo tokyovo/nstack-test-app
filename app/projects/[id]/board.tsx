@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { unstable_rethrow, useRouter } from "next/navigation";
 import { startTransition, useEffect, useOptimistic, useRef, useState, type DragEvent, type KeyboardEvent } from "react";
 import { isOverdue } from "@/lib/due-dates";
 import { COLUMN_NAMES, STATUSES, neighborStatus, type Status } from "@/lib/statuses";
@@ -15,7 +16,8 @@ type Props = {
   userId: number;
   /** The server's local date (YYYY-MM-DD); cards due before it, and not Done, are marked overdue. */
   today: string;
-  move: (taskId: number, status: Status) => Promise<void>;
+  /** Resolves true when the server stored the move. */
+  move: (taskId: number, status: Status) => Promise<boolean>;
 };
 type Move = { id: number; status: Status };
 
@@ -36,6 +38,7 @@ const KEY_STEPS: Record<string, -1 | 1> = { ArrowLeft: -1, ArrowRight: 1 };
 /**
  * The project's tasks in three columns, one per status. Drag a card to another column,
  * or focus it and press ArrowLeft / ArrowRight, to move it. A card's title links to the task page.
+ * A move the server refuses puts the card back and shows an alert until the next move succeeds.
  * Cards past their due date and not in Done say "Overdue".
  * The search box shows only tasks whose title or description contains the query (any case);
  * the assignee filter narrows that further to all, the viewer's, unassigned, or one member's tasks.
@@ -46,6 +49,8 @@ export function Board({ projectId, tasks, members, userId, today, move }: Props)
   );
   // A card moved by keyboard remounts in its new column; give it focus back once.
   const refocusId = useRef<number | null>(null);
+  const router = useRouter();
+  const [moveError, setMoveError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [assignee, setAssignee] = useState(ALL);
   const needle = query.trim().toLowerCase();
@@ -67,7 +72,14 @@ export function Board({ projectId, tasks, members, userId, today, move }: Props)
     if (!status || status === task.status) return;
     startTransition(async () => {
       applyMove({ id: task.id, status });
-      await move(task.id, status);
+      let moved = false;
+      try {
+        moved = await move(task.id, status);
+      } catch (error) {
+        unstable_rethrow(error); // a redirect (expired session) or not-found still navigates
+      }
+      setMoveError(moved ? null : `Could not move "${task.title}"`);
+      if (!moved) router.refresh(); // e.g. a task deleted in another tab leaves the board
     });
   }
 
@@ -105,6 +117,11 @@ export function Board({ projectId, tasks, members, userId, today, move }: Props)
           ))}
         </select>
       </label>
+      {moveError && (
+        <p role="alert" className="board-error">
+          {moveError}
+        </p>
+      )}
       {STATUSES.map((status) => {
         const name = COLUMN_NAMES[status];
         const headingId = `column-${status}`;

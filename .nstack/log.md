@@ -277,3 +277,9 @@
 - Decision: one conditional in the existing layout `<h1>`, no new component (principle 2; plan decision). Heading name unchanged, so smoke test untouched.
 - Decision: logged-out checks assert no `a` in the header at all (the header has no other links logged out), which is stricter than checking the title alone.
 - Evidence: logged-in tests red first (no link); logged-out tests red against an always-link mutant; full chain in verify.md "Proof chain (T19)".
+
+## 2026-11-25 T20 failed move shows an alert (builder)
+- Did: `moveTaskAction` returns `boolean` (false for invalid args or a refused move). Board: after the awaited move, sets `moveError` to `Could not move "<title>"` on false/throw (null on success) and calls `router.refresh()` on failure; the optimistic state reverts by itself. Alert is `<p role="alert" className="board-error">` inside `.board`, full grid row, red. Two AC29 tests in e2e/move.spec.ts (second tab of the same user deletes the task; drag, then ArrowRight with a following successful move).
+- Decision: catch only to show the alert; `unstable_rethrow(error)` first so a redirect (expired session) or not-found still navigates (plan fresh-reader answer).
+- Decision: the error state is a string, set once per finished move (`moved ? null : message`), so "one alert at a time, cleared by the next success" falls out of one assignment (principle 3).
+- Evidence: both AC29 tests red first (no alert); clear test red with the clear-on-success removed (alert still shown); full chain at the commit, see verify.md T20.
