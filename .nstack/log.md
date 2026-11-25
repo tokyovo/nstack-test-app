@@ -159,3 +159,11 @@
 - Correction: the previous run's decision to leave a local-only commit on main breaks the state rule (never leave a default-branch commit off the remote). State changes now ship by PR even when state-only.
 - needs-human: optional `origin/nstack/ci` cleanup still open; `git ls-remote` shows 10384bb still there. Left for the user.
 - Improve: no code change since the last improve pass (research + UX pass today); backlog best is still 8, below the bar of 9. Stopping: goal met, verify green, nothing above the bar.
+
+## 2026-11-25 Continue: policy fix; slice 3 planned (controller)
+- Orient: main == origin/main at 6d15479; lint + typecheck pass; CI on main green (run 45553944083). needs-human: optional `origin/nstack/ci` cleanup re-checked (`git ls-remote` still shows 10384bb); left for the user.
+- Correction: goal.md policy lacked `evolve` and `bar`; added defaults `evolve: yes`, `bar: 8` and removed the "Bar: 9" line from backlog.md (rules live only in goal.md/skills). Earlier stops used bar 9 from backlog.md, which was wrong.
+- Improve: research.md and the UX pass are from today, no code change since; four items score 8 and meet the bar: CI action majors, session expiry, forms keep values, assignee filter. Planned as slice 3 (T13-T16) on branch nstack/slice3.
+- Decision: session lifetime 30 days (common default), fixed from creation (no sliding renewal): simplest, easy to change.
+- Decision: `secure` cookie in production, opt-out via `INSECURE_COOKIES=1` for the http e2e/CI server, so tests cover the production build.
+- Decision: assignee filter is client-side like search (board already has all tasks), not in the URL (search isn't either; that's a separate backlog item).

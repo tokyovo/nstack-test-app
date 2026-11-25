@@ -52,3 +52,20 @@ Acceptance criteria (each a Playwright test in `e2e/`):
 - [x] T12 Edit and delete tasks. Proof: e2e AC17. Needs: T11
 
 Slice 2 shipped: PR #2 merged to main as 5f950cf; CI on main green (run 45552549785, 56 passed).
+
+# Plan: slice 3 "hardening + my tasks" (from improve, 2026-11-25)
+
+## Spec
+Evidence: backlog.md items scored 8 (bar 8 in goal.md). No new deps.
+
+Acceptance criteria:
+18. CI uses Node-24-based action majors (actions/checkout@v6+, actions/setup-node@v6+, actions/upload-artifact@v6+ or the latest major), and CI is green with no "Node.js 20 is deprecated" annotation.
+19. A session older than 30 days is rejected: the user is treated as logged out and the expired row is deleted (e2e: set the session row's created_at to 31 days ago in the DB, then `/projects` redirects to `/login`; a 29-day-old session still works). The session cookie has a 30-day maxAge (e2e checks its expiry is ~30 days out) and `secure: true` when NODE_ENV is production, unless `INSECURE_COOKIES=1` (set by the Playwright webServer, which serves http).
+20. After a validation error, forms keep what the user typed: signup/login keep the email (not the password); new-task and edit-task forms keep title, description, assignee and due date. e2e per form: submit invalid input, see the error, and the fields still hold the typed values.
+21. The board has an assignee filter ("All", "My tasks", "Unassigned", each member's email). Choosing one shows only matching tasks; it combines with search (AND); "All" restores the board. e2e covers My tasks, a specific member, Unassigned, combined with search.
+
+## Tickets
+- [ ] T13 Bump CI action majors. Proof: AC18, CI green on the PR and the run log has no Node 20 deprecation annotation. Needs: none
+- [ ] T14 Session expiry (30 days) + cookie maxAge + secure in production. Proof: e2e AC19. Needs: none
+- [ ] T15 Forms keep typed values after a validation error. Proof: e2e AC20. Needs: none
+- [ ] T16 Assignee filter on the board. Proof: e2e AC21. Needs: T15 (both touch board files; run in sequence)

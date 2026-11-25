@@ -14,3 +14,5 @@ A team task board web app: users sign up / log in with email + password, create 
 ## Policy
 - merge: auto
 - branch: main
+- evolve: yes
+- bar: 8
