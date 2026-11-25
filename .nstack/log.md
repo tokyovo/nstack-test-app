@@ -74,40 +74,10 @@
 - Correction: `.bind` args to server actions are NOT encrypted by Next (my T3 note was wrong); every action re-checks membership server-side.
 - Not verified: CI (parked).
 
+## 2026-11-25 T7+T8 review + verify, PR (controller)
+- Did: reviewer passed T7+T8, no findings. Controller ran the bite checks the reviewer could not: search on title only + removed addComment getTask guard -> 3 tests red; restored. Rebased `nstack/ci` onto `nstack/task-board` (branch tip + workflow commit). Opened PR https://github.com/tokyovo/nstack-test-app/pull/1 (no CI on it).
+- Evidence: `rm -rf .next; lint && typecheck && build && test:e2e` at 6f3ddc8 -> 41 passed, 0 skipped; `CI=true npm run test:e2e` -> 41 passed.
+- Stop: every remaining item (CI green, merge to main) is parked behind the token scope hard stop. Not merged: policy auto needs green CI.
+
 ## Needs human
-- 2026-11-25 Run `gh auth refresh -h github.com -s workflow` (adds `workflow` scope to the gh token). Then: `git push -u origin nstack/ci`, rebase `nstack/task-board` onto it (or merge both), open the PR, and nstack can wait for CI and merge. Changing credentials is a hard stop for nstack.
-
-## 2026-11-25 T3 projects
-- Did: lib/projects.ts (list/get/create/rename/delete, all scoped by membership in SQL), server actions + revalidatePath, /projects list with inline rename/delete forms, /projects/[id] page with notFound() for non-members. e2e/projects.spec.ts covers AC5-6; shared e2e helpers moved to e2e/helpers.ts.
-- Decisions:
-  - Rename and delete live inline in the /projects list: AC5 is about the list updating, fewest pages.
-  - Delete has no confirm dialog: v1, easy to add; dialogs complicate e2e.
-  - Non-member, missing, and non-numeric project ids all give the same 404 so B cannot tell A's project exists.
-  - Empty names are ignored silently (input is `required` client-side).
-
-## 2026-11-25 T4 invite
-- Did: inviteMember/listMembers in lib/projects.ts (inviter must be a member), inviteMemberAction bound to the project id, InviteForm client component (useActionState), Members list on /projects/[id]. e2e/invite.spec.ts covers AC7.
-- Decisions:
-  - Existing-member error text "That user is already a member" (spec names no text); inviting yourself gives the same.
-  - Email match is case-insensitive (users.email is COLLATE NOCASE).
-  - Invite form lives on the project page next to the Members list; FormState type reused from auth-actions.
-
-## 2026-11-25 T6 review fixes
-- Did: Board sets `refocusId` only when a key press actually moves the card (e2e/move.spec.ts "moves nothing" test, red before). Tamper tests for createTaskAction and inviteMemberAction (e2e/tasks.spec.ts, e2e/invite.spec.ts) via `tamperBoundProjectId` in e2e/helpers.ts; each shown red with its own getProject guard removed.
-- Decisions:
-  - Fix the cause (no refocus request on a no-op key) rather than also clearing the ref in the effect: smallest change, the effect's behavior for real moves is unchanged.
-  - Tamper helper rewrites both places the bound id appears (field "0" call args `[id,{},"$K1"]` and `$ACTION_<n>:1` bound list `[id,{}]`) and asserts both were rewritten, so a body-format change fails loudly instead of passing silently.
-  - Removed all three resolved backlog items (invite tamper, task-create tamper, the T6 `.bind` encryption note), not only the invite one: all are covered now.
-
-## 2026-11-25 T7 comments
-- Did: getTask in lib/tasks.ts, lib/comments.ts (listComments, addComment; member + task-in-project via getTask), addCommentAction bound to [projectId, taskId], task page /projects/[id]/tasks/[taskId] (details, Comments list, CommentForm), card titles on the board link there. e2e/comments.spec.ts covers AC11, 404s, two tamper tests.
-- Decisions:
-  - Task details on their own route, not a modal: server-rendered, linkable, no client state; fewest moving parts.
-  - Non-member, task in another project, and missing task all 404, like projects.
-  - Empty comment -> "Comment is required" (server check plus HTML `required`); comments oldest first, show author email and created_at as stored.
-  - Generalized the tamper helper to `tamperBoundIds` (several bound ids, null keeps one); it now keys on the `next-action` header and requires field "0" rewritten, because a form reached by client-side navigation sends no `$ACTION_` fields.
-
-## 2026-11-25 T8 search
-- Did: "Search tasks" box in the client Board filters shown cards by title or description (case-insensitive, trimmed); empty query shows all. e2e/search.spec.ts covers AC12.
-- Decisions:
-  - Filter client-side in Board, not a server query/URL param: the board already holds every task with its description, no new action to guard, instant as you type. Query is not kept in the URL or across reloads (spec does not ask).
+- 2026-11-25 Run `gh auth refresh -h github.com -s workflow` (adds `workflow` scope to the gh token; credential change is a hard stop for nstack). Then `git push -u origin nstack/ci` (it is `nstack/task-board` + the CI workflow commit), open a PR from `nstack/ci` (or close PR #1 in favor of it), wait for CI, and merge. Rerunning `/nstack:go` after the scope is added lets nstack do the push/CI/merge itself.
