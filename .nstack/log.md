@@ -185,3 +185,8 @@
 - Decision: label is "Show tasks for", not "...assignee...": existing tests use page-level `getByLabel("Assignee")`, which would match two controls.
 - Decision: filter is client-side state like search (not a URL param): smallest diff, same pattern; not persisted across reloads.
 - Evidence: tests red first (no filter control); mutant with search OR filter instead of AND made both tests red; full chain exit 0, 66 passed, no `data/`.
+
+## 2026-11-25 Slice 3 verify + review (controller)
+- Verify: full chain at 299a094: exit 0, 66 passed, no `data/`.
+- Review: reviewer -> pass, no important findings. Its runs: e2e 66 passed; `E2E_SECURE_COOKIES=1` session/auth specs 13 passed; bite checks (expired-row DELETE removed; Unassigned matching viewer) each turned a test red. Nits: checkout/setup-node at v6 not latest v7 (meets AC18); AC18 needs CI.
+- Lesson: ESLint linted `.claude/worktrees/` (agent worktrees) -> errors. Encoded: `.claude/**` in eslint globalIgnores, `.claude/worktrees/` in .gitignore.
