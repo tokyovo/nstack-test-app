@@ -81,3 +81,14 @@
 
 ## Needs human
 - 2026-11-25 Run `gh auth refresh -h github.com -s workflow` (adds `workflow` scope to the gh token; credential change is a hard stop for nstack). Then `git push -u origin nstack/ci` (it is `nstack/task-board` + the CI workflow commit), open a PR from `nstack/ci` (or close PR #1 in favor of it), wait for CI, and merge. Rerunning `/nstack:go` after the scope is added lets nstack do the push/CI/merge itself.
+
+## 2026-11-25 CI unparked, merge parked (controller)
+- Did: re-tested the parked scope item: the token now has `workflow`. Fast-forwarded nstack/task-board to the CI commit (bd433c8, parent b0d423e) and pushed it, so PR #1 now has CI. No force-push needed.
+- Evidence:
+| Claim | Command | Result |
+|---|---|---|
+| all checks at bd433c8 | rm -rf .next; lint && typecheck && build && test:e2e | exit 0, 41 passed; no `data/` |
+| CI green on PR #1 | gh pr checks 1 --watch | push + pull_request runs pass; CI log "41 passed" |
+| main not moved | git merge-base --is-ancestor origin/main HEAD | true |
+- Decision: put CI on PR #1's branch (ff) instead of opening a second PR from nstack/ci.
+- Blocked: `gh pr merge 1 --squash --delete-branch` denied by the Claude Code permission classifier. Parked in needs-human.md. AC13 ("green on main") still needs the merge.
