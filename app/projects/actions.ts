@@ -1,12 +1,14 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import type { FormState } from "@/app/auth-actions";
 import { requireUser } from "@/lib/auth";
 import { createProject, deleteProject, inviteMember, renameProject } from "@/lib/projects";
 import { addComment } from "@/lib/comments";
+import { MAX_TITLE_LENGTH } from "@/lib/limits";
 import { isStatus } from "@/lib/statuses";
-import { createTask, moveTask } from "@/lib/tasks";
+import { createTask, deleteTask, moveTask, updateTask, type NewTask } from "@/lib/tasks";
 
 function readName(formData: FormData): string {
   return String(formData.get("name") ?? "").trim();
@@ -64,20 +66,52 @@ const TASK_ERRORS = {
   "not-member": "Assignee must be a project member",
 } as const;
 
-export async function createTaskAction(projectId: number, _prev: FormState, formData: FormData): Promise<FormState> {
-  const user = await requireUser();
+/** Reads and validates the task form fields shared by create and edit; an error message if invalid. */
+function readTask(formData: FormData): NewTask | { error: string } {
   const title = String(formData.get("title") ?? "").trim();
   if (!title) return { error: "Title is required" };
+  if (title.length > MAX_TITLE_LENGTH) return { error: `Title must be at most ${MAX_TITLE_LENGTH} characters` };
   const description = String(formData.get("description") ?? "").trim();
   const assignee = String(formData.get("assigneeId") ?? "");
   const assigneeId = assignee ? Number(assignee) : null;
   if (assigneeId !== null && !Number.isInteger(assigneeId)) return { error: TASK_ERRORS["not-member"] };
   const dueDate = String(formData.get("dueDate") ?? "").trim() || null;
   if (dueDate !== null && !isDate(dueDate)) return { error: "Due date must be a date" };
-  const result = createTask(user.id, projectId, { title, description, assigneeId, dueDate });
+  return { title, description, assigneeId, dueDate };
+}
+
+export async function createTaskAction(projectId: number, _prev: FormState, formData: FormData): Promise<FormState> {
+  const user = await requireUser();
+  const task = readTask(formData);
+  if ("error" in task) return task;
+  const result = createTask(user.id, projectId, task);
   if (result !== "created") return { error: TASK_ERRORS[result] };
   revalidatePath(`/projects/${projectId}`);
   return {};
+}
+
+export async function updateTaskAction(
+  projectId: number,
+  taskId: number,
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const user = await requireUser();
+  const task = readTask(formData);
+  if ("error" in task) return task;
+  const result = updateTask(user.id, projectId, taskId, task);
+  if (result !== "updated") return { error: result === "not-found" ? "Task not found" : TASK_ERRORS[result] };
+  revalidatePath(`/projects/${projectId}`);
+  revalidatePath(`/projects/${projectId}/tasks/${taskId}`);
+  return {};
+}
+
+/** Deletes a task, then goes back to its board; does nothing unless the user may delete it. */
+export async function deleteTaskAction(projectId: number, taskId: number): Promise<void> {
+  const user = await requireUser();
+  if (!deleteTask(user.id, projectId, taskId)) return;
+  revalidatePath(`/projects/${projectId}`);
+  redirect(`/projects/${projectId}`);
 }
 
 /** Moves a task to another column; called from the board with untrusted arguments. */

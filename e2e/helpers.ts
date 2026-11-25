@@ -57,19 +57,27 @@ export function cards(page: Page, name: ColumnName) {
  * sent from `page`; a null entry keeps that id. The bound args travel as plain JSON in the multipart
  * body: the call args in field "0" (`[id,...,{},"$K1"]`) and, when the form was server-rendered, also
  * the bound list in `$ACTION_<n>:1` (`[id,...,{}]`). Every copy is rewritten; field "0" must be found.
+ * An action that sends no form data posts the args as a bare JSON array (`[id,...]`); that counts as field "0".
  * Returns a function that resolves once the tampered request has been answered.
  */
 export async function tamperBoundIds(page: Page, ids: (number | null)[]): Promise<() => Promise<void>> {
   let answered = false;
   const leading = new RegExp(`(name="(0|[^"]*\\$ACTION_\\d+:1)"\r\n\r\n\\[)${ids.map(() => "(\\d+),").join("")}`, "g");
+  const bare = new RegExp(`^\\[${ids.map(() => "(\\d+)").join(",")}(?=[,\\]])`);
   await page.route("**/projects/**", async (route) => {
     const body = route.request().headers()["next-action"] ? route.request().postData() : null;
     if (!body) return route.continue();
     const fields: string[] = [];
-    const tampered = body.replace(leading, (_match, head: string, field: string, ...rest: string[]) => {
-      fields.push(field);
-      return head + ids.map((id, i) => `${id ?? rest[i]},`).join("");
-    });
+    const rewrite = (rest: string[]) => ids.map((id, i) => `${id ?? rest[i]}`);
+    const tampered = body
+      .replace(leading, (_match, head: string, field: string, ...rest: string[]) => {
+        fields.push(field);
+        return head + rewrite(rest).join(",") + ",";
+      })
+      .replace(bare, (_match, ...rest: string[]) => {
+        fields.push("0");
+        return `[${rewrite(rest).join(",")}`;
+      });
     expect(fields).toContain("0");
     const response = await route.fetch({ postData: tampered });
     await route.fulfill({ response });
@@ -82,4 +90,17 @@ export async function tamperBoundIds(page: Page, ids: (number | null)[]): Promis
 /** Rewrites the bound project id of the next form-action request; see `tamperBoundIds`. */
 export function tamperBoundProjectId(page: Page, projectId: number): Promise<() => Promise<void>> {
   return tamperBoundIds(page, [projectId]);
+}
+
+/**
+ * Runs `move`, which must move one card on the board, and waits until the server has answered the
+ * move's server action. The board updates optimistically, so the card shows in its new column before
+ * the move is stored; a reload straight after that can beat the request and show the old column.
+ */
+export async function persistedMove(page: Page, move: () => Promise<void>) {
+  const answered = page.waitForResponse(
+    (response) => response.request().method() === "POST" && !!response.request().headers()["next-action"],
+  );
+  await move();
+  await (await answered).finished();
 }

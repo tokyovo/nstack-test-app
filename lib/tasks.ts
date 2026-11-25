@@ -9,6 +9,7 @@ export type Task = {
   description: string;
   status: Status;
   dueDate: string | null;
+  assigneeId: number | null;
   assigneeEmail: string | null;
 };
 
@@ -16,12 +17,18 @@ export type NewTask = { title: string; description: string; assigneeId: number |
 
 export type CreateTaskResult = "created" | "not-found" | "not-member";
 
+export type UpdateTaskResult = "updated" | "not-found" | "not-member";
+
+function isMember(projectId: number, userId: number): boolean {
+  return !!getDb().prepare("SELECT 1 FROM project_members WHERE project_id = ? AND user_id = ?").get(projectId, userId);
+}
+
 /** Tasks in the project, oldest first; empty if the user is not a member. */
 export function listTasks(userId: number, projectId: number): Task[] {
   if (!getProject(userId, projectId)) return [];
   return getDb()
     .prepare(
-      `SELECT tasks.id, tasks.title, tasks.description, tasks.status, tasks.due_date AS dueDate, users.email AS assigneeEmail
+      `SELECT tasks.id, tasks.title, tasks.description, tasks.status, tasks.due_date AS dueDate, tasks.assignee_id AS assigneeId, users.email AS assigneeEmail
        FROM tasks LEFT JOIN users ON users.id = tasks.assignee_id
        WHERE tasks.project_id = ? ORDER BY tasks.id`,
     )
@@ -31,14 +38,8 @@ export function listTasks(userId: number, projectId: number): Task[] {
 /** Adds a task in "To do" if the user is a member; the assignee, if any, must be a member too. */
 export function createTask(userId: number, projectId: number, task: NewTask): CreateTaskResult {
   if (!getProject(userId, projectId)) return "not-found";
-  const db = getDb();
-  if (task.assigneeId !== null) {
-    const member = db
-      .prepare("SELECT 1 FROM project_members WHERE project_id = ? AND user_id = ?")
-      .get(projectId, task.assigneeId);
-    if (!member) return "not-member";
-  }
-  db.prepare("INSERT INTO tasks (project_id, title, description, assignee_id, due_date) VALUES (?, ?, ?, ?, ?)").run(
+  if (task.assigneeId !== null && !isMember(projectId, task.assigneeId)) return "not-member";
+  getDb().prepare("INSERT INTO tasks (project_id, title, description, assignee_id, due_date) VALUES (?, ?, ?, ?, ?)").run(
     projectId,
     task.title,
     task.description,
@@ -62,10 +63,28 @@ export function getTask(userId: number, projectId: number, taskId: number): Task
   if (!getProject(userId, projectId)) return null;
   const row = getDb()
     .prepare(
-      `SELECT tasks.id, tasks.title, tasks.description, tasks.status, tasks.due_date AS dueDate, users.email AS assigneeEmail
+      `SELECT tasks.id, tasks.title, tasks.description, tasks.status, tasks.due_date AS dueDate, tasks.assignee_id AS assigneeId, users.email AS assigneeEmail
        FROM tasks LEFT JOIN users ON users.id = tasks.assignee_id
        WHERE tasks.id = ? AND tasks.project_id = ?`,
     )
     .get(taskId, projectId) as Task | undefined;
   return row ?? null;
+}
+
+/** Replaces a task's fields if it is in the project and the user is a member; the assignee, if any, must be a member too. */
+export function updateTask(userId: number, projectId: number, taskId: number, task: NewTask): UpdateTaskResult {
+  if (!getProject(userId, projectId)) return "not-found";
+  if (task.assigneeId !== null && !isMember(projectId, task.assigneeId)) return "not-member";
+  const result = getDb()
+    .prepare(
+      "UPDATE tasks SET title = ?, description = ?, assignee_id = ?, due_date = ? WHERE id = ? AND project_id = ?",
+    )
+    .run(task.title, task.description, task.assigneeId, task.dueDate, taskId, projectId);
+  return result.changes > 0 ? "updated" : "not-found";
+}
+
+/** Deletes the task (and, by cascade, its comments) if it is in the project and the user is a member. */
+export function deleteTask(userId: number, projectId: number, taskId: number): boolean {
+  if (!getProject(userId, projectId)) return false;
+  return getDb().prepare("DELETE FROM tasks WHERE id = ? AND project_id = ?").run(taskId, projectId).changes > 0;
 }

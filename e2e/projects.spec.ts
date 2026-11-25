@@ -32,13 +32,38 @@ test("AC5: a user renames a project and the list shows the new name", async ({ b
   await expect(projectList(page).getByRole("link", { name: "New name" })).toBeVisible();
 });
 
-test("AC5: a user deletes a project and it leaves the list", async ({ browser }) => {
+test("AC14: dismissing the delete confirmation keeps the project", async ({ browser }) => {
+  const { page } = await newUser(browser);
+  const url = await createProject(page, "Not yet");
+
+  const item = projectList(page).getByRole("listitem").filter({ hasText: "Not yet" });
+  let message = "";
+  page.once("dialog", (dialog) => {
+    message = dialog.message();
+    void dialog.dismiss();
+  });
+  await item.getByRole("button", { name: "Delete" }).click();
+
+  await expect.poll(() => message).toBe('Delete project "Not yet"? This also deletes its tasks.');
+  await page.reload();
+  await expect(projectList(page).getByRole("link", { name: "Not yet" })).toBeVisible();
+  const response = await page.goto(url);
+  expect(response?.status()).toBe(200);
+});
+
+test("AC5, AC14: a user confirms the delete and the project leaves the list", async ({ browser }) => {
   const { page } = await newUser(browser);
   await createProject(page, "Keep me");
   const doomedUrl = await createProject(page, "Delete me");
 
   const item = projectList(page).getByRole("listitem").filter({ hasText: "Delete me" });
+  let asked = false;
+  page.once("dialog", (dialog) => {
+    asked = true;
+    void dialog.accept();
+  });
   await item.getByRole("button", { name: "Delete" }).click();
+  await expect.poll(() => asked).toBe(true);
 
   await expect(projectList(page).getByRole("link", { name: "Delete me" })).toHaveCount(0);
   await expect(projectList(page).getByRole("link", { name: "Keep me" })).toBeVisible();
@@ -95,6 +120,7 @@ test("AC6: a non-member cannot rename or delete another user's project by tamper
   await bItem.locator('input[name="projectId"]').evaluateAll((inputs, id) => {
     for (const input of inputs as HTMLInputElement[]) input.value = id;
   }, aId);
+  b.page.once("dialog", (dialog) => void dialog.accept());
   await submitAndWait(b.page, bItem.getByRole("button", { name: "Delete" }));
 
   await a.page.goto("/projects");

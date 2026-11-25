@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { logOutAction } from "@/app/auth-actions";
 import { getCurrentUser } from "@/lib/auth";
+import "./globals.css";
 
 export const metadata: Metadata = { title: "Task board" };
 
