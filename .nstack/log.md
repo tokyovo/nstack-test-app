@@ -159,3 +159,34 @@
 - Correction: the previous run's decision to leave a local-only commit on main breaks the state rule (never leave a default-branch commit off the remote). State changes now ship by PR even when state-only.
 - needs-human: optional `origin/nstack/ci` cleanup still open; `git ls-remote` shows 10384bb still there. Left for the user.
 - Improve: no code change since the last improve pass (research + UX pass today); backlog best is still 8, below the bar of 9. Stopping: goal met, verify green, nothing above the bar.
+
+## 2026-11-25 Continue: policy fix; slice 3 planned (controller)
+- Orient: main == origin/main at 6d15479; lint + typecheck pass; CI on main green (run 45553944083). needs-human: optional `origin/nstack/ci` cleanup re-checked (`git ls-remote` still shows 10384bb); left for the user.
+- Correction: goal.md policy lacked `evolve` and `bar`; added defaults `evolve: yes`, `bar: 8` and removed the "Bar: 9" line from backlog.md (rules live only in goal.md/skills). Earlier stops used bar 9 from backlog.md, which was wrong.
+- Improve: research.md and the UX pass are from today, no code change since; four items score 8 and meet the bar: CI action majors, session expiry, forms keep values, assignee filter. Planned as slice 3 (T13-T16) on branch nstack/slice3.
+- Decision: session lifetime 30 days (common default), fixed from creation (no sliding renewal): simplest, easy to change.
+- Decision: `secure` cookie in production, opt-out via `INSECURE_COOKIES=1` for the http e2e/CI server, so tests cover the production build.
+- Decision: assignee filter is client-side like search (board already has all tasks), not in the URL (search isn't either; that's a separate backlog item).
+
+## 2026-11-25 T14 session expiry (builder)
+- Did: getCurrentUser rejects sessions with created_at <= now - 30 days and deletes the row; cookie gets maxAge 30d and `secure` when NODE_ENV=production unless INSECURE_COOKIES=1; Playwright webServer sets INSECURE_COOKIES=1. e2e/session-expiry.spec.ts (AC19: 31 days rejected + row gone, 29 days works, cookie ~30d/httpOnly/Lax/secure matches mode). Full chain 59 passed.
+- Decision: the expired cookie is not cleared on rejection (server components cannot set cookies); with its row deleted it is inert and the browser drops it at maxAge.
+- Decision: added `E2E_PORT` to playwright.config.ts because a parallel worktree's run held port 3100; default unchanged, so CI is unaffected.
+- Decision: added `E2E_SECURE_COOKIES=1` so `secure: true` in the production build is proven by e2e (Chromium accepts Secure cookies on http://localhost); the default run asserts secure=false (the opt-out).
+## 2026-11-25 T15 forms keep typed values after an error (builder)
+- Did: signup/login actions return the typed email with the error (`CredentialsState`); `CredentialsForm` uses it as the email default; the password is never returned. Task create/update actions return the raw typed fields (`TaskFormState.values`) on every error; `TaskForm` defaults to them, else to the task (edit) or empty (new). AC20 tests in e2e/keep-values.spec.ts.
+- Decision: values come back from the server in action state (uncontrolled inputs, defaultValue) rather than controlled inputs: smallest diff, same pattern as the existing error state.
+- Decision: the Assignee `<select>` is keyed on its default; without the key React's post-action form reset kept "Unassigned" (test red), text inputs did not need it.
+- Decision: the server-only error used for task forms is a spaces-only title (passes the browser `required` check); kept title is the raw typed value, not trimmed.
+- Evidence: tests red first (fields empty / original values), then green; full chain exit 0, 61 passed, no `data/`.
+
+## 2026-11-25 T16 assignee filter on the board (builder)
+- Did: `Board` gets `members` and the viewer's `userId`; a "Show tasks for" select (All, My tasks, Unassigned, each member's email in member order) filters cards client-side, ANDed with the search box. Page passes the already-loaded members. AC21 tests in e2e/assignee-filter.spec.ts.
+- Decision: label is "Show tasks for", not "...assignee...": existing tests use page-level `getByLabel("Assignee")`, which would match two controls.
+- Decision: filter is client-side state like search (not a URL param): smallest diff, same pattern; not persisted across reloads.
+- Evidence: tests red first (no filter control); mutant with search OR filter instead of AND made both tests red; full chain exit 0, 66 passed, no `data/`.
+
+## 2026-11-25 Slice 3 verify + review (controller)
+- Verify: full chain at 299a094: exit 0, 66 passed, no `data/`.
+- Review: reviewer -> pass, no important findings. Its runs: e2e 66 passed; `E2E_SECURE_COOKIES=1` session/auth specs 13 passed; bite checks (expired-row DELETE removed; Unassigned matching viewer) each turned a test red. Nits: checkout/setup-node at v6 not latest v7 (meets AC18); AC18 needs CI.
+- Lesson: ESLint linted `.claude/worktrees/` (agent worktrees) -> errors. Encoded: `.claude/**` in eslint globalIgnores, `.claude/worktrees/` in .gitignore.

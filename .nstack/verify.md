@@ -55,3 +55,14 @@ Run from the repo root. Needs Node 24, `npm ci`, and Chromium for Playwright 1.6
 
 ## Proof chain (slice 2 CI fix)
 - 2026-11-25: PR #2 CI failed 2 AC15 tests at 390px (page 402/405 wide); local runs passed. Cause (CI trace screenshot): the Assignee `<select>` is as wide as its longest option (a member's email); its `max-width: 100%` did not resolve inside a shrink-to-fit inline-block label, and CI fonts are wider. New test (member with a long email, 390px, board + task page) red locally first (750 > 390). Fix: `max-width: 100%` on `form label`. `rm -rf .next; lint && typecheck && build && test:e2e` exit 0, 56 passed, no `data/`.
+
+## Proof chain (T14)
+- `rm -rf .next; npm run lint && npm run typecheck && npm run build && E2E_PORT=3114 npm run test:e2e` — 2026-11-25 T14: exit 0, 59 passed (e2e/session-expiry.spec.ts AC19 + earlier); no `data/` dir. 31-day and cookie-expiry tests shown red (session accepted; cookie had no expiry) before the code. `E2E_SECURE_COOKIES=1 npx playwright test e2e/session-expiry.spec.ts e2e/auth.spec.ts`: 13 passed (Secure cookie in the production build, auth flows still work on localhost); cookie test shown red with `secure` forced false.
+- `E2E_PORT` (default 3100) picks the e2e server port; `E2E_SECURE_COOKIES=1` drops the webServer's `INSECURE_COOKIES=1`.
+## Proof chain (T15)
+- `rm -rf .next; npm run lint && npm run typecheck && npm run build && npm run test:e2e` — 2026-11-25 T15: exit 0, 61 passed (e2e/keep-values.spec.ts AC20 + earlier); no `data/` dir. AC20 tests shown red (fields cleared or reset) before the code; assignee check shown red without the select key.
+## Proof chain (T16)
+- `rm -rf .next; npm run lint && npm run typecheck && npm run build && npm run test:e2e` — 2026-11-25 T16: exit 0, 66 passed (e2e/assignee-filter.spec.ts AC21 + earlier); no `data/` dir. AC21 tests shown red (no filter) before the code; both shown red with the search/filter AND changed to OR.
+
+## Proof chain (slice 3, controller)
+- `rm -rf .next; npm run lint && npm run typecheck && npm run build && npm run test:e2e` at 299a094 (T13-T16 merged) — 2026-11-25: exit 0, 66 passed; no `data/` dir.

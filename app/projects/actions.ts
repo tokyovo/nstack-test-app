@@ -66,6 +66,16 @@ const TASK_ERRORS = {
   "not-member": "Assignee must be a project member",
 } as const;
 
+/** The task form fields as typed, sent back with an error so the form can be refilled. */
+export type TaskFormValues = { title: string; description: string; assigneeId: string; dueDate: string };
+
+export type TaskFormState = FormState & { values?: TaskFormValues };
+
+function typedTask(formData: FormData): TaskFormValues {
+  const field = (name: string) => String(formData.get(name) ?? "");
+  return { title: field("title"), description: field("description"), assigneeId: field("assigneeId"), dueDate: field("dueDate") };
+}
+
 /** Reads and validates the task form fields shared by create and edit; an error message if invalid. */
 function readTask(formData: FormData): NewTask | { error: string } {
   const title = String(formData.get("title") ?? "").trim();
@@ -80,12 +90,16 @@ function readTask(formData: FormData): NewTask | { error: string } {
   return { title, description, assigneeId, dueDate };
 }
 
-export async function createTaskAction(projectId: number, _prev: FormState, formData: FormData): Promise<FormState> {
+export async function createTaskAction(
+  projectId: number,
+  _prev: TaskFormState,
+  formData: FormData,
+): Promise<TaskFormState> {
   const user = await requireUser();
   const task = readTask(formData);
-  if ("error" in task) return task;
+  if ("error" in task) return { error: task.error, values: typedTask(formData) };
   const result = createTask(user.id, projectId, task);
-  if (result !== "created") return { error: TASK_ERRORS[result] };
+  if (result !== "created") return { error: TASK_ERRORS[result], values: typedTask(formData) };
   revalidatePath(`/projects/${projectId}`);
   return {};
 }
@@ -93,14 +107,16 @@ export async function createTaskAction(projectId: number, _prev: FormState, form
 export async function updateTaskAction(
   projectId: number,
   taskId: number,
-  _prev: FormState,
+  _prev: TaskFormState,
   formData: FormData,
-): Promise<FormState> {
+): Promise<TaskFormState> {
   const user = await requireUser();
   const task = readTask(formData);
-  if ("error" in task) return task;
+  if ("error" in task) return { error: task.error, values: typedTask(formData) };
   const result = updateTask(user.id, projectId, taskId, task);
-  if (result !== "updated") return { error: result === "not-found" ? "Task not found" : TASK_ERRORS[result] };
+  if (result !== "updated") {
+    return { error: result === "not-found" ? "Task not found" : TASK_ERRORS[result], values: typedTask(formData) };
+  }
   revalidatePath(`/projects/${projectId}`);
   revalidatePath(`/projects/${projectId}/tasks/${taskId}`);
   return {};
