@@ -60,3 +60,23 @@ export async function startSession(userId: number): Promise<void> {
     path: "/",
   });
 }
+
+/** Returns the user if the email exists and the password matches its scrypt hash, else null. */
+export async function verifyCredentials(email: string, password: string): Promise<User | null> {
+  const row = getDb()
+    .prepare("SELECT id, email, password_hash, password_salt FROM users WHERE email = ?")
+    .get(email) as { id: number; email: string; password_hash: string; password_salt: string } | undefined;
+  if (!row) return null;
+  const hash = Buffer.from(await scrypt(password, row.password_salt), "hex");
+  const stored = Buffer.from(row.password_hash, "hex");
+  if (hash.length !== stored.length || !crypto.timingSafeEqual(hash, stored)) return null;
+  return { id: row.id, email: row.email };
+}
+
+/** Deletes the current session row and clears the cookie. */
+export async function endSession(): Promise<void> {
+  const jar = await cookies();
+  const token = jar.get(SESSION_COOKIE)?.value;
+  if (token) getDb().prepare("DELETE FROM sessions WHERE token = ?").run(token);
+  jar.delete(SESSION_COOKIE);
+}

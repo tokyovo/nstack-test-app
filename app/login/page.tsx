@@ -1,6 +1,8 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
+import { logInAction } from "@/app/auth-actions";
+import { CredentialsForm } from "@/app/credentials-form";
 import { getCurrentUser } from "@/lib/auth";
-import { LoginForm } from "./login-form";
 
 export const dynamic = "force-dynamic";
 
@@ -9,7 +11,10 @@ export default async function LoginPage() {
   return (
     <main>
       <h2>Log in</h2>
-      <LoginForm />
+      <CredentialsForm action={logInAction} submitLabel="Log in" passwordAutoComplete="current-password" />
+      <p>
+        No account? <Link href="/signup">Sign up</Link>
+      </p>
     </main>
   );
 }

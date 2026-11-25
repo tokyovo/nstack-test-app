@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { createUser, startSession } from "@/lib/auth";
+import { createUser, endSession, startSession, verifyCredentials } from "@/lib/auth";
 
 export type FormState = { error?: string };
 
@@ -24,4 +24,17 @@ export async function signUpAction(_prev: FormState, formData: FormData): Promis
   if (!user) return { error: "An account with that email already exists" };
   await startSession(user.id);
   redirect("/projects");
+}
+
+export async function logInAction(_prev: FormState, formData: FormData): Promise<FormState> {
+  const { email, password } = readCredentials(formData);
+  const user = await verifyCredentials(email, password);
+  if (!user) return { error: "Invalid email or password" };
+  await startSession(user.id);
+  redirect("/projects");
+}
+
+export async function logOutAction(): Promise<void> {
+  await endSession();
+  redirect("/login");
 }
