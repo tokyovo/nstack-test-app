@@ -328,3 +328,18 @@
 - [x] review: one reviewer at 8d017f5 -> pass, no findings. Its runs: full chain via check:e2e-temp 80 passed, 0 temp files; mutant (alert not cleared on success) -> AC29 test red; drove the app on 3470 (deleted task + ArrowRight -> alert, card gone, ?q kept, no overflow at 390/1280). Second reviewer not started: no auth, payments, migrations or public API changes.
 - [x] seed-test timeout (T22 builder, twice): 16.7s on an idle machine; both timeouts came from two suites running at once on 2 CPUs. Lesson (rule 9, second time e2e load hurt a parallel run): the fact is now at the top of verify.md, so the next dispatch sees it; the backlog item (score 5, seed test headroom) stays.
 - [x] plan.md: T19-T22 ticked, slice 6 marked done.
+
+## 2026-11-25 Slice 6 shipped; improve: slice 7 planned (controller)
+- Ship (read ship/SKILL.md): PR https://github.com/tokyovo/nstack-test-app/pull/10, CI green (runs 45617130310, 45617165810; 80 passed). Merged under `merge: auto` as 85d592e. On main after pull: lint + typecheck pass. CI on main 85d592e: run 45617827969 (result in the next entry).
+- Read: improve/SKILL.md, plan/SKILL.md.
+- [x] 1 broken things: none (slice 6 verify + PR CI green)
+- [x] 2 known problems: `gh issue list` empty; backlog.md read; slice 6 items shipped
+- [x] 3 goal gaps: none
+- [x] 4 outside demand: research.md dated today
+- [x] 5 risk: `npm audit` 0 vulnerabilities
+- [x] 6 UX: slice 6 screens (/tmp/s6-shots/), new items in backlog.md (header link hint + 404 font, 4)
+- [x] 7 code health: nothing slowing the work
+- [x] decide: only CSV/JSON export (7) meets bar 7. Planned slice 7 (T23-T24, AC32-35) on nstack/export.
+- [x] plan check: fresh reader (Explore) asked 15 questions; answered in plan.md "Fresh-reader answers"
+- [ ] T23 build + verify
+- [ ] T24 build + verify
