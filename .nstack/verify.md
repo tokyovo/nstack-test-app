@@ -76,6 +76,9 @@ Run from the repo root. Needs Node 24, `npm ci`, and Chromium for Playwright 1.6
 - `rm -rf .next; npm run lint && npm run typecheck && npm run build && E2E_PORT=3118 npm run test:e2e` — 2026-11-25 T18: exit 0, 71 passed (e2e/forms-layout.spec.ts AC24-26 + earlier, AC15 layout tests unchanged and green); no `data/` dir. AC24 and AC26 tests shown red (label text bottom 163 > field top 138; row centers 27px apart) before the code; AC25 shown red with the field width rule removed (title 160px < 280) and with selects left out of it (assignee 719px > 512, long-email member).
 - AC27 screens: isolated `next start -p 3418` + mktemp DB, `BASE_URL=http://localhost:3418 npm run screens -- $D/shots`: exit 0, 10 non-empty PNGs (kept in /tmp/tmp.gH28IFPH9w/shots/). Reviewed login/signup/projects/board/task at 1280 and 390: labels above fields, fields 512px (full width at 390), project rows on one line at 1280 (wrap under the link at 390), no overflow.
 
+## Proof chain (T19)
+- `rm -rf .next; npm run lint && npm run typecheck && npm run build && E2E_PORT=3119 npm run test:e2e` — 2026-11-25 T19: lint, typecheck, build pass; e2e 73 passed, 2 failed on 30s timeouts (edit-task AC17, seed AC22) with load average 10 on 2 cores (parallel builders); no `data/` dir. Reruns: nav+smoke+edit-task+seed 14 passed (seed again timed out); seed alone with `--timeout=120000` passed in 34.2s. e2e/nav.spec.ts (AC28): logged-in tests shown red (no link) before the code; logged-out tests shown red against an always-link mutant.
+
 ## Drive
 How an agent runs and uses the app on its own, without touching anyone's data. Each value below was run on 2026-11-25 (d298d27) unless marked "T17".
 - **Start:** `npm run build`, then `D=$(mktemp -d); DATABASE_PATH=$D/app.db INSECURE_COOKIES=1 npx next start -p 3400` (any free port; `INSECURE_COOKIES=1` because it is http). Ready when `curl -s -o /dev/null -w '%{http_code}' localhost:3400/login` prints 200; `/` then gives 307 to /login.

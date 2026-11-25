@@ -271,3 +271,9 @@
 - [x] 7 code health: nothing slowing the work
 - [x] decide: bar now 7 (owner, 52442f7). Five candidates at 7. Grouped the three board-screen items (nav back, silent failed move, search not in URL) with the cheap e2e temp-file cleanup into slice 6 (T19-T22, AC28-31) on nstack/board-feedback. CSV/JSON export (7, c3) left for a later slice: different screen, new feature.
 - [x] plan check: fresh reader (Explore agent) asked 13 questions; answered in plan.md "Fresh-reader answers"
+
+## 2026-11-25 T19 header title links to Projects (builder)
+- Did: app/layout.tsx: when logged in, the header `<h1>` wraps "Task board" in `<Link href="/projects">`; logged out it stays plain text. app/globals.css: `header h1 a` inherits color, no underline. e2e/nav.spec.ts covers AC28 (board click-through, task page, /projects/999999 404, /login and /signup plain).
+- Decision: one conditional in the existing layout `<h1>`, no new component (principle 2; plan decision). Heading name unchanged, so smoke test untouched.
+- Decision: logged-out checks assert no `a` in the header at all (the header has no other links logged out), which is stricter than checking the title alone.
+- Evidence: logged-in tests red first (no link); logged-out tests red against an always-link mutant; full chain in verify.md "Proof chain (T19)".
