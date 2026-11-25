@@ -63,3 +63,6 @@ Run from the repo root. Needs Node 24, `npm ci`, and Chromium for Playwright 1.6
 - `rm -rf .next; npm run lint && npm run typecheck && npm run build && npm run test:e2e` — 2026-11-25 T15: exit 0, 61 passed (e2e/keep-values.spec.ts AC20 + earlier); no `data/` dir. AC20 tests shown red (fields cleared or reset) before the code; assignee check shown red without the select key.
 ## Proof chain (T16)
 - `rm -rf .next; npm run lint && npm run typecheck && npm run build && npm run test:e2e` — 2026-11-25 T16: exit 0, 66 passed (e2e/assignee-filter.spec.ts AC21 + earlier); no `data/` dir. AC21 tests shown red (no filter) before the code; both shown red with the search/filter AND changed to OR.
+
+## Proof chain (slice 3, controller)
+- `rm -rf .next; npm run lint && npm run typecheck && npm run build && npm run test:e2e` at 299a094 (T13-T16 merged) — 2026-11-25: exit 0, 66 passed; no `data/` dir.
