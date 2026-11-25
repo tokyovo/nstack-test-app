@@ -225,3 +225,8 @@
 
 - Review: one reviewer -> pass, no findings. Its runs: e2e 67 passed; seed twice idempotent; screens 10 PNGs; mutant (comment-exists check removed) -> seed test red.
 - Not verified: the favicon-404 filter in screens (headless Chromium never requested favicon in these runs). It does no harm if never hit.
+
+## 2026-11-25 Slice 4 shipped; improve: slice 5 planned (controller)
+- Ship: PR https://github.com/tokyovo/nstack-test-app/pull/7, CI green (runs 45563884016, 45563888822; 67 passed). Merged under `merge: auto` as ac360ee. On main after pull: lint + typecheck pass.
+- Improve (read improve/SKILL.md, plan/SKILL.md): no broken checks; `gh issue list` empty; `npm audit` 0 vulnerabilities; research.md is from today. UX pass on the new `npm run screens` output (/tmp/t17-shots/): every form has inline labels and ragged fields, the edit-task Title field truncates, selects stretch to the longest email, project rows stack controls. Earlier UX passes called the UI "plain but usable" without scoring that as its own candidate, as improve requires; scored now: 8 (v3 r1 c4), meets bar 8. Planned as slice 5 (T18, AC24-27) on nstack/forms-layout; the T17 select-width backlog item is folded in.
+- Decision: labels above fields (stacked) at every width: the most common form convention, and it removes the ragged wrapping at both widths with one rule set.
