@@ -1,6 +1,6 @@
 # Verify
 
-Run from the repo root. Needs Node 24, `npm ci`, and Chromium for Playwright 1.65.0 (`npx playwright install chromium`; CI uses `--with-deps`).
+Run from the repo root. This machine has 2 CPUs: two full e2e suites at once push AC22 (seed, ~17s idle) past the 30s test limit (seen twice on 2026-11-25 with parallel builders; CI runs one suite). Run at most one full e2e suite at a time here. Needs Node 24, `npm ci`, and Chromium for Playwright 1.65.0 (`npx playwright install chromium`; CI uses `--with-deps`).
 
 ## Fast checks
 - `npm run lint` — ESLint (eslint-config-next core-web-vitals + typescript). 2026-11-25 T1: pass, 0 problems.
@@ -9,6 +9,7 @@ Run from the repo root. Needs Node 24, `npm ci`, and Chromium for Playwright 1.6
 ## Full checks
 - `npm run build` — `next build` (production). 2026-11-25 T1: pass.
 - `npm run test:e2e` — Playwright, Chromium headless. Starts `next start -p 3100` on the existing build (run `npm run build` first) with `DATABASE_PATH` set to a fresh temp SQLite file per run; tests read the same file via `process.env.E2E_DATABASE_PATH`. 2026-11-25 T1: 2 passed (e2e/smoke.spec.ts).
+- `npm run check:e2e-temp [-- <playwright args>]` — runs `playwright test`, then exits 1 if any `taskboard-e2e-<that run's pid>-*` file (db, -wal, -shm) is left in the OS temp dir (AC31); else the suite's exit code. 2026-11-25 T22: 0 left.
 
 ## Proof chain (T1)
 - `npm run lint && npm run typecheck && npm run build && npm run test:e2e` — 2026-11-25 T1: exit 0; no `data/` dir created (tests isolated from dev DB).
@@ -76,6 +77,11 @@ Run from the repo root. Needs Node 24, `npm ci`, and Chromium for Playwright 1.6
 - `rm -rf .next; npm run lint && npm run typecheck && npm run build && E2E_PORT=3118 npm run test:e2e` — 2026-11-25 T18: exit 0, 71 passed (e2e/forms-layout.spec.ts AC24-26 + earlier, AC15 layout tests unchanged and green); no `data/` dir. AC24 and AC26 tests shown red (label text bottom 163 > field top 138; row centers 27px apart) before the code; AC25 shown red with the field width rule removed (title 160px < 280) and with selects left out of it (assignee 719px > 512, long-email member).
 - AC27 screens: isolated `next start -p 3418` + mktemp DB, `BASE_URL=http://localhost:3418 npm run screens -- $D/shots`: exit 0, 10 non-empty PNGs (kept in /tmp/tmp.gH28IFPH9w/shots/). Reviewed login/signup/projects/board/task at 1280 and 390: labels above fields, fields 512px (full width at 390), project rows on one line at 1280 (wrap under the link at 390), no overflow.
 
+## Proof chain (T19)
+- `rm -rf .next; npm run lint && npm run typecheck && npm run build && E2E_PORT=3119 npm run test:e2e` — 2026-11-25 T19: lint, typecheck, build pass; e2e 73 passed, 2 failed on 30s timeouts (edit-task AC17, seed AC22) with load average 10 on 2 cores (parallel builders); no `data/` dir. Reruns: nav+smoke+edit-task+seed 14 passed (seed again timed out); seed alone with `--timeout=120000` passed in 34.2s. e2e/nav.spec.ts (AC28): logged-in tests shown red (no link) before the code; logged-out tests shown red against an always-link mutant.
+## Proof chain (T22)
+- `rm -rf .next; npm run lint && npm run typecheck && npm run build && E2E_PORT=3122 npm run test:e2e` — 2026-11-25 T22: exit 0, 71 passed; no `data/` dir. AC31: `E2E_PORT=3122 npm run check:e2e-temp -- e2e/smoke.spec.ts` red with playwright.config.ts at HEAD (exit 1, .db/-shm/-wal of the run left), green with the teardown (0 left, exit 0). Full suite via `check:e2e-temp` twice: 0 left both times, but exit 1 from one AC22 seed timeout each (30s limit, test takes 19-29s on this 2-CPU box at load 8 with a parallel builder; passes alone, see backlog). Teardown runs after a failed test too. Caller-set `E2E_DATABASE_PATH` kept.
+
 ## Drive
 How an agent runs and uses the app on its own, without touching anyone's data. Each value below was run on 2026-11-25 (d298d27) unless marked "T17".
 - **Start:** `npm run build`, then `D=$(mktemp -d); DATABASE_PATH=$D/app.db INSECURE_COOKIES=1 npx next start -p 3400` (any free port; `INSECURE_COOKIES=1` because it is http). Ready when `curl -s -o /dev/null -w '%{http_code}' localhost:3400/login` prints 200; `/` then gives 307 to /login.
@@ -85,3 +91,9 @@ How an agent runs and uses the app on its own, without touching anyone's data. E
 - **Evidence:** `BASE_URL=http://localhost:3400 npm run screens -- <dir>` (T17): seeds, then writes login/signup/projects/board/task `-1280.png` and `-390.png` (10 full-page PNGs) into <dir>; exits 1 listing any console error or page error (favicon.ico 404 ignored). T17: exit 0, 10 non-empty files. One-off: `playwright-cli -s=drive screenshot --filename=<file>.png`; `playwright-cli -s=drive console` (expect only the favicon.ico 404).
 - **Isolate:** own port and own mktemp DB per copy; e2e uses `E2E_PORT` and its own temp DB.
 - **Clean up:** `kill $(ss -ltnp 'sport = :3400' | grep -o 'pid=[0-9]*' | cut -d= -f2)` (pkill -f matches the calling shell, avoid), then `rm -rf $D`; `playwright-cli -s=drive close`.
+
+## Proof chain (T20)
+- `rm -rf .next; npm run lint && npm run typecheck && npm run build && E2E_PORT=3120 npm run test:e2e` — 2026-11-25 T20: see log.md T20 for the run at the commit. AC29 tests (e2e/move.spec.ts) shown red (no alert) before the code; the clear-on-success check shown red with the clear removed. e2e/move.spec.ts alone: 7 passed.
+
+## Proof chain (T21)
+- `rm -rf .next; npm run lint && npm run typecheck && npm run build && E2E_PORT=3121 npm run test:e2e` — 2026-11-25 T21: exit 0, 80 passed (AC30 in e2e/search.spec.ts and e2e/assignee-filter.spec.ts + earlier); no `data/` dir. AC30 tests shown red (URL had no q/for) before the code; `for=bogus` test red with the member check removed (0 cards); both history checks red with `pushState` instead of `replaceState` (4 -> 5 and 6).

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { unstable_rethrow, useRouter } from "next/navigation";
 import { startTransition, useEffect, useOptimistic, useRef, useState, type DragEvent, type KeyboardEvent } from "react";
 import { isOverdue } from "@/lib/due-dates";
 import { COLUMN_NAMES, STATUSES, neighborStatus, type Status } from "@/lib/statuses";
@@ -15,7 +16,11 @@ type Props = {
   userId: number;
   /** The server's local date (YYYY-MM-DD); cards due before it, and not Done, are marked overdue. */
   today: string;
-  move: (taskId: number, status: Status) => Promise<void>;
+  /** Resolves true when the server stored the move. */
+  move: (taskId: number, status: Status) => Promise<boolean>;
+  /** The URL's `q` and `for` on load; an unknown `for` shows all tasks. */
+  initialQuery: string;
+  initialAssignee: string;
 };
 type Move = { id: number; status: Status };
 
@@ -31,23 +36,40 @@ function matchesAssignee(task: Task, assignee: string, userId: number): boolean 
   return task.assigneeId === Number(assignee);
 }
 
+function isAssignee(value: string, members: Member[]): boolean {
+  return [ALL, MINE, UNASSIGNED].includes(value) || members.some((member) => String(member.id) === value);
+}
+
+/** Mirrors the search and filter in the URL (`?q=&for=`) without adding a history entry. */
+function replaceUrl(query: string, assignee: string) {
+  const params = new URLSearchParams();
+  if (query.trim()) params.set("q", query);
+  if (assignee !== ALL) params.set("for", assignee);
+  const search = params.toString();
+  window.history.replaceState(null, "", search ? `?${search}` : window.location.pathname);
+}
+
 const KEY_STEPS: Record<string, -1 | 1> = { ArrowLeft: -1, ArrowRight: 1 };
 
 /**
  * The project's tasks in three columns, one per status. Drag a card to another column,
  * or focus it and press ArrowLeft / ArrowRight, to move it. A card's title links to the task page.
+ * A move the server refuses puts the card back and shows an alert until the next move succeeds.
  * Cards past their due date and not in Done say "Overdue".
  * The search box shows only tasks whose title or description contains the query (any case);
  * the assignee filter narrows that further to all, the viewer's, unassigned, or one member's tasks.
+ * Both live in the URL, so a reload or a shared link shows the same board.
  */
-export function Board({ projectId, tasks, members, userId, today, move }: Props) {
+export function Board({ projectId, tasks, members, userId, today, move, initialQuery, initialAssignee }: Props) {
   const [shown, applyMove] = useOptimistic(tasks, (current: Task[], { id, status }: Move) =>
     current.map((task) => (task.id === id ? { ...task, status } : task)),
   );
   // A card moved by keyboard remounts in its new column; give it focus back once.
   const refocusId = useRef<number | null>(null);
-  const [query, setQuery] = useState("");
-  const [assignee, setAssignee] = useState(ALL);
+  const router = useRouter();
+  const [moveError, setMoveError] = useState<string | null>(null);
+  const [query, setQuery] = useState(initialQuery);
+  const [assignee, setAssignee] = useState(() => (isAssignee(initialAssignee, members) ? initialAssignee : ALL));
   const needle = query.trim().toLowerCase();
   const visible = shown.filter(
     (task) =>
@@ -67,7 +89,14 @@ export function Board({ projectId, tasks, members, userId, today, move }: Props)
     if (!status || status === task.status) return;
     startTransition(async () => {
       applyMove({ id: task.id, status });
-      await move(task.id, status);
+      let moved = false;
+      try {
+        moved = await move(task.id, status);
+      } catch (error) {
+        unstable_rethrow(error); // a redirect (expired session) or not-found still navigates
+      }
+      setMoveError(moved ? null : `Could not move "${task.title}"`);
+      if (!moved) router.refresh(); // e.g. a task deleted in another tab leaves the board
     });
   }
 
@@ -90,11 +119,25 @@ export function Board({ projectId, tasks, members, userId, today, move }: Props)
   return (
     <div className="board">
       <label className="board-search">
-        Search tasks <input type="search" value={query} onChange={(event) => setQuery(event.target.value)} />
+        Search tasks{" "}
+        <input
+          type="search"
+          value={query}
+          onChange={(event) => {
+            setQuery(event.target.value);
+            replaceUrl(event.target.value, assignee);
+          }}
+        />
       </label>
       <label className="board-filter">
         Show tasks for{" "}
-        <select value={assignee} onChange={(event) => setAssignee(event.target.value)}>
+        <select
+          value={assignee}
+          onChange={(event) => {
+            setAssignee(event.target.value);
+            replaceUrl(query, event.target.value);
+          }}
+        >
           <option value={ALL}>All</option>
           <option value={MINE}>My tasks</option>
           <option value={UNASSIGNED}>Unassigned</option>
@@ -105,6 +148,11 @@ export function Board({ projectId, tasks, members, userId, today, move }: Props)
           ))}
         </select>
       </label>
+      {moveError && (
+        <p role="alert" className="board-error">
+          {moveError}
+        </p>
+      )}
       {STATUSES.map((status) => {
         const name = COLUMN_NAMES[status];
         const headingId = `column-${status}`;

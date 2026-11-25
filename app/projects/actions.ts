@@ -130,11 +130,13 @@ export async function deleteTaskAction(projectId: number, taskId: number): Promi
   redirect(`/projects/${projectId}`);
 }
 
-/** Moves a task to another column; called from the board with untrusted arguments. */
-export async function moveTaskAction(projectId: number, taskId: unknown, status: unknown): Promise<void> {
+/** Moves a task to another column; called from the board with untrusted arguments. True when the move was stored. */
+export async function moveTaskAction(projectId: number, taskId: unknown, status: unknown): Promise<boolean> {
   const user = await requireUser();
-  if (!Number.isInteger(taskId) || !isStatus(status)) return;
-  if (moveTask(user.id, projectId, taskId as number, status)) revalidatePath(`/projects/${projectId}`);
+  if (!Number.isInteger(taskId) || !isStatus(status)) return false;
+  if (!moveTask(user.id, projectId, taskId as number, status)) return false;
+  revalidatePath(`/projects/${projectId}`);
+  return true;
 }
 
 export async function addCommentAction(

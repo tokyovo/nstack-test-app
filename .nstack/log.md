@@ -258,3 +258,73 @@
 - Improve: bar 8 (goal.md). research.md from today; UX pass = T18 screens (/tmp/t18-shots/); `npm audit` 0; no issues. Top three: 7 (no nav back to Projects), 7 (failed move reverts silently), 7 (search not in URL). New: 6 (board below the fold at 1280). None at the bar.
 - needs-human: `origin/nstack/ci` still exists (10384bb); optional, left for the user.
 - Stopping: goal met, verify green, nothing at or above the bar.
+
+## 2026-11-25 Continue: improve at bar 7; slice 6 planned (controller)
+- Read: go/SKILL.md, improve/SKILL.md, plan/SKILL.md, build/SKILL.md, go/references/state.md
+- Orient: tree clean on main at 52442f7, no local-only commits; removed worktrees agent-a94c4166f0843f62b (nstack/t14) and agent-ac3106964929ad65a (nstack/t15), both clean and contained in merged origin/nstack/slice3 (PR #5); deleted the two local branches. Fast checks on main: lint + typecheck pass. needs-human: only the optional `origin/nstack/ci` cleanup is open, left to the user.
+- [x] 1 broken things: CI on main green at 7de6fe1 (45568344695); 52442f7 run in progress at the time
+- [x] 2 known problems: `gh issue list` empty; backlog.md read
+- [x] 3 goal gaps: none (every Done-when item has a passing e2e; CI green)
+- [x] 4 outside demand: research.md dated today (29 sources); its candidates are already in backlog.md
+- [x] 5 risk: `npm audit` 0 vulnerabilities
+- [x] 6 UX: n/a: no UI change since the slice 5 screens pass (/tmp/t18-shots/) earlier today; its findings are in backlog.md
+- [x] 7 code health: nothing slowing the work
+- [x] decide: bar now 7 (owner, 52442f7). Five candidates at 7. Grouped the three board-screen items (nav back, silent failed move, search not in URL) with the cheap e2e temp-file cleanup into slice 6 (T19-T22, AC28-31) on nstack/board-feedback. CSV/JSON export (7, c3) left for a later slice: different screen, new feature.
+- [x] plan check: fresh reader (Explore agent) asked 13 questions; answered in plan.md "Fresh-reader answers"
+
+## 2026-11-25 T19 header title links to Projects (builder)
+- Did: app/layout.tsx: when logged in, the header `<h1>` wraps "Task board" in `<Link href="/projects">`; logged out it stays plain text. app/globals.css: `header h1 a` inherits color, no underline. e2e/nav.spec.ts covers AC28 (board click-through, task page, /projects/999999 404, /login and /signup plain).
+- Decision: one conditional in the existing layout `<h1>`, no new component (principle 2; plan decision). Heading name unchanged, so smoke test untouched.
+- Decision: logged-out checks assert no `a` in the header at all (the header has no other links logged out), which is stricter than checking the title alone.
+- Evidence: logged-in tests red first (no link); logged-out tests red against an always-link mutant; full chain in verify.md "Proof chain (T19)".
+
+## 2026-11-25 T20 failed move shows an alert (builder)
+- Did: `moveTaskAction` returns `boolean` (false for invalid args or a refused move). Board: after the awaited move, sets `moveError` to `Could not move "<title>"` on false/throw (null on success) and calls `router.refresh()` on failure; the optimistic state reverts by itself. Alert is `<p role="alert" className="board-error">` inside `.board`, full grid row, red. Two AC29 tests in e2e/move.spec.ts (second tab of the same user deletes the task; drag, then ArrowRight with a following successful move).
+- Decision: catch only to show the alert; `unstable_rethrow(error)` first so a redirect (expired session) or not-found still navigates (plan fresh-reader answer).
+- Decision: the error state is a string, set once per finished move (`moved ? null : message`), so "one alert at a time, cleared by the next success" falls out of one assignment (principle 3).
+- Evidence: both AC29 tests red first (no alert); clear test red with the clear-on-success removed (alert still shown); full chain at the commit, see verify.md T20.
+
+## 2026-11-25 Continue: slice 6 build (controller)
+- Read: go/SKILL.md, build/SKILL.md, verify/SKILL.md; state files.
+- Orient: found builder worktrees from the previous session with no live agents: nstack/t19 (d8c8daf, committed), nstack/t20 (4445de2, committed), nstack/t22 (uncommitted draft: playwright.config.ts + e2e/global-teardown.ts). No open PRs; main == origin/main.
+- [x] merge T19, T20 into nstack/board-feedback: T19 fast-forward; T20 conflict in log.md only (kept both entries). lint + typecheck pass after merge. Removed both worktrees and branches.
+- [x] T21: builder done (afbaacd), merged as c17d85f (log.md conflict only, kept both)
+- [x] T22: builder kept the draft, added `npm run check:e2e-temp` (scripts/e2e-temp-check.mts); 1a95b9e merged as bdc27bf. Its two full runs hit a 30s timeout in the AC22 seed test under load from the parallel builder; rerun below on an idle machine passed.
+- [x] ticket-scope verify T19-T22: covered by the slice verify below (same commit, wider scope). Removed all worktrees and the 6 stale `worktree-agent-*` branches (each contained in HEAD or origin/main).
+## 2026-11-25 T22 e2e run removes its temp SQLite files (builder)
+- Did: playwright.config.ts sets `E2E_DB_GENERATED=1` only when it fills the default `E2E_DATABASE_PATH`; new e2e/global-teardown.ts (`globalTeardown`) removes that file and its -wal/-shm (`force`, missing ignored); a caller-set path is kept. New `npm run check:e2e-temp` (scripts/e2e-temp-check.mts) runs `playwright test` as a child, then lists `taskboard-e2e-<child pid>-*` in the temp dir and exits 1 if any remain.
+- Started from an interrupted builder's uncommitted draft (config + teardown); kept it unchanged after proving it.
+- Decision: AC31 check is a script, not a manual count: the config names the file after the Playwright process pid, which is the child the script spawns, so parallel runs never count. It drops an inherited `E2E_DATABASE_PATH` so the default (cleaned) path is the one checked.
+- Decision: order confirmed in Playwright 1.65.0 source (lib/runner/index.js `createGlobalSetupTasks`): plugin (webServer) setup runs before global teardown tasks, and teardowns run in reverse, so globalTeardown runs while `next start` is still up and the server is killed after. Unlinking open files is fine on Linux; the script counts after the child exits (server already killed) and found 0, so nothing is recreated on shutdown.
+- Evidence: red with config reverted to HEAD: `check:e2e-temp -- e2e/smoke.spec.ts` exit 1, 3 files left (.db, -shm, -wal, pid matched). Green with the teardown: same command 0 left, exit 0. Caller-set `E2E_DATABASE_PATH=$D/own.db`: own.db/-shm/-wal kept. Full chain exit 0, 71 passed, no `data/`. Full suite via `check:e2e-temp` twice: 0 files left each time, exit 1 from an AC22 seed-test timeout (30s, load from a parallel builder; passes alone 3/3); so the teardown also runs after a failure. Seed timeout logged in backlog.md, not fixed here.
+- Backlog: /tmp holds ~540 `taskboard-e2e-*` files from earlier runs; not this ticket's to delete (other builders may be running).
+## 2026-11-25 T21 search and assignee filter live in the URL (builder)
+- Did: page.tsx reads `searchParams` and passes `initialQuery` / `initialAssignee` (first entry of a repeated key, "" when missing) to Board. Board seeds its state from them (an unknown `for` becomes "all") and, on each search keystroke or filter change, calls `replaceUrl`, which writes `?q=&for=` with `history.replaceState` (q as typed, left out when it trims to empty; for left out when "all"). Three AC30 e2e tests.
+- Decision: `for` is validated in Board, not page.tsx: the filter values live in the client module and page already passes members (principle 6 boundary is the props; one check, `isAssignee`).
+- Decision: `replaceUrl` builds a fresh query (no other keys exist on the board URL), smaller than merging into location.search (principle 2).
+- Evidence: red first (q/for null); `for=bogus` red without validation; history checks red with pushState; full chain 80 passed, see verify.md T21. One full run was accidentally made with the pushState mutant still in place (2 AC30 failures, 78 passed); the restored code was then rerun clean.
+
+## 2026-11-25 Slice 6 verify (controller)
+- Read: verify/SKILL.md.
+
+| Claim | Command | Result |
+|---|---|---|
+| clean tree at c17d85f | git status; git rev-parse HEAD | clean, c17d85f |
+| all checks + AC31 | `rm -rf .next; lint && typecheck && build && E2E_PORT=3160 npm run check:e2e-temp` | exit 0, 80 passed, 0 skipped, 0 build warnings, `0 taskboard-e2e-189724-* file(s) left`, no `data/` |
+| AC22 seed timeout (T22 report) | same run, idle machine | passed; timeout only under parallel builder load |
+| AC28 bites | layout title Link -> span | both logged-in nav tests failed |
+| AC29 bites | board `setMoveError(null)` always | both AC29 tests failed |
+| AC30 bites | `replaceState` -> `pushState` | AC30 search + assignee-filter tests failed |
+| AC31 bites | `globalTeardown` commented out, `check:e2e-temp -- e2e/smoke.spec.ts` | db-wal and db-shm left (listed) |
+| restored | git checkout; rebuild; nav/move/search/assignee-filter via check:e2e-temp | 17 passed, 0 files left, tree clean |
+| screens | isolated `next start -p 3400` + mktemp DB; `npm run screens` exit 0 (10 PNGs) + board-filtered (`?q=launch&for=bogus`), board-alert (task deleted in tab 2, ArrowRight), 404 at 1280 and 390: /tmp/s6-shots/*.png | header title same look, alert red between filter and columns, filtered board shows 1 card with "launch" filled and "All" selected, stacked at 390, no overflow |
+| nothing weaker | git diff main...HEAD | e2e +195 lines, 0 deleted; no skip/only/any/ts-ignore/eslint-disable |
+
+- Observed, not in scope: the header link has no visual hint (plan decision: looks like the title); Next's default 404 body uses its own font (unchanged). Logged in backlog.md.
+- Not verified: none.
+
+## 2026-11-25 Slice 6 review + record (controller)
+- Read: review/SKILL.md, ship/SKILL.md.
+- [x] review: one reviewer at 8d017f5 -> pass, no findings. Its runs: full chain via check:e2e-temp 80 passed, 0 temp files; mutant (alert not cleared on success) -> AC29 test red; drove the app on 3470 (deleted task + ArrowRight -> alert, card gone, ?q kept, no overflow at 390/1280). Second reviewer not started: no auth, payments, migrations or public API changes.
+- [x] seed-test timeout (T22 builder, twice): 16.7s on an idle machine; both timeouts came from two suites running at once on 2 CPUs. Lesson (rule 9, second time e2e load hurt a parallel run): the fact is now at the top of verify.md, so the next dispatch sees it; the backlog item (score 5, seed test headroom) stays.
+- [x] plan.md: T19-T22 ticked, slice 6 marked done.
