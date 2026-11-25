@@ -8,6 +8,9 @@ export const SESSION_COOKIE = "session";
 
 export type User = { id: number; email: string };
 
+/** Sessions expire this many days after they start (fixed, no sliding renewal). */
+export const SESSION_DAYS = 30;
+
 /** Returns the logged-in user from the session cookie, or null. */
 export async function getCurrentUser(): Promise<User | null> {
   // cookies() first: it opts the page out of build-time prerendering, so the build never opens the DB.
@@ -16,10 +19,17 @@ export async function getCurrentUser(): Promise<User | null> {
   if (!token) return null;
   const row = db
     .prepare(
-      "SELECT users.id, users.email FROM sessions JOIN users ON users.id = sessions.user_id WHERE sessions.token = ?",
+      `SELECT users.id, users.email, sessions.created_at <= datetime('now', ?) AS expired
+       FROM sessions JOIN users ON users.id = sessions.user_id WHERE sessions.token = ?`,
     )
-    .get(token) as User | undefined;
-  return row ?? null;
+    .get(`-${SESSION_DAYS} days`, token) as (User & { expired: number }) | undefined;
+  if (!row) return null;
+  if (row.expired) {
+    // The stale cookie cannot be cleared here (pages may not set cookies); without its row it is inert.
+    db.prepare("DELETE FROM sessions WHERE token = ?").run(token);
+    return null;
+  }
+  return { id: row.id, email: row.email };
 }
 
 /** Redirect guard for pages that need a logged-in user. */
@@ -51,7 +61,10 @@ export async function createUser(email: string, password: string): Promise<User 
   return result.changes ? { id: Number(result.lastInsertRowid), email } : null;
 }
 
-/** Starts a session for the user and sets the httpOnly, SameSite=Lax session cookie. */
+/**
+ * Starts a session for the user and sets the httpOnly, SameSite=Lax session cookie, which lasts
+ * SESSION_DAYS and is Secure in production unless INSECURE_COOKIES=1 (the http e2e server sets it).
+ */
 export async function startSession(userId: number): Promise<void> {
   const token = crypto.randomBytes(32).toString("hex");
   getDb().prepare("INSERT INTO sessions (token, user_id) VALUES (?, ?)").run(token, userId);
@@ -59,6 +72,8 @@ export async function startSession(userId: number): Promise<void> {
     httpOnly: true,
     sameSite: "lax",
     path: "/",
+    maxAge: SESSION_DAYS * 24 * 60 * 60,
+    secure: process.env.NODE_ENV === "production" && process.env.INSECURE_COOKIES !== "1",
   });
 }
 

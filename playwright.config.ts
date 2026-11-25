@@ -9,7 +9,8 @@ process.env.E2E_DATABASE_PATH ??= path.join(
   `taskboard-e2e-${process.pid}-${Date.now()}.db`,
 );
 
-const PORT = 3100;
+// E2E_PORT lets parallel worktrees run the suite side by side.
+const PORT = Number(process.env.E2E_PORT ?? 3100);
 
 export default defineConfig({
   testDir: "./e2e",
@@ -28,6 +29,11 @@ export default defineConfig({
     url: `http://localhost:${PORT}`,
     reuseExistingServer: false,
     timeout: 60_000,
-    env: { DATABASE_PATH: process.env.E2E_DATABASE_PATH },
+    // The server is plain http, so the session cookie is not Secure (INSECURE_COOKIES=1).
+    // E2E_SECURE_COOKIES=1 keeps the production default instead; Chromium accepts Secure cookies on localhost.
+    env: {
+      DATABASE_PATH: process.env.E2E_DATABASE_PATH!,
+      INSECURE_COOKIES: process.env.E2E_SECURE_COOKIES === "1" ? "0" : "1",
+    },
   },
 });
