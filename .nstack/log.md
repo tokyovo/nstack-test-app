@@ -37,3 +37,11 @@
 
 ## Needs human
 - 2026-11-25 Run `gh auth refresh -h github.com -s workflow` (adds `workflow` scope to the gh token). Then: `git push -u origin nstack/ci`, rebase `nstack/task-board` onto it (or merge both), open the PR, and nstack can wait for CI and merge. Changing credentials is a hard stop for nstack.
+
+## 2026-11-25 T3 projects
+- Did: lib/projects.ts (list/get/create/rename/delete, all scoped by membership in SQL), server actions + revalidatePath, /projects list with inline rename/delete forms, /projects/[id] page with notFound() for non-members. e2e/projects.spec.ts covers AC5-6; shared e2e helpers moved to e2e/helpers.ts.
+- Decisions:
+  - Rename and delete live inline in the /projects list: AC5 is about the list updating, fewest pages.
+  - Delete has no confirm dialog: v1, easy to add; dialogs complicate e2e.
+  - Non-member, missing, and non-numeric project ids all give the same 404 so B cannot tell A's project exists.
+  - Empty names are ignored silently (input is `required` client-side).
