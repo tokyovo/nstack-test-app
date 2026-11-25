@@ -35,6 +35,16 @@
 - Lesson: two verify chains in parallel collide on `.next` and port 3100 (a reviewer hit "Could not find a production build"). Run reviewers one at a time.
 - Not verified: CI (parked, see Needs human).
 
+## 2026-11-25 T3+T4 review + verify (controller)
+- Did: one builder did T3 and T4 (same files). Reviewer (correctness + security) passed; its nit "no test for non-member writes" treated as important (access control) and fixed with a tamper e2e test.
+- Evidence:
+| Claim | Command | Result |
+|---|---|---|
+| all checks | rm -rf .next; lint && typecheck && build && test:e2e | exit 0, 22 passed |
+| tamper test bites | MEMBER_CHECK -> always true, build, playwright -g tampering | 1 failed; restored, green |
+| tests isolated | ls data | absent |
+- Not verified: CI (parked).
+
 ## Needs human
 - 2026-11-25 Run `gh auth refresh -h github.com -s workflow` (adds `workflow` scope to the gh token). Then: `git push -u origin nstack/ci`, rebase `nstack/task-board` onto it (or merge both), open the PR, and nstack can wait for CI and merge. Changing credentials is a hard stop for nstack.
 

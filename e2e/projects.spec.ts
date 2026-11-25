@@ -72,3 +72,33 @@ test("AC6: logged-out visitors to a project URL are sent to /login", async ({ br
   await page.goto(url);
   await expect(page).toHaveURL("/login");
 });
+
+/** Clicks a server-action submit button and waits for the action's response. */
+async function submitAndWait(page: import("@playwright/test").Page, button: import("@playwright/test").Locator) {
+  await Promise.all([page.waitForResponse((r) => r.request().method() === "POST"), button.click()]);
+}
+
+test("AC6: a non-member cannot rename or delete another user's project by tampering with the form", async ({ browser }) => {
+  const a = await newUser(browser);
+  const aUrl = await createProject(a.page, "A private");
+  const aId = aUrl.split("/").pop()!;
+
+  const b = await newUser(browser);
+  await createProject(b.page, "B own");
+  const bItem = projectList(b.page).getByRole("listitem").filter({ hasText: "B own" });
+  // Point B's own rename and delete forms at A's project id, as a hand-crafted request would.
+  await bItem.locator('input[name="projectId"]').evaluateAll((inputs, id) => {
+    for (const input of inputs as HTMLInputElement[]) input.value = id;
+  }, aId);
+  await bItem.getByLabel("Rename B own").fill("Hijacked");
+  await submitAndWait(b.page, bItem.getByRole("button", { name: "Rename" }));
+  await bItem.locator('input[name="projectId"]').evaluateAll((inputs, id) => {
+    for (const input of inputs as HTMLInputElement[]) input.value = id;
+  }, aId);
+  await submitAndWait(b.page, bItem.getByRole("button", { name: "Delete" }));
+
+  await a.page.goto("/projects");
+  await expect(projectList(a.page).getByRole("link", { name: "A private", exact: true })).toBeVisible();
+  await a.page.goto(aUrl);
+  await expect(a.page.getByRole("heading", { name: "A private" })).toBeVisible();
+});

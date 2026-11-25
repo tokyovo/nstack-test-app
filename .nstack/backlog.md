@@ -3,3 +3,4 @@
 - CI uses actions/checkout@v4, setup-node@v4, upload-artifact@v4; bump when newer majors are standard.
 - Login timing leaks whether an email exists (unknown email skips scrypt, ~58 ms faster). Fix: run scrypt against a dummy salt on unknown email. (T2 security review)
 - Session cookie has no `secure` flag and sessions never expire; add expiry + `secure` in production. (T2 security review)
+- Invite action has no non-member tamper test (projectId is a `.bind` arg, encrypted by Next; guard `getProject` in inviteMember exists, read-only proof). (T3/T4 review)
