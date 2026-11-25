@@ -128,7 +128,8 @@ Fresh-reader answers (2026-11-25):
 - AC31: teardown deletes only the file the config generated (config sets a flag, e.g. an env var `E2E_DB_GENERATED=1`, when it fills the default), plus its -wal/-shm. If the server could recreate files after unlink, kill order must be handled; builder checks in 1.65 by running and counting. Interrupted runs: best effort only. Proof: count files matching this run's pid-based name after the run (0), not a global before/after count; red first without the teardown (1+).
 
 ## Tickets
-- [ ] T19 Header title links to /projects when logged in (AC28). Proof: new e2e/nav.spec.ts, red first; full chain. Needs: none
-- [ ] T20 Failed move shows an alert and the card stays put (AC29). Proof: e2e in e2e/move.spec.ts (second page deletes the task, first page drags and keyboard-moves it), red first; full chain. Needs: none
-- [ ] T21 Search and assignee filter live in the URL (AC30). Proof: e2e in e2e/search.spec.ts and e2e/assignee-filter.spec.ts (type, check URL, reload, check board and inputs; history length unchanged; `for=bogus` shows all), red first; full chain. Needs: T20 (same file, board.tsx)
-- [ ] T22 e2e run removes its temp SQLite files (AC31). Proof: after `npm run test:e2e`, no file named for that run (taskboard-e2e-<pid>-*) remains in the temp dir (red first: 1+ without the teardown); full chain. Needs: none
+Slice 6 done 2026-11-25: T19-T22 merged on nstack/board-feedback, slice verify + review passed at 8d017f5.
+- [x] T19 Header title links to /projects when logged in (AC28). Proof: new e2e/nav.spec.ts, red first; full chain. Needs: none
+- [x] T20 Failed move shows an alert and the card stays put (AC29). Proof: e2e in e2e/move.spec.ts (second page deletes the task, first page drags and keyboard-moves it), red first; full chain. Needs: none
+- [x] T21 Search and assignee filter live in the URL (AC30). Proof: e2e in e2e/search.spec.ts and e2e/assignee-filter.spec.ts (type, check URL, reload, check board and inputs; history length unchanged; `for=bogus` shows all), red first; full chain. Needs: T20 (same file, board.tsx)
+- [x] T22 e2e run removes its temp SQLite files (AC31). Proof: after `npm run test:e2e`, no file named for that run (taskboard-e2e-<pid>-*) remains in the temp dir (red first: 1+ without the teardown); full chain. Needs: none

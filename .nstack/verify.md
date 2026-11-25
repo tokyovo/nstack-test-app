@@ -1,6 +1,6 @@
 # Verify
 
-Run from the repo root. Needs Node 24, `npm ci`, and Chromium for Playwright 1.65.0 (`npx playwright install chromium`; CI uses `--with-deps`).
+Run from the repo root. This machine has 2 CPUs: two full e2e suites at once push AC22 (seed, ~17s idle) past the 30s test limit (seen twice on 2026-11-25 with parallel builders; CI runs one suite). Run at most one full e2e suite at a time here. Needs Node 24, `npm ci`, and Chromium for Playwright 1.65.0 (`npx playwright install chromium`; CI uses `--with-deps`).
 
 ## Fast checks
 - `npm run lint` — ESLint (eslint-config-next core-web-vitals + typescript). 2026-11-25 T1: pass, 0 problems.

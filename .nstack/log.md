@@ -322,3 +322,9 @@
 
 - Observed, not in scope: the header link has no visual hint (plan decision: looks like the title); Next's default 404 body uses its own font (unchanged). Logged in backlog.md.
 - Not verified: none.
+
+## 2026-11-25 Slice 6 review + record (controller)
+- Read: review/SKILL.md, ship/SKILL.md.
+- [x] review: one reviewer at 8d017f5 -> pass, no findings. Its runs: full chain via check:e2e-temp 80 passed, 0 temp files; mutant (alert not cleared on success) -> AC29 test red; drove the app on 3470 (deleted task + ArrowRight -> alert, card gone, ?q kept, no overflow at 390/1280). Second reviewer not started: no auth, payments, migrations or public API changes.
+- [x] seed-test timeout (T22 builder, twice): 16.7s on an idle machine; both timeouts came from two suites running at once on 2 CPUs. Lesson (rule 9, second time e2e load hurt a parallel run): the fact is now at the top of verify.md, so the next dispatch sees it; the backlog item (score 5, seed test headroom) stays.
+- [x] plan.md: T19-T22 ticked, slice 6 marked done.
