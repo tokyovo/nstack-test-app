@@ -196,3 +196,9 @@
 - Backlog: removed shipped items (T9-T16). Top three left: 7 (no nav back to Projects), 7 (failed move reverts silently), 7 (search not in URL). All below bar 8. research.md is from today; no new UX pass, as slice 3 only added one board select, covered by e2e.
 - needs-human: `origin/nstack/ci` still exists (10384bb); optional, left for the user.
 - Stopping: goal met, verify green on main, nothing at or above the bar.
+
+## 2026-11-25 Continue: Drive section; slice 4 planned (controller)
+- Read: go/SKILL.md, go/references/state.md, improve/SKILL.md, plan/SKILL.md, build/SKILL.md.
+- Orient: main == origin/main at d298d27; lint + typecheck pass; CI on main green (run 45560003645). needs-human: optional `origin/nstack/ci` cleanup re-checked (`git ls-remote` still shows 10384bb); left for the user.
+- verify.md had no Drive section (go step 0 item 4). Ran start/sign-in/screenshot/cleanup once: build, `next start -p 3400` on a mktemp DB, `/` -> 307 /login, signup via playwright-cli landed on /projects, screenshot saved, console only the known favicon 404; stopped by port, temp dir removed. Wrote Drive with those values. No seed or screens command exists, so slice 4 (T17) adds them before any further improve pass.
+- Decision: seed goes through the UI with Playwright's browser API (no direct DB writes): reuses the app's validation and the server-only db module stays server-only; no new deps.

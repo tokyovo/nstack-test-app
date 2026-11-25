@@ -66,3 +66,13 @@ Run from the repo root. Needs Node 24, `npm ci`, and Chromium for Playwright 1.6
 
 ## Proof chain (slice 3, controller)
 - `rm -rf .next; npm run lint && npm run typecheck && npm run build && npm run test:e2e` at 299a094 (T13-T16 merged) — 2026-11-25: exit 0, 66 passed; no `data/` dir.
+
+## Drive
+How an agent runs and uses the app on its own, without touching anyone's data. Each value below was run on 2026-11-25 (d298d27) unless marked "T17".
+- **Start:** `npm run build`, then `D=$(mktemp -d); DATABASE_PATH=$D/app.db INSECURE_COOKIES=1 npx next start -p 3400` (any free port; `INSECURE_COOKIES=1` because it is http). Ready when `curl -s -o /dev/null -w '%{http_code}' localhost:3400/login` prints 200; `/` then gives 307 to /login.
+- **Seed:** T17 adds `BASE_URL=http://localhost:3400 npm run seed`. Until then, sign up and create data in the UI.
+- **Sign in:** sign up at /signup with any email and `correct-horse-1` (min 8 chars); lands on /projects. In tests, `e2e/helpers.ts` `signUp()` / `newUser()`. playwright-cli: `playwright-cli -s=drive open http://localhost:3400/signup`, `fill 'input[name=email]' ...`, `fill 'input[name=password]' ...`, `press Enter`.
+- **Screens:** /login, /signup, /projects, /projects/<id> (board), /projects/<id>/tasks/<taskId> (task page).
+- **Evidence:** `playwright-cli -s=drive screenshot --filename=<file>.png`; `playwright-cli -s=drive console` (expect only the favicon.ico 404). T17 adds `npm run screens -- <dir>`.
+- **Isolate:** own port and own mktemp DB per copy; e2e uses `E2E_PORT` and its own temp DB.
+- **Clean up:** `kill $(ss -ltnp 'sport = :3400' | grep -o 'pid=[0-9]*' | cut -d= -f2)` (pkill -f matches the calling shell, avoid), then `rm -rf $D`; `playwright-cli -s=drive close`.
