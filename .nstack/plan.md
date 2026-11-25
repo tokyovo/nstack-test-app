@@ -30,4 +30,4 @@ Out of scope: see goal.md.
 - [x] T5 Tasks: create with fields; three-column board. Proof: e2e for AC 8. Needs: T4 (assignee needs members)
 - [x] T6 Move tasks by drag-and-drop and by keyboard. Proof: e2e for AC 9-10. Needs: T5
 - [x] T7 Comments on a task. Proof: e2e for AC 11. Needs: T5
-- [ ] T8 Search tasks in a project. Proof: e2e for AC 12. Needs: T5
+- [x] T8 Search tasks in a project. Proof: e2e for AC 12. Needs: T5

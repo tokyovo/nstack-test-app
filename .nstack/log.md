@@ -106,3 +106,8 @@
   - Non-member, task in another project, and missing task all 404, like projects.
   - Empty comment -> "Comment is required" (server check plus HTML `required`); comments oldest first, show author email and created_at as stored.
   - Generalized the tamper helper to `tamperBoundIds` (several bound ids, null keeps one); it now keys on the `next-action` header and requires field "0" rewritten, because a form reached by client-side navigation sends no `$ACTION_` fields.
+
+## 2026-11-25 T8 search
+- Did: "Search tasks" box in the client Board filters shown cards by title or description (case-insensitive, trimmed); empty query shows all. e2e/search.spec.ts covers AC12.
+- Decisions:
+  - Filter client-side in Board, not a server query/URL param: the board already holds every task with its description, no new action to guard, instant as you type. Query is not kept in the URL or across reloads (spec does not ask).

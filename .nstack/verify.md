@@ -36,3 +36,6 @@ Run from the repo root. Needs Node 24, `npm ci`, and Chromium for Playwright 1.6
 
 ## Proof chain (T7)
 - `rm -rf .next; npm run lint && npm run typecheck && npm run build && npm run test:e2e` — 2026-11-25 T7: exit 0, 40 passed (e2e/comments.spec.ts AC11 + earlier); no `data/` dir. Comment tests shown red (no task link) before the code; each tamper test shown red with its own guard removed (membership check in getTask, task-in-project condition).
+
+## Proof chain (T8)
+- `rm -rf .next; npm run lint && npm run typecheck && npm run build && npm run test:e2e` — 2026-11-25 T8: exit 0, 41 passed (e2e/search.spec.ts AC12 + earlier); no `data/` dir. Search test shown red (no search box) before the code.

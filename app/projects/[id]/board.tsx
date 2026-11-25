@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { startTransition, useEffect, useOptimistic, useRef, type DragEvent, type KeyboardEvent } from "react";
+import { startTransition, useEffect, useOptimistic, useRef, useState, type DragEvent, type KeyboardEvent } from "react";
 import { COLUMN_NAMES, STATUSES, neighborStatus, type Status } from "@/lib/statuses";
 import type { Task } from "@/lib/tasks";
 
@@ -13,6 +13,7 @@ const KEY_STEPS: Record<string, -1 | 1> = { ArrowLeft: -1, ArrowRight: 1 };
 /**
  * The project's tasks in three columns, one per status. Drag a card to another column,
  * or focus it and press ArrowLeft / ArrowRight, to move it. A card's title links to the task page.
+ * The search box shows only tasks whose title or description contains the query (any case).
  */
 export function Board({ projectId, tasks, move }: Props) {
   const [shown, applyMove] = useOptimistic(tasks, (current: Task[], { id, status }: Move) =>
@@ -20,6 +21,11 @@ export function Board({ projectId, tasks, move }: Props) {
   );
   // A card moved by keyboard remounts in its new column; give it focus back once.
   const refocusId = useRef<number | null>(null);
+  const [query, setQuery] = useState("");
+  const needle = query.trim().toLowerCase();
+  const visible = needle
+    ? shown.filter((task) => [task.title, task.description].some((text) => text.toLowerCase().includes(needle)))
+    : shown;
   useEffect(() => {
     if (refocusId.current === null) return;
     const card = document.querySelector<HTMLElement>(`[data-task-id="${refocusId.current}"]`);
@@ -55,6 +61,9 @@ export function Board({ projectId, tasks, move }: Props) {
 
   return (
     <div>
+      <label>
+        Search tasks <input type="search" value={query} onChange={(event) => setQuery(event.target.value)} />
+      </label>
       {STATUSES.map((status) => {
         const name = COLUMN_NAMES[status];
         const headingId = `column-${status}`;
@@ -67,7 +76,7 @@ export function Board({ projectId, tasks, move }: Props) {
           >
             <h3 id={headingId}>{name}</h3>
             <ul>
-              {shown
+              {visible
                 .filter((task) => task.status === status)
                 .map((task) => (
                   <li
