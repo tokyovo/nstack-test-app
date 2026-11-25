@@ -122,3 +122,9 @@
 - Decision: the 400-char title is inserted straight into the DB in the test (models a task saved before the cap); the cap makes it impossible via the UI. The long description goes through the UI.
 - Decision: columns stack to one column under 640px rather than scrolling sideways; spec only requires no horizontal scroll.
 - Decision: the 390px no-scroll test passed on the unstyled app (stacked lists); kept as a guard and shown red against a fixed-width-grid mutant (scrollWidth 624).
+
+## 2026-11-25 T11 overdue flag on cards (builder)
+- Did: `lib/due-dates.ts` (client-safe `localToday`, `isOverdue`); the project page passes the server's local date to `Board` as `today`; overdue cards get class `overdue` and an "Overdue" line, styled in globals.css. AC16 test in e2e/overdue.spec.ts.
+- Decision: server computes `today` and the client compares, so an optimistic move to Done clears the flag at once without a reload; the date still comes from the server's clock as the spec says.
+- Decision: test uses fixed far dates (2000-01-15, 2999-12-31) so it never depends on the run date or time zone; the due-today boundary (not overdue) is not e2e-tested, as it would flake at midnight.
+- Evidence: full chain exit 0, 47 passed; bite check (Done exclusion removed) -> red; restored.

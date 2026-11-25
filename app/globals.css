@@ -93,3 +93,13 @@ form label {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+.task-card.overdue {
+  border-color: #b91c1c;
+  border-left-width: 4px;
+}
+
+.task-card .overdue-label {
+  color: #b91c1c;
+  font-weight: 600;
+}
