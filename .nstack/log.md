@@ -271,3 +271,9 @@
 - [x] 7 code health: nothing slowing the work
 - [x] decide: bar now 7 (owner, 52442f7). Five candidates at 7. Grouped the three board-screen items (nav back, silent failed move, search not in URL) with the cheap e2e temp-file cleanup into slice 6 (T19-T22, AC28-31) on nstack/board-feedback. CSV/JSON export (7, c3) left for a later slice: different screen, new feature.
 - [x] plan check: fresh reader (Explore agent) asked 13 questions; answered in plan.md "Fresh-reader answers"
+
+## 2026-11-25 T20 failed move shows an alert (builder)
+- Did: `moveTaskAction` returns `boolean` (false for invalid args or a refused move). Board: after the awaited move, sets `moveError` to `Could not move "<title>"` on false/throw (null on success) and calls `router.refresh()` on failure; the optimistic state reverts by itself. Alert is `<p role="alert" className="board-error">` inside `.board`, full grid row, red. Two AC29 tests in e2e/move.spec.ts (second tab of the same user deletes the task; drag, then ArrowRight with a following successful move).
+- Decision: catch only to show the alert; `unstable_rethrow(error)` first so a redirect (expired session) or not-found still navigates (plan fresh-reader answer).
+- Decision: the error state is a string, set once per finished move (`moved ? null : message`), so "one alert at a time, cleared by the next success" falls out of one assignment (principle 3).
+- Evidence: both AC29 tests red first (no alert); clear test red with the clear-on-success removed (alert still shown); full chain at the commit, see verify.md T20.
