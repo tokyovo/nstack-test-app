@@ -21,7 +21,7 @@ export default async function ProjectPage({ params }: PageProps<"/projects/[id]"
     <main>
       <h2>{project.name}</h2>
       <TaskForm action={createTaskAction.bind(null, project.id)} members={members} />
-      <Board projectId={project.id} tasks={tasks} today={localToday()} move={moveTaskAction.bind(null, project.id)} />
+      <Board projectId={project.id} tasks={tasks} members={members} userId={user.id} today={localToday()} move={moveTaskAction.bind(null, project.id)} />
       <section>
         <h3>Members</h3>
         <ul aria-label="Members">

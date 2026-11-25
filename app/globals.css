@@ -53,7 +53,8 @@ form label {
   align-items: start;
 }
 
-.board-search {
+.board-search,
+.board-filter {
   grid-column: 1 / -1;
 }
 
