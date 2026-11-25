@@ -116,7 +116,7 @@ Out of scope: breadcrumbs, a nav menu, retrying failed moves, persisting filters
 Decision: header link (one element in app/layout.tsx) rather than per-page back links: covers board, task page and 404 with one change. The task page already links to its board.
 Decision: `moveTaskAction` returns `boolean` (true when stored); the board shows the alert when it returns false or throws. The optimistic state reverts on its own when the transition ends, so no extra revert code.
 Decision: URL state via `window.history.replaceState` (Next App Router syncs it with useSearchParams; no navigation, no server round trip); the page passes the initial `q` / `for` from `searchParams` as props so the board needs no Suspense boundary. replace, not push: typing should not fill the back button.
-Decision: temp DB cleanup in a Playwright `globalTeardown` that removes `E2E_DATABASE_PATH` and its -wal/-shm; it runs after the webServer is stopped? No: Playwright runs globalTeardown before stopping the webServer, so removal must tolerate the open file (unlink on Linux is fine; CI is Linux). Check AC31 with `ls $TMPDIR/taskboard-e2e-*` before and after a run.
+Decision: temp DB cleanup in a Playwright `globalTeardown` that removes `E2E_DATABASE_PATH` and its -wal/-shm (missing files ignored). If the webServer is still running when it runs, unlinking open files is fine on Linux (local and CI); the builder confirms the order in the Playwright version pinned. Check AC31 by counting `taskboard-e2e-*` in the temp dir before and after a run.
 
 ## Tickets
 - [ ] T19 Header title links to /projects when logged in (AC28). Proof: new e2e/nav.spec.ts, red first; full chain. Needs: none
