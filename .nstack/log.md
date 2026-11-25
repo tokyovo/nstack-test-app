@@ -288,9 +288,9 @@
 - Read: go/SKILL.md, build/SKILL.md, verify/SKILL.md; state files.
 - Orient: found builder worktrees from the previous session with no live agents: nstack/t19 (d8c8daf, committed), nstack/t20 (4445de2, committed), nstack/t22 (uncommitted draft: playwright.config.ts + e2e/global-teardown.ts). No open PRs; main == origin/main.
 - [x] merge T19, T20 into nstack/board-feedback: T19 fast-forward; T20 conflict in log.md only (kept both entries). lint + typecheck pass after merge. Removed both worktrees and branches.
-- [ ] T21: builder dispatched (worktree, branch nstack/t21 from 45dce39)
-- [ ] T22: builder dispatched to prove/finish the draft in its existing worktree
-- [ ] ticket-scope verify T19, T20, T21, T22 (on the slice branch, after merges)
+- [x] T21: builder done (afbaacd), merged as c17d85f (log.md conflict only, kept both)
+- [x] T22: builder kept the draft, added `npm run check:e2e-temp` (scripts/e2e-temp-check.mts); 1a95b9e merged as bdc27bf. Its two full runs hit a 30s timeout in the AC22 seed test under load from the parallel builder; rerun below on an idle machine passed.
+- [x] ticket-scope verify T19-T22: covered by the slice verify below (same commit, wider scope). Removed all worktrees and the 6 stale `worktree-agent-*` branches (each contained in HEAD or origin/main).
 ## 2026-11-25 T22 e2e run removes its temp SQLite files (builder)
 - Did: playwright.config.ts sets `E2E_DB_GENERATED=1` only when it fills the default `E2E_DATABASE_PATH`; new e2e/global-teardown.ts (`globalTeardown`) removes that file and its -wal/-shm (`force`, missing ignored); a caller-set path is kept. New `npm run check:e2e-temp` (scripts/e2e-temp-check.mts) runs `playwright test` as a child, then lists `taskboard-e2e-<child pid>-*` in the temp dir and exits 1 if any remain.
 - Started from an interrupted builder's uncommitted draft (config + teardown); kept it unchanged after proving it.
@@ -303,3 +303,22 @@
 - Decision: `for` is validated in Board, not page.tsx: the filter values live in the client module and page already passes members (principle 6 boundary is the props; one check, `isAssignee`).
 - Decision: `replaceUrl` builds a fresh query (no other keys exist on the board URL), smaller than merging into location.search (principle 2).
 - Evidence: red first (q/for null); `for=bogus` red without validation; history checks red with pushState; full chain 80 passed, see verify.md T21. One full run was accidentally made with the pushState mutant still in place (2 AC30 failures, 78 passed); the restored code was then rerun clean.
+
+## 2026-11-25 Slice 6 verify (controller)
+- Read: verify/SKILL.md.
+
+| Claim | Command | Result |
+|---|---|---|
+| clean tree at c17d85f | git status; git rev-parse HEAD | clean, c17d85f |
+| all checks + AC31 | `rm -rf .next; lint && typecheck && build && E2E_PORT=3160 npm run check:e2e-temp` | exit 0, 80 passed, 0 skipped, 0 build warnings, `0 taskboard-e2e-189724-* file(s) left`, no `data/` |
+| AC22 seed timeout (T22 report) | same run, idle machine | passed; timeout only under parallel builder load |
+| AC28 bites | layout title Link -> span | both logged-in nav tests failed |
+| AC29 bites | board `setMoveError(null)` always | both AC29 tests failed |
+| AC30 bites | `replaceState` -> `pushState` | AC30 search + assignee-filter tests failed |
+| AC31 bites | `globalTeardown` commented out, `check:e2e-temp -- e2e/smoke.spec.ts` | db-wal and db-shm left (listed) |
+| restored | git checkout; rebuild; nav/move/search/assignee-filter via check:e2e-temp | 17 passed, 0 files left, tree clean |
+| screens | isolated `next start -p 3400` + mktemp DB; `npm run screens` exit 0 (10 PNGs) + board-filtered (`?q=launch&for=bogus`), board-alert (task deleted in tab 2, ArrowRight), 404 at 1280 and 390: /tmp/s6-shots/*.png | header title same look, alert red between filter and columns, filtered board shows 1 card with "launch" filled and "All" selected, stacked at 390, no overflow |
+| nothing weaker | git diff main...HEAD | e2e +195 lines, 0 deleted; no skip/only/any/ts-ignore/eslint-disable |
+
+- Observed, not in scope: the header link has no visual hint (plan decision: looks like the title); Next's default 404 body uses its own font (unchanged). Logged in backlog.md.
+- Not verified: none.
