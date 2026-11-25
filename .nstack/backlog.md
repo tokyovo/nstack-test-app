@@ -1,5 +1,5 @@
 # Backlog
-Rescored 2026-11-25 after slice 4 (UX pass on `npm run screens` output, /tmp/t17-shots/). The forms-layout item became slice 5 (T18); the select-width item is folded into it.
+Rescored 2026-11-25 after slice 5 (UX pass on T18 `npm run screens` output, /tmp/t18-shots/). Slice 4 and 5 shipped; items below are open.
 Scored 2026-11-25 (value + risk + cost, cost 5 = cheapest). Sources: UX pass (headless Chromium, screenshots /tmp/ux-shots/), research.md (29 sources), earlier reviews.
 
 - 7 (v2 r1 c4) No navigation back to Projects from a board / 404 page; header not a link. (UX; still true in the 2026-11-25 post-slice-2 UX pass)

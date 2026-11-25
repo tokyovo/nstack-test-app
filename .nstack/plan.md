@@ -97,3 +97,5 @@ Acceptance criteria (e2e, Playwright, at 1280x800 unless stated; seed data or a 
 
 ## Tickets
 - [x] T18 Form and project-row layout. Proof: e2e AC24-26 (new e2e/forms-layout.spec.ts), full chain, `npm run screens` reviewed at both widths. Needs: none Evidence: 20cf901, full chain 71 passed; controller verify + review in log.md (2026-11-25 Slice 5 verify + review).
+
+Slices 4-5 shipped: PR #7 merged as ac360ee (CI 67 passed), PR #8 merged as c30759b (CI run 45567398138, 71 passed).
