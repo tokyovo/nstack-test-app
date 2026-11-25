@@ -96,4 +96,4 @@ Acceptance criteria (e2e, Playwright, at 1280x800 unless stated; seed data or a 
 27. Nothing regresses: the AC15 tests (no horizontal scroll at 390px, long text wraps) still pass, and the screens at 1280 and 390 px are reviewed by eye.
 
 ## Tickets
-- [ ] T18 Form and project-row layout. Proof: e2e AC24-26 (new e2e/forms-layout.spec.ts), full chain, `npm run screens` reviewed at both widths. Needs: none
+- [x] T18 Form and project-row layout. Proof: e2e AC24-26 (new e2e/forms-layout.spec.ts), full chain, `npm run screens` reviewed at both widths. Needs: none Evidence: 20cf901, full chain 71 passed; controller verify + review in log.md (2026-11-25 Slice 5 verify + review).

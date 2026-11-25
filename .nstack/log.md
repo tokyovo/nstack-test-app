@@ -237,3 +237,18 @@
 - Decision: AC25's 40-char title is a realistic sentence ("Prepare the launch checklist for Q3 2026", ~300px), not 40 wide glyphs: 40 "W"s exceed 512px in any common font, which the 280-512 bound allows. Field widths themselves are forced by CSS, not fonts (slice 2 lesson).
 - Decision: form margin scoped to `main form` after the screens review showed it pushed the header's Log out button up.
 - Evidence: each test red first (see verify.md T18); full chain exit 0, 71 passed, no `data/`; screens exit 0, 10 PNGs reviewed at both widths.
+
+## 2026-11-25 Slice 5 verify + review (controller)
+
+| Claim | Command | Result |
+|---|---|---|
+| clean tree at ab4e752 | git status; git log | clean |
+| all checks | `rm -rf .next; lint && typecheck && build && E2E_PORT=3125 test:e2e` | exit 0, 71 passed, no warnings, no `data/` |
+| AC25 bites | removed `width: min(100%, 32rem)`, ran e2e/forms-layout.spec.ts | AC25 failed, restored, 4 passed |
+| AC24 bites | label + field `display: block` -> `inline-block` | both AC24 tests + AC25 failed, restored, tree clean |
+| AC26 bites | reviewer: `.project-row` -> display:block | AC26 failed |
+| screens | /tmp/t18-shots/{board,projects,task}-{1280,390}.png (10 files, `npm run screens` exit 0) | labels above fields, 512px fields at 1280, full width at 390, no select stretch, project rows one line at 1280, no overflow, no console errors |
+| nothing weaker | git diff 0c2b054...HEAD | no deleted/skipped tests; AC15 tests unchanged |
+
+- Review: one reviewer -> pass, no important findings; two cosmetic nits logged in backlog.md. Board-pushed-below-fold tradeoff (seen in board-1280) logged in backlog.md.
+- Not verified: none.

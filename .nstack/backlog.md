@@ -19,3 +19,6 @@ Scored 2026-11-25 (value + risk + cost, cost 5 = cheapest). Sources: UX pass (he
 - Rejected: login timing leaks whether an email exists (signup/invite reveal it by design, AC2/AC7).
 - Needs human (changes the goal's fixed three columns): custom columns / swimlanes, research.md.
 - 6 (v2 r1 c3) (review nit, slice 2) `deleteTaskAction` (app/projects/actions.ts) does nothing visible when the delete is refused, e.g. the task was already deleted in another tab; the edit path shows "Task not found". Show the same error or redirect to the board.
+- 6 (v2 r1 c3) (T18 screens) At 1280px the stacked new-task form, search and filter take ~600px above the board, so the columns start below the fold on a laptop. Collapse the new-task form behind an "Add task" toggle, or put search + filter in one row.
+- 4 (v1 r1 c2) (T18 review nit) Board Search and "Show tasks for" labels get the label margin on top of the grid gap (~40px between them vs ~12px elsewhere), app/globals.css:47-51.
+- 3 (v1 r1 c1) (T18 review nit) Project rename fields do not line up across rows (start after each link); project list keeps the default ul indent at 390px.
