@@ -343,3 +343,8 @@
 - [x] plan check: fresh reader (Explore) asked 15 questions; answered in plan.md "Fresh-reader answers"
 - [ ] T23 build + verify
 - [ ] T24 build + verify
+## 2026-11-25 T23 CSV export route and board link (builder)
+- Did: new GET route `app/projects/[id]/export/route.ts`: getCurrentUser (else 307 to /login), integer id + getProject (else plain `Not found` 404), `format=csv` (else `Unknown format` 400), then `tasksToCsv(listTasks(...))` with Content-Type, attachment Content-Disposition and `Cache-Control: no-store`. New `lib/export.ts`: BOM, header, one row per task, formula guard (`'` before leading `=+-@`, tab, CR) then RFC 4180 quoting, CRLF after every row. Board page: `<p className="export-links">` with a plain `<a href=... download>Export CSV</a>` under the `<h2>`. New e2e/export.spec.ts (2 tests).
+- Decision: T23 adds only the "Export CSV" link; "Export JSON" comes with T24, so the board never links to a format the route rejects with 400 (principle 11).
+- Decision: CSV code in lib/export.ts, route stays a list of checks (principle 3); T24's JSON goes beside it.
+- Evidence: both tests red first (no link; route 404). Mutants each red: formula guard removed, quote doubling removed, BOM removed (AC32/33 test); membership check replaced by a stub project, format check disabled (AC35 test). Full chain via check:e2e-temp: exit 0, 82 passed, 0 temp files left, no `data/`.
