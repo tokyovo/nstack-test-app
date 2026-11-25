@@ -159,7 +159,7 @@ Decision: logged out redirects to /login like every page (requireUser), rather t
 
 ## Tickets
 - [x] T23 CSV export route and board links (AC32, AC33, AC35 for csv). Proof: new e2e/export.spec.ts (download event, read file; tasks with comma/quote/newline/leading `=`/non-ASCII; request checks), red first; full chain. Needs: none
-- [ ] T24 JSON export (AC34, AC35 for json). Proof: e2e in e2e/export.spec.ts, red first; full chain. Needs: T23 (same route file)
+- [x] T24 JSON export (AC34, AC35 for json). Proof: e2e in e2e/export.spec.ts, red first; full chain. Needs: T23 (same route file)
 
 Fresh-reader answers (2026-11-25):
 - Links: plain `<a href download>` (not next/link: no prefetch or client navigation of a route handler), in page.tsx next to the project `<h2>`, inside `<p className="export-links">`. Href `/projects/<id>/export?format=csv|json`; `download` with no value (filename from Content-Disposition).

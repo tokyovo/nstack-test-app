@@ -342,7 +342,7 @@
 - [x] decide: only CSV/JSON export (7) meets bar 7. Planned slice 7 (T23-T24, AC32-35) on nstack/export.
 - [x] plan check: fresh reader (Explore) asked 15 questions; answered in plan.md "Fresh-reader answers"
 - [x] T23 build + verify: builder 4e7825c (CSV route, lib/export.ts, Export CSV link; JSON link deferred to T24 so the board never links a 400). Controller at 4e7825c: lint, typecheck, build pass; `check:e2e-temp -- e2e/export.spec.ts` 2 passed, 0 files left; quote-doubling mutant -> 1 failed, restored, tree clean. Main CI on 85d592e: run 45617827969 success, 80 passed.
-- [ ] T24 build + verify
+- [x] T24 build + verify: builder 67908d4 + 8d73c8d (JSON in lib/export.ts, route takes json, Export JSON link); covered by the slice verify below.
 ## 2026-11-25 T23 CSV export route and board link (builder)
 - Did: new GET route `app/projects/[id]/export/route.ts`: getCurrentUser (else 307 to /login), integer id + getProject (else plain `Not found` 404), `format=csv` (else `Unknown format` 400), then `tasksToCsv(listTasks(...))` with Content-Type, attachment Content-Disposition and `Cache-Control: no-store`. New `lib/export.ts`: BOM, header, one row per task, formula guard (`'` before leading `=+-@`, tab, CR) then RFC 4180 quoting, CRLF after every row. Board page: `<p className="export-links">` with a plain `<a href=... download>Export CSV</a>` under the `<h2>`. New e2e/export.spec.ts (2 tests).
 - Decision: T23 adds only the "Export CSV" link; "Export JSON" comes with T24, so the board never links to a format the route rejects with 400 (principle 11).
@@ -353,3 +353,19 @@
 - Decision: route picks content type and body with one ternary rather than a format table (principle 2: two formats do not need a lookup structure).
 - Decision: AC34 test project name has quotes and non-ASCII to check JSON escaping and UTF-8; first byte checked as `{` (no BOM, plan decision).
 - Evidence: both tests red first (no "Export JSON" link; route 400 for json). Mutant (JSON status as column name) -> AC34 red, restored. Full chain at 67908d4: `rm -rf .next; lint && typecheck && build && E2E_PORT=3124 npm run check:e2e-temp` exit 0, 84 passed, 0 temp files left, no `data/`.
+
+## 2026-11-25 Slice 7 verify (controller)
+- Read: verify/SKILL.md.
+
+| Claim | Command | Result |
+|---|---|---|
+| clean tree at 8d73c8d | git status; git rev-parse | clean |
+| all checks | `rm -rf .next; lint && typecheck && build && E2E_PORT=3190 npm run check:e2e-temp` | exit 0, 84 passed, 0 skipped, 0 build warnings, 0 temp files, no `data/` |
+| AC32 quoting bites | quote doubling removed (T23 verify) | 1 failed |
+| AC33/AC35 bite | formula guard off + membership check replaced by a stub project | all 4 export tests failed; restored, tree clean |
+| AC34 bites | builder: JSON status as column name | AC34 failed |
+| real downloads | isolated server :3400 + seed, clicked Export CSV / Export JSON in Chromium | project-1-tasks.csv: BOM, CRLF, header, 4 rows, comma-title quoted, "To do"/"In progress"/"Done"; project-1-tasks.json: project + 4 tasks, status keys, null assignee/due; kept in /tmp/s7-shots/ |
+| screens | `npm run screens` exit 0; /tmp/s7-shots/board-1280.png, board-390.png | "Export CSV Export JSON" under the project title, fits at 390, no overflow |
+| nothing weaker | git diff main...HEAD | no deleted/skipped tests, no any/ts-ignore/eslint-disable |
+
+- Not verified: leading tab/CR formula prefixes end to end (the server trims them before storage; plan answer). None else.
