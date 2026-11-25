@@ -1,0 +1,5 @@
+# Needs human
+
+- [x] 2026-11-25 Add `workflow` scope to the gh token. Resolved: `gh auth status` on 2026-11-25 shows scopes 'gist', 'read:org', 'repo', 'workflow'; CI workflow pushed on nstack/task-board (bd433c8) and green on PR #1.
+- [ ] 2026-11-25 Merge PR #1 (https://github.com/tokyovo/nstack-test-app/pull/1) into main. CI is green (run 45535731993, 41 e2e passed) and review had no important findings, so policy `merge: auto` applies, but the Claude Code permission classifier denied `gh pr merge 1 --squash --delete-branch`. Unblock: merge it yourself (`gh pr merge 1 --squash --delete-branch`), or allow that command in Claude Code settings and rerun `/nstack:go`. After the merge, nstack must confirm CI is green on main (AC13). Check: `gh pr view 1 --json state -q .state` == MERGED.
+- [ ] 2026-11-25 Optional cleanup: remote branch `origin/nstack/ci` (10384bb) is a stale T1-era copy, superseded by bd433c8 on nstack/task-board. Delete with `git push origin --delete nstack/ci` if you want.

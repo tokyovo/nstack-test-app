@@ -1,0 +1,46 @@
+{
+  "name": "nstack-test-app",
+  "version": "1.0.0",
+  "description": "A team task board, built autonomously by [nstack](https://github.com/tokyovo/nstack) as an end-to-end test.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "next typegen && tsc --noEmit",
+    "test:e2e": "playwright test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tokyovo/nstack-test-app.git"
+  },
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tokyovo/nstack-test-app/issues"
+  },
+  "homepage": "https://github.com/tokyovo/nstack-test-app#readme",
+  "dependencies": {
+    "better-sqlite3": "^13.2.0",
+    "next": "^16.4.6",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "server-only": "^0.0.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.0",
+    "@types/better-sqlite3": "^9.6.0",
+    "@types/node": "^26.6.7",
+    "@types/react": "^19.3.1",
+    "@types/react-dom": "^19.3.0",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.4.6",
+    "typescript": "^6.0.3"
+  },
+  "allowScripts": {
+    "better-sqlite3": false
+  },
+  "private": true,
+  "engines": {
+    "node": ">=24"
+  }
+}
