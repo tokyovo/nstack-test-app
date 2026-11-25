@@ -258,3 +258,16 @@
 - Improve: bar 8 (goal.md). research.md from today; UX pass = T18 screens (/tmp/t18-shots/); `npm audit` 0; no issues. Top three: 7 (no nav back to Projects), 7 (failed move reverts silently), 7 (search not in URL). New: 6 (board below the fold at 1280). None at the bar.
 - needs-human: `origin/nstack/ci` still exists (10384bb); optional, left for the user.
 - Stopping: goal met, verify green, nothing at or above the bar.
+
+## 2026-11-25 Continue: improve at bar 7; slice 6 planned (controller)
+- Read: go/SKILL.md, improve/SKILL.md, plan/SKILL.md, build/SKILL.md, go/references/state.md
+- Orient: tree clean on main at 52442f7, no local-only commits; removed worktrees agent-a94c4166f0843f62b (nstack/t14) and agent-ac3106964929ad65a (nstack/t15), both clean and contained in merged origin/nstack/slice3 (PR #5); deleted the two local branches. Fast checks on main: lint + typecheck pass. needs-human: only the optional `origin/nstack/ci` cleanup is open, left to the user.
+- [x] 1 broken things: CI on main green at 7de6fe1 (45568344695); 52442f7 run in progress at the time
+- [x] 2 known problems: `gh issue list` empty; backlog.md read
+- [x] 3 goal gaps: none (every Done-when item has a passing e2e; CI green)
+- [x] 4 outside demand: research.md dated today (29 sources); its candidates are already in backlog.md
+- [x] 5 risk: `npm audit` 0 vulnerabilities
+- [x] 6 UX: n/a: no UI change since the slice 5 screens pass (/tmp/t18-shots/) earlier today; its findings are in backlog.md
+- [x] 7 code health: nothing slowing the work
+- [x] decide: bar now 7 (owner, 52442f7). Five candidates at 7. Grouped the three board-screen items (nav back, silent failed move, search not in URL) with the cheap e2e temp-file cleanup into slice 6 (T19-T22, AC28-31) on nstack/board-feedback. CSV/JSON export (7, c3) left for a later slice: different screen, new feature.
+- [ ] plan check: fresh reader questions answered

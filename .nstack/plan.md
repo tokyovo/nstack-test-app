@@ -99,3 +99,27 @@ Acceptance criteria (e2e, Playwright, at 1280x800 unless stated; seed data or a 
 - [x] T18 Form and project-row layout. Proof: e2e AC24-26 (new e2e/forms-layout.spec.ts), full chain, `npm run screens` reviewed at both widths. Needs: none Evidence: 20cf901, full chain 71 passed; controller verify + review in log.md (2026-11-25 Slice 5 verify + review).
 
 Slices 4-5 shipped: PR #7 merged as ac360ee (CI 67 passed), PR #8 merged as c30759b (CI run 45567398138, 71 passed).
+
+# Plan: slice 6 "board feedback" (from improve, 2026-11-25, bar 7)
+
+## Spec
+Evidence: backlog.md items scored 7 (bar lowered to 7 by the owner, 52442f7): no way back to Projects from a board, task page or 404 page; a move the server refuses snaps the card back with no message; search and filter are lost on reload and cannot be shared; every e2e run leaves its SQLite file in the OS temp dir. All but the last touch the board screen.
+
+Acceptance criteria (Playwright e2e unless stated):
+28. When logged in, the header's "Task board" title is a link to /projects, on every page (board, task page, a 404 such as /projects/999999); clicking it on the board lands on /projects. Logged out (/login), the title is plain text (not a link).
+29. When the server refuses a move (the task was deleted in another tab, then the card is dragged or moved with ArrowRight), the card ends up back in its original column and an element with role="alert" says `Could not move "<title>"` ; the next successful move clears that message. A successful move shows no alert.
+30. Typing in Search tasks and choosing "Show tasks for" updates the URL query (`?q=<text>&for=<all|mine|unassigned|member id>`, a key left out when empty / "all") without adding history entries; loading the board with that URL shows the same filtered board with the inputs filled. Unknown `for` values behave as "all".
+31. (Script check) After `npm run test:e2e` exits, no `taskboard-e2e-*` file from that run (db, -wal, -shm) remains in the OS temp dir.
+
+Out of scope: breadcrumbs, a nav menu, retrying failed moves, persisting filters per user.
+
+Decision: header link (one element in app/layout.tsx) rather than per-page back links: covers board, task page and 404 with one change. The task page already links to its board.
+Decision: `moveTaskAction` returns `boolean` (true when stored); the board shows the alert when it returns false or throws. The optimistic state reverts on its own when the transition ends, so no extra revert code.
+Decision: URL state via `window.history.replaceState` (Next App Router syncs it with useSearchParams; no navigation, no server round trip); the page passes the initial `q` / `for` from `searchParams` as props so the board needs no Suspense boundary. replace, not push: typing should not fill the back button.
+Decision: temp DB cleanup in a Playwright `globalTeardown` that removes `E2E_DATABASE_PATH` and its -wal/-shm; it runs after the webServer is stopped? No: Playwright runs globalTeardown before stopping the webServer, so removal must tolerate the open file (unlink on Linux is fine; CI is Linux). Check AC31 with `ls $TMPDIR/taskboard-e2e-*` before and after a run.
+
+## Tickets
+- [ ] T19 Header title links to /projects when logged in (AC28). Proof: new e2e/nav.spec.ts, red first; full chain. Needs: none
+- [ ] T20 Failed move shows an alert and the card stays put (AC29). Proof: e2e in e2e/move.spec.ts (second page deletes the task, first page drags and keyboard-moves it), red first; full chain. Needs: none
+- [ ] T21 Search and assignee filter live in the URL (AC30). Proof: e2e in e2e/search.spec.ts and e2e/assignee-filter.spec.ts (type, check URL, reload, check board and inputs; history length unchanged; `for=bogus` shows all), red first; full chain. Needs: T20 (same file, board.tsx)
+- [ ] T22 e2e run removes its temp SQLite files (AC31). Proof: `ls ${TMPDIR:-/tmp}/taskboard-e2e-*` count before and after `npm run test:e2e` is unchanged (red first: count grows by 1+ without the teardown); full chain. Needs: none
