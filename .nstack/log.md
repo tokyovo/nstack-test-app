@@ -270,4 +270,4 @@
 - [x] 6 UX: n/a: no UI change since the slice 5 screens pass (/tmp/t18-shots/) earlier today; its findings are in backlog.md
 - [x] 7 code health: nothing slowing the work
 - [x] decide: bar now 7 (owner, 52442f7). Five candidates at 7. Grouped the three board-screen items (nav back, silent failed move, search not in URL) with the cheap e2e temp-file cleanup into slice 6 (T19-T22, AC28-31) on nstack/board-feedback. CSV/JSON export (7, c3) left for a later slice: different screen, new feature.
-- [ ] plan check: fresh reader questions answered
+- [x] plan check: fresh reader (Explore agent) asked 13 questions; answered in plan.md "Fresh-reader answers"
