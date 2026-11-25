@@ -147,3 +147,9 @@
 - Did: PR #2 CI green after the select-width fix (runs 45552206435, 45552215407; 56 passed). No re-review after the CI fix (one CSS rule + one test, proven red then green). Merged under `merge: auto` as 5f950cf. Local main reset to origin/main (its only extra commit, 780fe09, was inside the squash). CI on main green: run 45552549785, 56 passed. Fast checks on main: lint and typecheck pass.
 - Improve: no broken checks; research.md is from today; UX pass after slice 2 (1280px and 390px screenshots of the board, the task page and signup; no console errors): the UI is plain but usable. Rescored the backlog. Best is 8 (forms lose typed values; session expiry; filter by assignee), below the bar of 9. Stopping.
 - Decision: the post-merge state goes through a small PR from nstack/state-slice2, not a local commit on main.
+
+## 2026-11-25 Continue: orient; still nothing above the bar (controller)
+- Orient: main == origin/main at 67f5043 (state-only change since 5f950cf: `git diff --stat` touches only .nstack/). lint + typecheck pass. CI on main at 67f5043 green: run 45553194725, 56 passed.
+- needs-human: only open item is the optional `origin/nstack/ci` cleanup; `git ls-remote` shows it still exists (10384bb). Left for the user.
+- Improve: no code change since the last improve pass (research + UX pass today), so they were not redone. New evidence: the CI log warns that Node 20 is deprecated for actions/checkout@v4 and setup-node@v4; rescored that item 6 -> 8, still below the bar of 9. Stopping: goal met, verify green, nothing above the bar.
+- Decision: this log entry is a local commit on main, not pushed; it rides along with the next real PR instead of opening a state-only PR each run.

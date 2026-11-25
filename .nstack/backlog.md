@@ -17,7 +17,7 @@ Scored 2026-11-25 (value + risk + cost, cost 5 = cheapest). Bar for a ticket: 9.
 - 6 (v2 r1 c3) Checklists/subtasks. Evidence: 4 sources, research.md
 - 6 (v2 r1 c3) Duplicate a task / templates. Evidence: 4 sources, research.md
 - 6 (v2 r1 c4) Silent feedback: whitespace project name does nothing; no "no results" on empty search; no visible drop area in empty columns. (UX)
-- 6 (v1 r1 c4) CI action majors (@v4); bump when newer majors are standard.
+- 8 (v1 r2 c5) CI action majors (@v4): main CI run 45553194725 now warns "Node.js 20 is deprecated" and forces actions/checkout@v4 and actions/setup-node@v4 onto Node 24 (still green). Bump both to their Node 24 majors before GitHub removes Node 20. Rescored 2026-11-25 from 6.
 - 5 (v2 r1 c2) Calendar view. Evidence: 5 sources, research.md
 - 5 (v2 r1 c2) Multiple assignees. Evidence: 3 sources, research.md
 - 5 (v1 r1 c3) Comment timestamps shown as raw UTC with no timezone. (UX)
