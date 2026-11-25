@@ -60,8 +60,8 @@ export function Board({ projectId, tasks, move }: Props) {
   }
 
   return (
-    <div>
-      <label>
+    <div className="board">
+      <label className="board-search">
         Search tasks <input type="search" value={query} onChange={(event) => setQuery(event.target.value)} />
       </label>
       {STATUSES.map((status) => {
@@ -71,6 +71,7 @@ export function Board({ projectId, tasks, move }: Props) {
           <section
             key={status}
             aria-labelledby={headingId}
+            className="board-column"
             onDragOver={(event) => event.preventDefault()}
             onDrop={(event) => onDrop(event, status)}
           >
@@ -82,6 +83,7 @@ export function Board({ projectId, tasks, move }: Props) {
                   <li
                     key={task.id}
                     data-task-id={task.id}
+                    className="task-card"
                     tabIndex={0}
                     draggable
                     onDragStart={(event) => event.dataTransfer.setData("text/plain", String(task.id))}

@@ -5,6 +5,7 @@ import type { FormState } from "@/app/auth-actions";
 import { requireUser } from "@/lib/auth";
 import { createProject, deleteProject, inviteMember, renameProject } from "@/lib/projects";
 import { addComment } from "@/lib/comments";
+import { MAX_TITLE_LENGTH } from "@/lib/limits";
 import { isStatus } from "@/lib/statuses";
 import { createTask, moveTask } from "@/lib/tasks";
 
@@ -68,6 +69,7 @@ export async function createTaskAction(projectId: number, _prev: FormState, form
   const user = await requireUser();
   const title = String(formData.get("title") ?? "").trim();
   if (!title) return { error: "Title is required" };
+  if (title.length > MAX_TITLE_LENGTH) return { error: `Title must be at most ${MAX_TITLE_LENGTH} characters` };
   const description = String(formData.get("description") ?? "").trim();
   const assignee = String(formData.get("assigneeId") ?? "");
   const assigneeId = assignee ? Number(assignee) : null;

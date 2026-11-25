@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import type { FormState } from "@/app/auth-actions";
 import type { Member } from "@/lib/projects";
+import { MAX_TITLE_LENGTH } from "@/lib/limits";
 
 type Props = {
   action: (prev: FormState, formData: FormData) => Promise<FormState>;
@@ -16,7 +17,7 @@ export function TaskForm({ action, members }: Props) {
     <form action={formAction}>
       {state.error && <p role="alert">{state.error}</p>}
       <label>
-        Title <input name="title" required />
+        Title <input name="title" required maxLength={MAX_TITLE_LENGTH} />
       </label>
       <label>
         Description <textarea name="description" />

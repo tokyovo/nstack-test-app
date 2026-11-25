@@ -116,3 +116,9 @@
 - Did: `ConfirmButton` client component (native `window.confirm`, preventDefault on cancel) used for the project Delete button. AC14 tests in e2e/projects.spec.ts; the existing delete and tamper tests now accept the dialog.
 - Decision: native confirm() over a custom modal: no deps, accessible by default, smallest diff; easy to swap later.
 - Evidence: full chain exit 0, 42 passed.
+
+## 2026-11-25 T10 base stylesheet + title cap (builder)
+- Did: `app/globals.css` (imported in layout): CSS grid board, 3 columns (minmax(0,1fr)), 1 column under 640px; `overflow-wrap: anywhere` on body; card/column classes on the board. Title cap 200 in `lib/limits.ts` (shared by server action and the form's maxLength; lib/tasks.ts is server-only). AC15 tests in e2e/layout.spec.ts.
+- Decision: the 400-char title is inserted straight into the DB in the test (models a task saved before the cap); the cap makes it impossible via the UI. The long description goes through the UI.
+- Decision: columns stack to one column under 640px rather than scrolling sideways; spec only requires no horizontal scroll.
+- Decision: the 390px no-scroll test passed on the unstyled app (stacked lists); kept as a guard and shown red against a fixed-width-grid mutant (scrollWidth 624).
