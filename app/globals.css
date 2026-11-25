@@ -40,6 +40,10 @@ button {
 
 /* Each label sits above its field, and fields share the form's left edge. A fixed field width
    (capped by the container) keeps a <select> from growing to its longest option, e.g. a long email. */
+main form {
+  margin-bottom: 1rem;
+}
+
 label {
   display: block;
   max-width: 100%;
@@ -125,4 +129,8 @@ label > :is(input, select, textarea) {
 
 .project-row {
   margin-bottom: 0.5rem;
+}
+
+.project-row form {
+  margin: 0;
 }
