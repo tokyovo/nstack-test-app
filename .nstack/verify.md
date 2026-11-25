@@ -55,3 +55,6 @@ Run from the repo root. Needs Node 24, `npm ci`, and Chromium for Playwright 1.6
 
 ## Proof chain (slice 2 CI fix)
 - 2026-11-25: PR #2 CI failed 2 AC15 tests at 390px (page 402/405 wide); local runs passed. Cause (CI trace screenshot): the Assignee `<select>` is as wide as its longest option (a member's email); its `max-width: 100%` did not resolve inside a shrink-to-fit inline-block label, and CI fonts are wider. New test (member with a long email, 390px, board + task page) red locally first (750 > 390). Fix: `max-width: 100%` on `form label`. `rm -rf .next; lint && typecheck && build && test:e2e` exit 0, 56 passed, no `data/`.
+
+## Proof chain (T15)
+- `rm -rf .next; npm run lint && npm run typecheck && npm run build && npm run test:e2e` — 2026-11-25 T15: exit 0, 61 passed (e2e/keep-values.spec.ts AC20 + earlier); no `data/` dir. AC20 tests shown red (fields cleared or reset) before the code; assignee check shown red without the select key.

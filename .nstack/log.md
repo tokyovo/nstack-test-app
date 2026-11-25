@@ -167,3 +167,10 @@
 - Decision: session lifetime 30 days (common default), fixed from creation (no sliding renewal): simplest, easy to change.
 - Decision: `secure` cookie in production, opt-out via `INSECURE_COOKIES=1` for the http e2e/CI server, so tests cover the production build.
 - Decision: assignee filter is client-side like search (board already has all tasks), not in the URL (search isn't either; that's a separate backlog item).
+
+## 2026-11-25 T15 forms keep typed values after an error (builder)
+- Did: signup/login actions return the typed email with the error (`CredentialsState`); `CredentialsForm` uses it as the email default; the password is never returned. Task create/update actions return the raw typed fields (`TaskFormState.values`) on every error; `TaskForm` defaults to them, else to the task (edit) or empty (new). AC20 tests in e2e/keep-values.spec.ts.
+- Decision: values come back from the server in action state (uncontrolled inputs, defaultValue) rather than controlled inputs: smallest diff, same pattern as the existing error state.
+- Decision: the Assignee `<select>` is keyed on its default; without the key React's post-action form reset kept "Unassigned" (test red), text inputs did not need it.
+- Decision: the server-only error used for task forms is a spaces-only title (passes the browser `required` check); kept title is the raw typed value, not trimmed.
+- Evidence: tests red first (fields empty / original values), then green; full chain exit 0, 61 passed, no `data/`.
