@@ -43,3 +43,32 @@ test("AC12: search filters the board by title or description, case-insensitively
   await expect(cards(a.page, "To do")).toHaveCount(2);
   await expect(cards(a.page, "In progress")).toContainText(["Plan sprint"]);
 });
+
+function query(page: Page, key: string) {
+  return new URL(page.url()).searchParams.get(key);
+}
+
+test("AC30: the search lives in the URL without adding history, and a reload keeps it", async ({ browser }) => {
+  const a = await newUser(browser);
+  const url = await createProject(a.page, "Shareable search");
+  await a.page.goto(url);
+  await addTask(a.page, "Fix Login bug");
+  await addTask(a.page, "Write docs");
+  await a.page.goto(url);
+  const historyLength = await a.page.evaluate(() => history.length);
+
+  const search = a.page.getByLabel("Search tasks");
+  await search.fill("login ");
+  await expect.poll(() => query(a.page, "q")).toBe("login ");
+  expect(await a.page.evaluate(() => history.length)).toBe(historyLength);
+  await expect(allCards(a.page)).toHaveCount(1);
+
+  await a.page.reload();
+  await expect(a.page.getByLabel("Search tasks")).toHaveValue("login ");
+  await expect(allCards(a.page)).toHaveCount(1);
+  await expect(cards(a.page, "To do")).toContainText(["Fix Login bug"]);
+
+  await a.page.getByLabel("Search tasks").fill("  ");
+  await expect.poll(() => query(a.page, "q")).toBeNull();
+  await expect(allCards(a.page)).toHaveCount(2);
+});

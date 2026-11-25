@@ -94,3 +94,6 @@ How an agent runs and uses the app on its own, without touching anyone's data. E
 
 ## Proof chain (T20)
 - `rm -rf .next; npm run lint && npm run typecheck && npm run build && E2E_PORT=3120 npm run test:e2e` — 2026-11-25 T20: see log.md T20 for the run at the commit. AC29 tests (e2e/move.spec.ts) shown red (no alert) before the code; the clear-on-success check shown red with the clear removed. e2e/move.spec.ts alone: 7 passed.
+
+## Proof chain (T21)
+- `rm -rf .next; npm run lint && npm run typecheck && npm run build && E2E_PORT=3121 npm run test:e2e` — 2026-11-25 T21: exit 0, 80 passed (AC30 in e2e/search.spec.ts and e2e/assignee-filter.spec.ts + earlier); no `data/` dir. AC30 tests shown red (URL had no q/for) before the code; `for=bogus` test red with the member check removed (0 cards); both history checks red with `pushState` instead of `replaceState` (4 -> 5 and 6).
