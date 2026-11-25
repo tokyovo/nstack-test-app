@@ -72,6 +72,10 @@ Run from the repo root. Needs Node 24, `npm ci`, and Chromium for Playwright 1.6
 ## Proof chain (slice 3, controller)
 - `rm -rf .next; npm run lint && npm run typecheck && npm run build && npm run test:e2e` at 299a094 (T13-T16 merged) — 2026-11-25: exit 0, 66 passed; no `data/` dir.
 
+## Proof chain (T18)
+- `rm -rf .next; npm run lint && npm run typecheck && npm run build && E2E_PORT=3118 npm run test:e2e` — 2026-11-25 T18: exit 0, 71 passed (e2e/forms-layout.spec.ts AC24-26 + earlier, AC15 layout tests unchanged and green); no `data/` dir. AC24 and AC26 tests shown red (label text bottom 163 > field top 138; row centers 27px apart) before the code; AC25 shown red with the field width rule removed (title 160px < 280) and with selects left out of it (assignee 719px > 512, long-email member).
+- AC27 screens: isolated `next start -p 3418` + mktemp DB, `BASE_URL=http://localhost:3418 npm run screens -- $D/shots`: exit 0, 10 non-empty PNGs (kept in /tmp/tmp.gH28IFPH9w/shots/). Reviewed login/signup/projects/board/task at 1280 and 390: labels above fields, fields 512px (full width at 390), project rows on one line at 1280 (wrap under the link at 390), no overflow.
+
 ## Drive
 How an agent runs and uses the app on its own, without touching anyone's data. Each value below was run on 2026-11-25 (d298d27) unless marked "T17".
 - **Start:** `npm run build`, then `D=$(mktemp -d); DATABASE_PATH=$D/app.db INSECURE_COOKIES=1 npx next start -p 3400` (any free port; `INSECURE_COOKIES=1` because it is http). Ready when `curl -s -o /dev/null -w '%{http_code}' localhost:3400/login` prints 200; `/` then gives 307 to /login.

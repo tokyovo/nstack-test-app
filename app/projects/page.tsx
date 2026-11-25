@@ -20,7 +20,7 @@ export default async function ProjectsPage() {
       </form>
       <ul aria-label="Your projects">
         {projects.map((project) => (
-          <li key={project.id}>
+          <li key={project.id} className="project-row">
             <Link href={`/projects/${project.id}`}>{project.name}</Link>
             <form action={renameProjectAction}>
               <input type="hidden" name="projectId" value={project.id} />

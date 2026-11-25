@@ -83,3 +83,17 @@ Acceptance criteria:
 
 ## Tickets
 - [x] T17 Seed and screens commands. Proof: e2e AC22 in the full chain; AC23 run once against an isolated server (`ls <dir>` shows 10 non-empty PNGs). Needs: none Evidence: acd877b, full chain 67 passed; controller verify + review in log.md (2026-11-25 Slice 4 verify + review).
+
+# Plan: slice 5 "forms look finished" (from improve, 2026-11-25)
+
+## Spec
+Evidence: UX pass on `npm run screens` output (/tmp/t17-shots/, 1280 and 390 px). Every form puts its label inline before the field, so fields and buttons wrap raggedly; the edit-task Title field is ~160px and cuts off the title; the Assignee and "Show tasks for" selects stretch to the longest member email (~530px); each project row stacks a rename field and a Delete button under the link. Score 8 (v3 r1 c4), bar 8. Plain CSS in `app/globals.css`, markup changes only where CSS cannot do it; no new deps.
+
+Acceptance criteria (e2e, Playwright, at 1280x800 unless stated; seed data or a long-email member as in AC15):
+24. In the new-task and edit-task forms, the comment form, the invite form, the new-project form and login/signup, each label sits above its field (label's bottom <= field's top) and the fields of one form share a left edge.
+25. Text inputs, textareas and selects in the task forms are between 280px and 512px wide at 1280px, also with a member whose email is 60+ chars (selects no longer stretch to the longest email); the edit-task Title field shows a 40-char title in full (input scrollWidth <= clientWidth).
+26. On /projects at 1280px, a project's link, rename field, Rename and Delete buttons are on one row (their vertical centers within 4px of each other).
+27. Nothing regresses: the AC15 tests (no horizontal scroll at 390px, long text wraps) still pass, and the screens at 1280 and 390 px are reviewed by eye.
+
+## Tickets
+- [x] T18 Form and project-row layout. Proof: e2e AC24-26 (new e2e/forms-layout.spec.ts), full chain, `npm run screens` reviewed at both widths. Needs: none Evidence: 20cf901, full chain 71 passed; controller verify + review in log.md (2026-11-25 Slice 5 verify + review).
