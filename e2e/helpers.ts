@@ -39,3 +39,15 @@ export async function createProject(page: Page, name: string): Promise<string> {
   await expect(link).toBeVisible();
   return (await link.getAttribute("href"))!;
 }
+
+export type ColumnName = "To do" | "In progress" | "Done";
+
+/** A board column on a project page. */
+export function column(page: Page, name: ColumnName) {
+  return page.getByRole("region", { name, exact: true });
+}
+
+/** The task cards in a board column. */
+export function cards(page: Page, name: ColumnName) {
+  return column(page, name).getByRole("listitem");
+}

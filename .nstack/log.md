@@ -54,6 +54,15 @@
   - Board is a Server Component for now; T6 will need a client card (draggable, key handlers), so move STATUSES/COLUMN_NAMES out of server-only lib/tasks.ts then.
 - Lesson: tampering with a date input by changing its `type` does not stick (React resets `type` on re-render); prepend a hidden field instead.
 
+## 2026-11-25 T6 move tasks
+- Did: lib/statuses.ts (client-safe STATUSES, COLUMN_NAMES, isStatus, neighborStatus); moveTask in lib/tasks.ts (member + task-in-project); moveTaskAction; Board is now a client component (native DnD, ArrowLeft/ArrowRight on a focused card, useOptimistic). e2e/move.spec.ts covers AC9-10 plus two tamper tests; column/cards locators moved to e2e/helpers.ts.
+- Decisions:
+  - Optimistic move (useOptimistic) then server action + revalidatePath: instant UI, server stays the source of truth.
+  - Keyboard-moved card gets focus back in its new column, so repeated presses keep working.
+  - ArrowLeft in "To do" / ArrowRight in "Done" do nothing.
+  - Action takes taskId/status as `unknown` and validates (integer, known status): they arrive from the client.
+- Lesson: `.bind(null, projectId)` args travel in plain text in the action request body (`[projectId, taskId, status]`); a string replace on the body hit projectId first, so the first tamper test passed with guards removed. Parse the JSON args and wait for the response (route.fetch + fulfill).
+
 ## Needs human
 - 2026-11-25 Run `gh auth refresh -h github.com -s workflow` (adds `workflow` scope to the gh token). Then: `git push -u origin nstack/ci`, rebase `nstack/task-board` onto it (or merge both), open the PR, and nstack can wait for CI and merge. Changing credentials is a hard stop for nstack.
 

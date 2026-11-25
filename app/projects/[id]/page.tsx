@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { getProject, listMembers } from "@/lib/projects";
 import { listTasks } from "@/lib/tasks";
-import { createTaskAction, inviteMemberAction } from "../actions";
+import { createTaskAction, inviteMemberAction, moveTaskAction } from "../actions";
 import { Board } from "./board";
 import { InviteForm } from "./invite-form";
 import { TaskForm } from "./task-form";
@@ -20,7 +20,7 @@ export default async function ProjectPage({ params }: PageProps<"/projects/[id]"
     <main>
       <h2>{project.name}</h2>
       <TaskForm action={createTaskAction.bind(null, project.id)} members={members} />
-      <Board tasks={tasks} />
+      <Board tasks={tasks} move={moveTaskAction.bind(null, project.id)} />
       <section>
         <h3>Members</h3>
         <ul aria-label="Members">

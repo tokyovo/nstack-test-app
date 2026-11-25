@@ -1,14 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import Database from "better-sqlite3";
-import { createProject, newUser } from "./helpers";
-
-function column(page: Page, name: "To do" | "In progress" | "Done") {
-  return page.getByRole("region", { name, exact: true });
-}
-
-function cards(page: Page, name: "To do" | "In progress" | "Done") {
-  return column(page, name).getByRole("listitem");
-}
+import { cards, column, createProject, newUser } from "./helpers";
 
 function taskError(page: Page) {
   return page.locator("form").filter({ has: page.getByRole("button", { name: "Add task" }) }).getByRole("alert");

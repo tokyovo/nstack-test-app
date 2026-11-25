@@ -4,7 +4,8 @@ import { revalidatePath } from "next/cache";
 import type { FormState } from "@/app/auth-actions";
 import { requireUser } from "@/lib/auth";
 import { createProject, deleteProject, inviteMember, renameProject } from "@/lib/projects";
-import { createTask } from "@/lib/tasks";
+import { isStatus } from "@/lib/statuses";
+import { createTask, moveTask } from "@/lib/tasks";
 
 function readName(formData: FormData): string {
   return String(formData.get("name") ?? "").trim();
@@ -76,4 +77,11 @@ export async function createTaskAction(projectId: number, _prev: FormState, form
   if (result !== "created") return { error: TASK_ERRORS[result] };
   revalidatePath(`/projects/${projectId}`);
   return {};
+}
+
+/** Moves a task to another column; called from the board with untrusted arguments. */
+export async function moveTaskAction(projectId: number, taskId: unknown, status: unknown): Promise<void> {
+  const user = await requireUser();
+  if (!Number.isInteger(taskId) || !isStatus(status)) return;
+  if (moveTask(user.id, projectId, taskId as number, status)) revalidatePath(`/projects/${projectId}`);
 }

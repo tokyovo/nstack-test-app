@@ -1,9 +1,7 @@
 import "server-only";
 import { getDb } from "@/lib/db";
 import { getProject } from "@/lib/projects";
-
-export const STATUSES = ["todo", "in_progress", "done"] as const;
-export type Status = (typeof STATUSES)[number];
+import type { Status } from "@/lib/statuses";
 
 export type Task = {
   id: number;
@@ -48,4 +46,13 @@ export function createTask(userId: number, projectId: number, task: NewTask): Cr
     task.dueDate,
   );
   return "created";
+}
+
+/** Sets a task's status if it is in the project and the user is a member; false otherwise. */
+export function moveTask(userId: number, projectId: number, taskId: number, status: Status): boolean {
+  if (!getProject(userId, projectId)) return false;
+  const result = getDb()
+    .prepare("UPDATE tasks SET status = ? WHERE id = ? AND project_id = ?")
+    .run(status, taskId, projectId);
+  return result.changes > 0;
 }
