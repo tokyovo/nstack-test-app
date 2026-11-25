@@ -48,3 +48,6 @@ Run from the repo root. Needs Node 24, `npm ci`, and Chromium for Playwright 1.6
 
 ## Proof chain (T11)
 - `rm -rf .next; npm run lint && npm run typecheck && npm run build && npm run test:e2e` — 2026-11-25 T11: exit 0, 47 passed (e2e/overdue.spec.ts AC16 + earlier); no `data/` dir. AC16 test shown red (no "Overdue") before the code; shown red with the Done exclusion removed from isOverdue.
+
+## Proof chain (T12)
+- `rm -rf .next; npm run lint && npm run typecheck && npm run build && npm run test:e2e` — 2026-11-25 T12: exit 0, 55 passed (e2e/edit-task.spec.ts AC17 + earlier); no `data/` dir. Edit and delete tests shown red (no form/button) before the code; each tamper test shown red with its own guard removed (getProject check, task-in-project condition) in updateTask and deleteTask.

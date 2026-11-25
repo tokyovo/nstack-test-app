@@ -25,4 +25,4 @@ Scored 2026-11-25 (value + risk + cost, cost 5 = cheapest). Bar for a ticket: 9.
 - 3 (v1 r1 c1... cosmetic, cheap but no user value) favicon.ico 404 in console.
 - Rejected: login timing leaks whether an email exists (signup/invite reveal it by design, AC2/AC7).
 - Needs human (changes the goal's fixed three columns): custom columns / swimlanes, research.md.
-- (T12) Task forms reset to their defaults after a failed submit (React form-action reset), so a validation error loses the user's edits on both the new-task and edit-task forms. Fix: return the submitted values in FormState or use controlled inputs.
+- 5 (v2 r1 c2) (T12) Task forms reset to their defaults after a failed submit (React form-action reset), so a validation error loses the user's edits on both the new-task and edit-task forms. Fix: return the submitted values in FormState or use controlled inputs.
