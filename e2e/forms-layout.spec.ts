@@ -104,3 +104,21 @@ test("AC25: task form fields are 280-512px wide with a 60+ char member email; th
   const { scrollWidth, clientWidth } = await titleInput.evaluate((input) => ({ scrollWidth: input.scrollWidth, clientWidth: input.clientWidth }));
   expect(scrollWidth).toBeLessThanOrEqual(clientWidth);
 });
+
+test("AC26: on /projects a project's link, rename field, Rename and Delete sit on one row", async ({ browser }) => {
+  const a = await newUser(browser);
+  await a.page.setViewportSize(DESKTOP);
+  await createProject(a.page, "One row");
+  const row = a.page.getByRole("list", { name: "Your projects" }).getByRole("listitem").filter({ hasText: "One row" });
+  const parts = [
+    row.getByRole("link", { name: "One row", exact: true }),
+    row.getByLabel("Rename One row"),
+    row.getByRole("button", { name: "Rename", exact: true }),
+    row.getByRole("button", { name: "Delete", exact: true }),
+  ];
+  const centers = await Promise.all(parts.map(async (part) => {
+    const box = (await part.boundingBox())!;
+    return box.y + box.height / 2;
+  }));
+  for (const center of centers) expect(Math.abs(center - centers[0])).toBeLessThanOrEqual(4);
+});

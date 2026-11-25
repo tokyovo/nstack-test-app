@@ -113,3 +113,16 @@ label > :is(input, select, textarea) {
   color: #b91c1c;
   font-weight: 600;
 }
+
+/* A project's link, rename field and buttons share one row, wrapping on narrow screens. */
+.project-row,
+.project-row form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.project-row {
+  margin-bottom: 0.5rem;
+}
