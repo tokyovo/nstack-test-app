@@ -52,6 +52,13 @@ test("AC20: the new-task form keeps title, description, assignee and due date af
   await submitBlankTitle(a.page, "Add task", a.email);
   await expectKept(a.page, "Add task", a.email);
   await expect(cards(a.page, "To do")).toHaveCount(0);
+
+  // The same invalid input again: still kept.
+  const form = formWith(a.page, "Add task");
+  const answered = a.page.waitForResponse((response) => !!response.request().headers()["next-action"]);
+  await form.getByRole("button", { name: "Add task" }).click();
+  await (await answered).finished();
+  await expectKept(a.page, "Add task", a.email);
 });
 
 test("AC20: the edit-task form keeps the typed fields after an error", async ({ browser }) => {
