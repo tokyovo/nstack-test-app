@@ -90,3 +90,29 @@ test("AC3: an unknown email shows 'Invalid email or password'", async ({ page })
   await logIn(page, newEmail(), PASSWORD);
   await expect(page.locator("form").getByRole("alert")).toHaveText("Invalid email or password");
 });
+
+test("AC4: the stored password is a salted hash, not the plain text", async ({ browser }) => {
+  const a = newEmail();
+  const b = newEmail();
+  for (const email of [a, b]) {
+    const page = await (await browser.newContext()).newPage();
+    await signUp(page, email);
+    await expect(page).toHaveURL("/projects");
+  }
+
+  const db = new Database(process.env.E2E_DATABASE_PATH!, { readonly: true });
+  const rows = db
+    .prepare("SELECT email, password_hash, password_salt FROM users WHERE email IN (?, ?)")
+    .all(a, b) as { email: string; password_hash: string; password_salt: string }[];
+  db.close();
+
+  expect(rows).toHaveLength(2);
+  for (const row of rows) {
+    expect(row.password_hash).not.toBe(PASSWORD);
+    expect(row.password_hash).not.toContain(PASSWORD);
+    expect(row.password_hash).toMatch(/^[0-9a-f]{128}$/); // 64-byte scrypt key, hex
+  }
+  // Same password, different per-user salt -> different hashes.
+  expect(rows[0].password_salt).not.toBe(rows[1].password_salt);
+  expect(rows[0].password_hash).not.toBe(rows[1].password_hash);
+});

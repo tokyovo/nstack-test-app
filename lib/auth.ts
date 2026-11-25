@@ -10,8 +10,9 @@ export type User = { id: number; email: string };
 
 /** Returns the logged-in user from the session cookie, or null. */
 export async function getCurrentUser(): Promise<User | null> {
-  const db = getDb(); // opened even without a cookie so the schema exists from the first request
+  // cookies() first: it opts the page out of build-time prerendering, so the build never opens the DB.
   const token = (await cookies()).get(SESSION_COOKIE)?.value;
+  const db = getDb(); // opened even without a cookie so the schema exists from the first request
   if (!token) return null;
   const row = db
     .prepare(
