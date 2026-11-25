@@ -341,7 +341,7 @@
 - [x] 7 code health: nothing slowing the work
 - [x] decide: only CSV/JSON export (7) meets bar 7. Planned slice 7 (T23-T24, AC32-35) on nstack/export.
 - [x] plan check: fresh reader (Explore) asked 15 questions; answered in plan.md "Fresh-reader answers"
-- [ ] T23 build + verify
+- [x] T23 build + verify: builder 4e7825c (CSV route, lib/export.ts, Export CSV link; JSON link deferred to T24 so the board never links a 400). Controller at 4e7825c: lint, typecheck, build pass; `check:e2e-temp -- e2e/export.spec.ts` 2 passed, 0 files left; quote-doubling mutant -> 1 failed, restored, tree clean. Main CI on 85d592e: run 45617827969 success, 80 passed.
 - [ ] T24 build + verify
 ## 2026-11-25 T23 CSV export route and board link (builder)
 - Did: new GET route `app/projects/[id]/export/route.ts`: getCurrentUser (else 307 to /login), integer id + getProject (else plain `Not found` 404), `format=csv` (else `Unknown format` 400), then `tasksToCsv(listTasks(...))` with Content-Type, attachment Content-Disposition and `Cache-Control: no-store`. New `lib/export.ts`: BOM, header, one row per task, formula guard (`'` before leading `=+-@`, tab, CR) then RFC 4180 quoting, CRLF after every row. Board page: `<p className="export-links">` with a plain `<a href=... download>Export CSV</a>` under the `<h2>`. New e2e/export.spec.ts (2 tests).

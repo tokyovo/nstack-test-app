@@ -158,7 +158,7 @@ Decision: filename uses the project id, not the name, so no escaping of user tex
 Decision: logged out redirects to /login like every page (requireUser), rather than 401.
 
 ## Tickets
-- [ ] T23 CSV export route and board links (AC32, AC33, AC35 for csv). Proof: new e2e/export.spec.ts (download event, read file; tasks with comma/quote/newline/leading `=`/non-ASCII; request checks), red first; full chain. Needs: none
+- [x] T23 CSV export route and board links (AC32, AC33, AC35 for csv). Proof: new e2e/export.spec.ts (download event, read file; tasks with comma/quote/newline/leading `=`/non-ASCII; request checks), red first; full chain. Needs: none
 - [ ] T24 JSON export (AC34, AC35 for json). Proof: e2e in e2e/export.spec.ts, red first; full chain. Needs: T23 (same route file)
 
 Fresh-reader answers (2026-11-25):
