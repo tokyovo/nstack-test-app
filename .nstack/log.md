@@ -128,3 +128,11 @@
 - Decision: server computes `today` and the client compares, so an optimistic move to Done clears the flag at once without a reload; the date still comes from the server's clock as the spec says.
 - Decision: test uses fixed far dates (2000-01-15, 2999-12-31) so it never depends on the run date or time zone; the due-today boundary (not overdue) is not e2e-tested, as it would flake at midnight.
 - Evidence: full chain exit 0, 47 passed; bite check (Done exclusion removed) -> red; restored.
+
+## 2026-11-25 T12 edit and delete tasks (builder)
+- Did: task page gets an "Edit task" section reusing `TaskForm` (now takes optional `task` defaults and `submitLabel`) bound to `updateTaskAction`, plus a "Delete task" `ConfirmButton` form bound to `deleteTaskAction` (redirects to the board). Create and edit share one `readTask` validator in actions.ts (title required, <= MAX_TITLE_LENGTH, integer assignee, valid date); `updateTask`/`deleteTask` in lib/tasks.ts check membership, task-in-project, and assignee membership. `Task` now carries `assigneeId`. AC17 tests in e2e/edit-task.spec.ts.
+- Decision: reused TaskForm for editing instead of a second form: same fields and limits, one place to change.
+- Decision: delete redirects to the project board on success; a refused delete does nothing (same as moveTaskAction).
+- Decision: extended `tamperBoundIds` to also rewrite a bare JSON body (`[projectId,taskId]`), which is what Next sends for a bound action with no form fields (the delete form).
+- Decision: e2e/layout.spec.ts long-description locator scoped to the `dl`; the edit textarea now also holds the text (strict-mode clash). Assertion unchanged.
+- Evidence: full chain exit 0 (see verify.md T12). Bite checks: getProject guard removed from updateTask+deleteTask -> 2 non-member tamper tests red; `project_id` condition removed from both -> 2 other-task tamper tests red; restored.

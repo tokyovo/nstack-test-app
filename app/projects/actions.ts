@@ -1,13 +1,14 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import type { FormState } from "@/app/auth-actions";
 import { requireUser } from "@/lib/auth";
 import { createProject, deleteProject, inviteMember, renameProject } from "@/lib/projects";
 import { addComment } from "@/lib/comments";
 import { MAX_TITLE_LENGTH } from "@/lib/limits";
 import { isStatus } from "@/lib/statuses";
-import { createTask, moveTask, updateTask, type NewTask } from "@/lib/tasks";
+import { createTask, deleteTask, moveTask, updateTask, type NewTask } from "@/lib/tasks";
 
 function readName(formData: FormData): string {
   return String(formData.get("name") ?? "").trim();
@@ -103,6 +104,14 @@ export async function updateTaskAction(
   revalidatePath(`/projects/${projectId}`);
   revalidatePath(`/projects/${projectId}/tasks/${taskId}`);
   return {};
+}
+
+/** Deletes a task, then goes back to its board; does nothing unless the user may delete it. */
+export async function deleteTaskAction(projectId: number, taskId: number): Promise<void> {
+  const user = await requireUser();
+  if (!deleteTask(user.id, projectId, taskId)) return;
+  revalidatePath(`/projects/${projectId}`);
+  redirect(`/projects/${projectId}`);
 }
 
 /** Moves a task to another column; called from the board with untrusted arguments. */

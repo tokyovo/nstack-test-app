@@ -5,7 +5,8 @@ import { listComments } from "@/lib/comments";
 import { getProject, listMembers } from "@/lib/projects";
 import { COLUMN_NAMES } from "@/lib/statuses";
 import { getTask } from "@/lib/tasks";
-import { addCommentAction, updateTaskAction } from "../../../actions";
+import { addCommentAction, deleteTaskAction, updateTaskAction } from "../../../actions";
+import { ConfirmButton } from "../../../confirm-button";
 import { TaskForm } from "../../task-form";
 import { CommentForm } from "./comment-form";
 
@@ -44,6 +45,11 @@ export default async function TaskPage({ params }: PageProps<"/projects/[id]/tas
           task={task}
           submitLabel="Save changes"
         />
+        <form action={deleteTaskAction.bind(null, project.id, task.id)}>
+          <ConfirmButton message={`Delete task "${task.title}"? This also deletes its comments.`}>
+            Delete task
+          </ConfirmButton>
+        </form>
       </section>
       <section>
         <h3>Comments</h3>

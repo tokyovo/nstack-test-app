@@ -82,3 +82,9 @@ export function updateTask(userId: number, projectId: number, taskId: number, ta
     .run(task.title, task.description, task.assigneeId, task.dueDate, taskId, projectId);
   return result.changes > 0 ? "updated" : "not-found";
 }
+
+/** Deletes the task (and, by cascade, its comments) if it is in the project and the user is a member. */
+export function deleteTask(userId: number, projectId: number, taskId: number): boolean {
+  if (!getProject(userId, projectId)) return false;
+  return getDb().prepare("DELETE FROM tasks WHERE id = ? AND project_id = ?").run(taskId, projectId).changes > 0;
+}

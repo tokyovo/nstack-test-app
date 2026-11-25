@@ -29,7 +29,9 @@ function editForm(page: Page) {
 
 function userId(email: string): number {
   const db = new Database(process.env.E2E_DATABASE_PATH!, { readonly: true });
-  const row = db.prepare("SELECT id FROM users WHERE email = ?").get(email) as { id: number };
+  const row = db.prepare("SELECT id FROM users WHERE email = ?").get(email) as {
+    id: number;
+  };
   db.close();
   return row.id;
 }
@@ -159,4 +161,44 @@ test("AC17: an edit request naming a project the user is not a member of changes
 
 test("AC17: an edit request naming another project's task id changes nothing", async ({ browser }) => {
   await tampered(browser, (a) => [null, a.taskId], editTitle); // keeps B's own project id
+});
+
+test("AC17: deleting a task asks first; dismissing keeps it, accepting removes it and its URL 404s", async ({
+  browser,
+}) => {
+  const a = await newUser(browser);
+  const url = await createProject(a.page, "Cleanup");
+  await addTask(a.page, url, "Doomed task");
+  const taskUrl = await openTask(a.page, "Doomed task");
+
+  let message = "";
+  a.page.once("dialog", (dialog) => {
+    message = dialog.message();
+    void dialog.dismiss();
+  });
+  await a.page.getByRole("button", { name: "Delete task" }).click();
+  expect(message).toContain("Doomed task");
+  await a.page.reload();
+  await expect(a.page.getByRole("heading", { name: "Doomed task", exact: true })).toBeVisible();
+
+  a.page.once("dialog", (dialog) => void dialog.accept());
+  await a.page.getByRole("button", { name: "Delete task" }).click();
+  await expect(a.page).toHaveURL(url);
+  await expect(a.page.getByRole("link", { name: "Doomed task" })).toHaveCount(0);
+  await a.page.reload();
+  await expect(cards(a.page, "To do")).toHaveCount(0);
+  expect((await a.page.goto(taskUrl))?.status()).toBe(404);
+});
+
+async function deleteTask(page: Page) {
+  page.once("dialog", (dialog) => void dialog.accept());
+  await page.getByRole("button", { name: "Delete task" }).click();
+}
+
+test("AC17: a delete request naming a project the user is not a member of deletes nothing", async ({ browser }) => {
+  await tampered(browser, (a) => [a.projectId, a.taskId], deleteTask);
+});
+
+test("AC17: a delete request naming another project's task id deletes nothing", async ({ browser }) => {
+  await tampered(browser, (a) => [null, a.taskId], deleteTask); // keeps B's own project id
 });

@@ -82,7 +82,7 @@ test("AC15: a 400-char unbroken title or description causes no horizontal scroll
     await expectNoHorizontalScroll(a.page);
 
     await a.page.goto(shortTaskHref!);
-    await expect(a.page.getByText(longDescription)).toBeVisible();
+    await expect(a.page.locator("dl").getByText(longDescription)).toBeVisible();
     await expectNoHorizontalScroll(a.page);
   }
 });
