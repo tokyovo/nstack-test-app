@@ -33,3 +33,20 @@ Out of scope: see goal.md.
 - [x] T8 Search tasks in a project. Proof: e2e for AC 12. Needs: T5
 
 AC13 met: PR #1 merged to main as e2ecb58; CI on main green (run 45541011124, 41 passed).
+
+# Plan: slice 2 "usable board" (from improve, 2026-11-25)
+
+## Spec
+Evidence: UX pass + research (see backlog.md, research.md). Keep it small: plain CSS in `app/globals.css` (no CSS framework), no new deps.
+
+Acceptance criteria (each a Playwright test in `e2e/`):
+14. Clicking a project's Delete asks for confirmation; dismissing it keeps the project; accepting deletes it.
+15. On the board at 1280x800, the three columns sit side by side (same top, different left); at 390x844 the page has no horizontal scroll (document scrollWidth <= viewport width). A task with a 400-char unbroken title causes no horizontal scroll on the board or task page at either size. Title length is capped server-side at 200 chars (longer is rejected with an error).
+16. A task whose due date is before today (server's local date) and that is not in Done is marked overdue on its card (visible text "Overdue" and a CSS class); a future-dated task and a past-dated task in Done are not.
+17. A member can edit a task's title, description, assignee and due date from the task page; changes persist after reload and show on the board. A member can delete a task (with confirmation); it disappears from the board and its URL then 404s. Non-members cannot edit/delete (server-side check, tamper test).
+
+## Tickets
+- [ ] T9 Confirm before project delete. Proof: e2e AC14. Needs: none
+- [ ] T10 Base stylesheet: side-by-side columns, responsive at 390px, word-wrap long text, 200-char title cap. Proof: e2e AC15. Needs: none
+- [ ] T11 Overdue flag on cards. Proof: e2e AC16. Needs: T10 (same board files)
+- [ ] T12 Edit and delete tasks. Proof: e2e AC17. Needs: T11

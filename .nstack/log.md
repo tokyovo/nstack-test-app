@@ -107,3 +107,7 @@
 - Decision: skipped the `research` step (outside demand). goal.md is a fixed v1 spec; new features past it should come from the user's direction, not from web research.
 - Decision: left `origin/nstack/ci` in place (deleting a remote branch is the user's call; listed in needs-human.md).
 - Not committed upstream: this state update is a local commit on main; not pushed, to keep main changing only through PRs.
+
+## 2026-11-25 Continue: orient + improve rerun (controller)
+- Orient: main ahead of origin/main by 1 (local state commit 780fe09), origin/main e2ecb58; lint + typecheck pass; CI on main green (run 45541011124). needs-human: only open item is optional `origin/nstack/ci` cleanup; branch still exists (git ls-remote), left for the user.
+- Correction: the previous run skipped `research` with "goal is a fixed spec"; improve forbids that reason. Rerunning improve with research (step 4) and a UX pass (step 6).
