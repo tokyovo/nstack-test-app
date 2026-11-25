@@ -31,3 +31,5 @@ Out of scope: see goal.md.
 - [x] T6 Move tasks by drag-and-drop and by keyboard. Proof: e2e for AC 9-10. Needs: T5
 - [x] T7 Comments on a task. Proof: e2e for AC 11. Needs: T5
 - [x] T8 Search tasks in a project. Proof: e2e for AC 12. Needs: T5
+
+AC13 met: PR #1 merged to main as e2ecb58; CI on main green (run 45541011124, 41 passed).

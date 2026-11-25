@@ -29,7 +29,7 @@ Run from the repo root. Needs Node 24, `npm ci`, and Chromium for Playwright 1.6
 - `rm -rf .next; npm run lint && npm run typecheck && npm run build && npm run test:e2e` — 2026-11-25 T6: exit 0, 31 passed (e2e/move.spec.ts AC9-10 + earlier); no `data/` dir. Drag/key tests shown red (cards did not move) before the code; each tamper test shown red with its own guard removed (membership check, task-in-project check).
 
 ## CI
-- `.github/workflows/ci.yml`: on push and pull_request, ubuntu-latest, Node 24: npm ci, playwright install --with-deps chromium, lint, typecheck, build, test:e2e. Not yet run (branch not pushed).
+- `.github/workflows/ci.yml`: on push and pull_request, ubuntu-latest, Node 24: npm ci, playwright install --with-deps chromium, lint, typecheck, build, test:e2e. 2026-11-25: green on PR #1 (runs 45536064790, 45536071126) and on main at e2ecb58 (run 45541011124, 41 passed).
 
 ## Proof chain (T6 review fixes)
 - `rm -rf .next; npm run lint && npm run typecheck && npm run build && npm run test:e2e` — 2026-11-25: exit 0, 34 passed; no `data/` dir. Focus test shown red before the fix; task-create and invite tamper tests each shown red with their own getProject guard removed.
