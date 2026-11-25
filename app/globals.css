@@ -38,8 +38,11 @@ button {
   max-width: 100%;
 }
 
+/* Capping the label lets max-width: 100% on its control resolve, so a <select> sized by a long
+   option (e.g. a member's email) cannot widen the page. */
 form label {
   display: inline-block;
+  max-width: 100%;
   margin: 0 0.5rem 0.5rem 0;
 }
 

@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import Database from "better-sqlite3";
-import { cards, column, createProject, newUser, type ColumnName } from "./helpers";
+import { cards, column, createProject, newEmail, newUser, signUp, type ColumnName } from "./helpers";
 
 const DESKTOP = { width: 1280, height: 800 };
 const PHONE = { width: 390, height: 844 };
@@ -58,6 +58,22 @@ test("AC15: at 390x844 the projects page and board have no horizontal scroll", a
   await addTask(a.page, "A card");
   await expect(cards(a.page, "To do")).toHaveCount(1);
   await expectNoHorizontalScroll(a.page);
+});
+
+test("AC15: at 390x844 a member with a long email (assignee option) causes no horizontal scroll", async ({ browser }) => {
+  // The assignee <select> is as wide as its longest option; a long email must not widen the page.
+  const page = await (await browser.newContext({ viewport: PHONE })).newPage();
+  await signUp(page, `long-address-${"x".repeat(40)}-${newEmail()}`);
+  await expect(page).toHaveURL("/projects");
+  const url = await createProject(page, "Long email");
+  await page.goto(url);
+  await expect(page.getByLabel("Assignee")).toBeVisible();
+  await expectNoHorizontalScroll(page);
+  await addTask(page, "A card");
+  await expect(cards(page, "To do")).toHaveCount(1);
+  await page.goto(`${url}/tasks/${(await page.getByRole("link", { name: "A card" }).getAttribute("href"))!.split("/").pop()}`);
+  await expect(page.getByLabel("Assignee")).toBeVisible();
+  await expectNoHorizontalScroll(page);
 });
 
 test("AC15: a 400-char unbroken title or description causes no horizontal scroll", async ({ browser }) => {
