@@ -196,3 +196,32 @@
 - Backlog: removed shipped items (T9-T16). Top three left: 7 (no nav back to Projects), 7 (failed move reverts silently), 7 (search not in URL). All below bar 8. research.md is from today; no new UX pass, as slice 3 only added one board select, covered by e2e.
 - needs-human: `origin/nstack/ci` still exists (10384bb); optional, left for the user.
 - Stopping: goal met, verify green on main, nothing at or above the bar.
+
+## 2026-11-25 Continue: Drive section; slice 4 planned (controller)
+- Read: go/SKILL.md, go/references/state.md, improve/SKILL.md, plan/SKILL.md, build/SKILL.md.
+- Orient: main == origin/main at d298d27; lint + typecheck pass; CI on main green (run 45560003645). needs-human: optional `origin/nstack/ci` cleanup re-checked (`git ls-remote` still shows 10384bb); left for the user.
+- verify.md had no Drive section (go step 0 item 4). Ran start/sign-in/screenshot/cleanup once: build, `next start -p 3400` on a mktemp DB, `/` -> 307 /login, signup via playwright-cli landed on /projects, screenshot saved, console only the known favicon 404; stopped by port, temp dir removed. Wrote Drive with those values. No seed or screens command exists, so slice 4 (T17) adds them before any further improve pass.
+- Decision: seed goes through the UI with Playwright's browser API (no direct DB writes): reuses the app's validation and the server-only db module stays server-only; no new deps.
+
+## 2026-11-25 T17 seed and screens commands (builder)
+- Did: scripts/seed-app.mts `seed(browser, baseURL)` fills the app through its UI (demo + long-email member, "Website relaunch" with overdue / 200-char / assigned / commented tasks across 3 columns, empty "Team offsite"); scripts/seed.mts (`npm run seed`) prints sign-in and board URL; scripts/screens.mts (`npm run screens -- <dir>`) seeds then saves 10 full-page PNGs, exit 1 on console/page errors except favicon.ico. e2e/seed.spec.ts (AC22). Full chain 67 passed; AC23 run on port 3417: 10 non-empty PNGs, exit 0.
+- Decision: every seed step checks before acting (log in else sign up; project/member/task/comment only if missing; move right until in target column), so re-runs and interrupted runs converge (principle 7); the e2e test runs seed twice and checks nothing doubles.
+- Decision: scripts are `.mts` (Node type stripping without the typeless-package.json warning; `"type": "module"` would change how Playwright loads e2e/*.ts). tsconfig: `allowImportingTsExtensions`, include `**/*.mts`.
+- Decision: the overdue task is due 7 days before today (realistic dates, still overdue in any time zone); the comment task is reached via the href on the board.
+- Note: headless Chromium did not log the favicon 404 during screens; the error check was shown to bite with a mutant that logs console.error on each page (exit 1).
+
+## 2026-11-25 Slice 4 verify + review (controller)
+- Read: verify/SKILL.md, review/SKILL.md, ship/SKILL.md.
+
+| Claim | Command | Result |
+|---|---|---|
+| clean tree at acd877b | git status; git log -1 | clean, acd877b |
+| all checks | `rm -rf .next; lint && typecheck && build && E2E_PORT=3121 test:e2e` | exit 0, 67 passed, 0 skipped, no warnings, no `data/` |
+| AC22 seed test bites | overdue task dueInDays -7 -> +7, ran e2e/seed.spec.ts | 1 failed (Overdue count 0), restored, 1 passed |
+| AC22/23 real run | isolated `next start -p 3422` + mktemp DB; `npm run seed`, `npm run screens -- $D/shots` | seed exit 0 (prints sign-in + board URL); screens exit 0, 10 non-empty PNGs |
+| AC23 console check bites | injected `console.error("bite")` in app/layout.tsx, rebuilt, ran screens | exit 1, lists each page with "bite"; restored + rebuilt, tree clean |
+| screens | /tmp/t17-shots/board-1280.png, board-390.png, task-390.png (all 10 kept there) | columns side by side / stacked, overdue card marked, long title and long email wrap, no overflow |
+| nothing weaker | git diff d298d27...HEAD | no deleted/skipped tests, no any/ts-ignore/eslint-disable |
+
+- Review: one reviewer -> pass, no findings. Its runs: e2e 67 passed; seed twice idempotent; screens 10 PNGs; mutant (comment-exists check removed) -> seed test red.
+- Not verified: the favicon-404 filter in screens (headless Chromium never requested favicon in these runs). It does no harm if never hit.

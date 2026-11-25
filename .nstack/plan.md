@@ -71,3 +71,15 @@ Acceptance criteria:
 - [x] T16 Assignee filter on the board. Proof: e2e AC21. Needs: T15 (both touch board files; run in sequence) Evidence: 4016f7c, full chain 66 passed (verify.md).
 
 Slice 3 shipped: PR #5 merged to main as 6d9be09; CI on main green (run 45559280150, 66 passed).
+
+# Plan: slice 4 "drive harness" (from go step 0, 2026-11-25)
+
+## Spec
+verify.md had no Drive section and no one command takes screenshots of the main screens, so agents (improve's UX pass, reviewers) drive the app by hand each time. Add a seed and a screens command. No new deps (`@playwright/test` already ships the browser API); scripts run with Node 24's built-in TypeScript type stripping.
+
+Acceptance criteria:
+22. `BASE_URL=<url> npm run seed` fills a running app, through its UI, with realistic data: user demo@example.com / correct-horse-1 (created, or logged in if it exists), a second member with a long email, a project "Website relaunch" with tasks in all three columns (one overdue, one with a 200-char title, one assigned, one with a comment), and an empty project. It prints the sign-in and the board URL. e2e/seed.spec.ts runs the seed function against the e2e server and checks the board shows tasks in all three columns, an "Overdue" card and a comment on a task; runs in CI.
+23. `BASE_URL=<url> npm run screens -- <dir>` seeds (as in 22), then saves PNG screenshots of /login, /signup, /projects, the board and a task page at 1280x800 and 390x844 (10 files, full page) into <dir>, and exits non-zero if any page logs a console error other than the favicon 404. Proof: run against an isolated server; 10 files exist and are non-empty.
+
+## Tickets
+- [x] T17 Seed and screens commands. Proof: e2e AC22 in the full chain; AC23 run once against an isolated server (`ls <dir>` shows 10 non-empty PNGs). Needs: none Evidence: acd877b, full chain 67 passed; controller verify + review in log.md (2026-11-25 Slice 4 verify + review).
