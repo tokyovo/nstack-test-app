@@ -19,7 +19,7 @@ import {
 import { ConfirmButton } from "../../../confirm-button";
 import { TaskForm } from "../../task-form";
 import { ChecklistForm } from "./checklist-form";
-import { ChecklistItem } from "./checklist-item";
+import { Checklist } from "./checklist";
 import { CommentForm } from "./comment-form";
 import { TaskLabelsForm } from "./task-labels-form";
 
@@ -81,16 +81,13 @@ export default async function TaskPage({ params }: PageProps<"/projects/[id]/tas
       <section aria-labelledby="checklist-heading">
         <h3 id="checklist-heading">Checklist</h3>
         {checklist.length === 0 && <p>No items yet</p>}
-        <ul aria-label="Checklist" className="checklist">
-          {checklist.map((item) => (
-            <ChecklistItem
-              key={item.id}
-              item={item}
-              toggle={toggleChecklistItemAction.bind(null, project.id, task.id, item.id)}
-              remove={deleteChecklistItemAction.bind(null, project.id, task.id, item.id)}
-            />
-          ))}
-        </ul>
+        <Checklist
+          rows={checklist.map((item) => ({
+            item,
+            toggle: toggleChecklistItemAction.bind(null, project.id, task.id, item.id),
+            remove: deleteChecklistItemAction.bind(null, project.id, task.id, item.id),
+          }))}
+        />
         <ChecklistForm action={addChecklistItemAction.bind(null, project.id, task.id)} />
       </section>
       <section>

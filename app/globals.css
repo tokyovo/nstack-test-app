@@ -74,12 +74,18 @@ label > :is(input, select, textarea) {
   margin: 0;
 }
 
-.board-error {
+.board-error,
+.board-empty {
   grid-column: 1 / -1;
+  margin: 0;
 }
 
-.board-error {
+.column-empty {
   margin: 0;
+  color: #6b7280;
+}
+
+main [role="alert"] {
   color: #b91c1c;
   font-weight: 600;
 }
@@ -205,10 +211,6 @@ label > :is(input, select, textarea) {
 .checklist-item > .checkbox-row {
   flex: 1;
   min-width: 0;
-}
-
-.checklist-item form {
-  margin: 0;
 }
 
 .checklist-item span {

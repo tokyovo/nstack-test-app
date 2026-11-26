@@ -32,6 +32,34 @@ test("AC5: a user renames a project and the list shows the new name", async ({ b
   await expect(projectList(page).getByRole("link", { name: "New name" })).toBeVisible();
 });
 
+test("AC50: a whitespace-only name is rejected in the browser by the new-project and rename inputs", async ({
+  browser,
+}) => {
+  const { page } = await newUser(browser);
+  await createProject(page, "Kept name");
+
+  const create = page.getByLabel("New project name");
+  await create.fill("   ");
+  await page.getByRole("button", { name: "Create project" }).click();
+  // Not submitted: a submitted server-action form is reset, so the spaces would be gone.
+  await expect(create).toHaveValue("   ");
+  expect(await create.evaluate((input: HTMLInputElement) => input.validity.patternMismatch)).toBe(true);
+  await expect(page.locator("input[name=name]:invalid")).toHaveCount(1);
+  await expect(create).toHaveAttribute("title", "Name cannot be blank");
+
+  const item = projectList(page).getByRole("listitem").filter({ hasText: "Kept name" });
+  const rename = item.getByLabel("Rename Kept name");
+  await rename.fill("   ");
+  await item.getByRole("button", { name: "Rename" }).click();
+  await expect(rename).toHaveValue("   ");
+  expect(await rename.evaluate((input: HTMLInputElement) => input.validity.patternMismatch)).toBe(true);
+  await expect(rename).toHaveAttribute("title", "Name cannot be blank");
+
+  await page.reload();
+  await expect(projectList(page).getByRole("listitem")).toHaveCount(1);
+  await expect(projectList(page).getByRole("link", { name: "Kept name", exact: true })).toBeVisible();
+});
+
 test("AC14: dismissing the delete confirmation keeps the project", async ({ browser }) => {
   const { page } = await newUser(browser);
   const url = await createProject(page, "Not yet");

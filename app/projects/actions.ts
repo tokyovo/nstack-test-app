@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { FormState } from "@/app/auth-actions";
 import { requireUser } from "@/lib/auth";
-import { createProject, deleteProject, inviteMember, renameProject } from "@/lib/projects";
+import { createProject, deleteProject, getProject, inviteMember, renameProject } from "@/lib/projects";
 import { addChecklistItem, deleteChecklistItem, setChecklistItemDone } from "@/lib/checklist";
 import { addComment } from "@/lib/comments";
 import { createLabel, setTaskLabels } from "@/lib/labels";
@@ -125,11 +125,14 @@ export async function updateTaskAction(
   return {};
 }
 
-/** Deletes a task, then goes back to its board; does nothing unless the user may delete it. */
+/**
+ * Deletes a task, then goes back to its board. A member whose task is already gone (deleted in another
+ * tab) also goes back to the board; anyone else stays put and nothing changes.
+ */
 export async function deleteTaskAction(projectId: number, taskId: number): Promise<void> {
   const user = await requireUser();
-  if (!deleteTask(user.id, projectId, taskId)) return;
-  revalidatePath(`/projects/${projectId}`);
+  if (deleteTask(user.id, projectId, taskId)) revalidatePath(`/projects/${projectId}`);
+  else if (!getProject(user.id, projectId)) return;
   redirect(`/projects/${projectId}`);
 }
 
@@ -238,7 +241,10 @@ export async function toggleChecklistItemAction(
   return true;
 }
 
-export async function deleteChecklistItemAction(projectId: number, taskId: number, itemId: number): Promise<void> {
+/** Deletes a checklist item; called from the task page. True when it was deleted. */
+export async function deleteChecklistItemAction(projectId: number, taskId: number, itemId: number): Promise<boolean> {
   const user = await requireUser();
-  if (deleteChecklistItem(user.id, projectId, taskId, itemId)) revalidateChecklist(projectId, taskId);
+  if (!deleteChecklistItem(user.id, projectId, taskId, itemId)) return false;
+  revalidateChecklist(projectId, taskId);
+  return true;
 }

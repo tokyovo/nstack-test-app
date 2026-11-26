@@ -126,7 +126,10 @@ test("AC17: edits get the same validation as new tasks", async ({ browser }) => 
   await expect(a.page.locator("dl")).toContainText("Unassigned");
 });
 
-/** B acts on B's own task page while the bound [projectId, taskId] are rewritten to `ids` (null keeps one). */
+/**
+ * B acts on B's own task page while the bound [projectId, taskId] are rewritten to `ids` (null keeps one).
+ * Returns B's page and B's task path.
+ */
 async function tampered(
   browser: Browser,
   ids: (a: { projectId: number; taskId: number }) => (number | null)[],
@@ -139,7 +142,7 @@ async function tampered(
   const taskUrlA = await openTask(a.page, "A's task");
   const urlB = await createProject(b.page, "Mine");
   await addTask(b.page, urlB, "B's task");
-  await openTask(b.page, "B's task");
+  const taskUrlB = await openTask(b.page, "B's task");
 
   const [, , projectId, , taskId] = taskUrlA.split("/");
   const answered = await tamperBoundIds(b.page, ids({ projectId: Number(projectId), taskId: Number(taskId) }));
@@ -148,6 +151,7 @@ async function tampered(
 
   await a.page.reload();
   await expect(a.page.getByRole("heading", { name: "A's task", exact: true })).toBeVisible();
+  return { page: b.page, taskUrl: taskUrlB };
 }
 
 async function editTitle(page: Page) {
@@ -190,13 +194,32 @@ test("AC17: deleting a task asks first; dismissing keeps it, accepting removes i
   expect((await a.page.goto(taskUrl))?.status()).toBe(404);
 });
 
+test("AC48: deleting a task already deleted in another tab lands on the project board", async ({ browser }) => {
+  const a = await newUser(browser);
+  const url = await createProject(a.page, "Stale delete");
+  await addTask(a.page, url, "Gone task");
+  const taskUrl = await openTask(a.page, "Gone task");
+
+  const other = await a.page.context().newPage();
+  await other.goto(taskUrl);
+  await deleteTask(other);
+  await expect(other).toHaveURL(url);
+  await other.close();
+
+  await deleteTask(a.page);
+  await expect(a.page).toHaveURL(url);
+  await expect(a.page.getByRole("heading", { name: "Stale delete", exact: true })).toBeVisible();
+  await expect(cards(a.page, "To do")).toHaveCount(0);
+});
+
 async function deleteTask(page: Page) {
   page.once("dialog", (dialog) => void dialog.accept());
   await page.getByRole("button", { name: "Delete task" }).click();
 }
 
 test("AC17: a delete request naming a project the user is not a member of deletes nothing", async ({ browser }) => {
-  await tampered(browser, (a) => [a.projectId, a.taskId], deleteTask);
+  const b = await tampered(browser, (a) => [a.projectId, a.taskId], deleteTask);
+  await expect(b.page).toHaveURL(b.taskUrl); // AC48: a non-member is not sent to that project's board
 });
 
 test("AC17: a delete request naming another project's task id deletes nothing", async ({ browser }) => {

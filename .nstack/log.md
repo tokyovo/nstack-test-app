@@ -554,3 +554,91 @@
 - Small-fix exception used: one finding, 4 changed code lines, verify passed, test seen red before the fix -> no new review round.
 - Worktree removed; no servers listening.
 - [x] Done when: no important findings; verify passed after the last fix (110 passed at 74072ab); nit fixed.
+
+## 2026-11-26 ship slice board-fold
+- Read: ship/SKILL.md 47e5182 (same file as the slice 8 ship entry, this run)
+- [x] 1. Commit. T29, T30 + state on nstack/board-fold.
+- [x] 2. Sync. 0 new commits on origin/main.
+- [x] 3. Push. nstack/board-fold.
+- [x] 4. Open the PR. https://github.com/tokyovo/nstack-test-app/pull/14
+- [x] 5. Wait for CI. runs 45766836409, 45766858110 pass; 110 passed.
+- [x] 6. Merge. `merge: auto`: squash-merged as a63733e.
+- [x] 7. Confirm and clean up. main at a63733e: lint + typecheck pass; CI run 45768015387 (a63733e) success; remote branch deleted by --delete-branch; no worktrees.
+- [x] Done when: merged, CI green on main, fast checks pass.
+
+## 2026-11-26 improve
+- Read: improve/SKILL.md 762f257 (same file as the earlier improve entry, this run)
+- [x] 1. Gather evidence
+  - [x] 1.1. Broken things. CI on main green (45768015387, 110 passed).
+  - [x] 1.2. Known problems. No open issues; needs-human all resolved; backlog re-summed by script: 7 scores were wrong (e.g. "6 (v2 r2 c3)", "4 (v1 r2 c4)"); the 2026-11-25 "nothing at bar 7" stop rested on these miscounts.
+  - [x] 1.3. Gaps against the goal. None.
+  - [x] 1.4. Outside demand. research.md 2026-11-25 (<7 days); candidates in backlog.
+  - [x] 1.5. Risk. npm audit 0 (earlier this run); CSV guard gap (7) is the risk item.
+  - [x] 1.6. User experience. /tmp/t29-shots/ reviewed at T29; nothing new beyond backlog items.
+  - [x] 1.7. Code health. Nothing blocking.
+- [x] 2. Score. Re-summed; fixed items (board fold, export gap, filter margin) removed. At 7: silent checklist failure, silent board/project feedback, CSV guard after spaces.
+- [x] 3. Decide. Slice task-feedback (T31-T33, AC47-51), grouped with the 6 "task delete refused is silent".
+- Lesson: score sums were wrong in 7 of ~20 backlog lines, twice across runs. Structure: the backlog is now re-summed with a script before deciding (the python one-liner in this entry's step); added to backlog.md hand-off notes as an nstack tooling suggestion (a `scripts/` check belongs in nstack, not this app).
+- [x] Done when: sources checked, candidates scored, slice planned.
+
+## 2026-11-26 plan slice task-feedback
+- Read: plan/SKILL.md 59d57d8 (same file, this run)
+- [x] 1. Ground truth: checklist-item.tsx, project forms, lib/export.ts guard, deleteTaskAction.
+- [x] 2. Interrogate: questions on refusal UX, redirect vs message, blank names, guard scope; answered + Decision lines.
+  - [x] 2.1. listed in plan answers.
+  - [x] 2.2. from code (board moveTo pattern, tamper helpers).
+  - [x] 2.3. Decisions logged in plan.md.
+- [x] 3. Spec AC47-51.
+- [x] 4. Tickets T31-T33, sequential (2 CPUs).
+- [x] 5. Check the plan
+  - [x] 5.1. AC47,48->T31; AC49,50->T32; AC51->T33.
+  - [x] 5.2. Fresh Explore reader: 10 questions, answered under "Fresh-reader answers" (AC48 changed: no redirect for non-members).
+  - [x] 5.3. Slice in plan.md, branch nstack/task-feedback.
+- [x] Done when: met.
+
+## 2026-11-26 build T31
+- Read: build/SKILL.md 141fcec
+- Did: builder: new client `checklist.tsx` owns one alert + refresh on refusal (moveTo pattern, unstable_rethrow); checklist delete returns boolean, called from a button; deleteTaskAction redirects members to the board on refusal. 3 tests red first; mutant (success doesn't clear alert) red. Commit 67b913c.
+- Decision (builder): a tampered delete naming another project's task, by a member of their own board, now lands on their own board (A's task untouched; test still passes).
+- Controller proof at 67b913c: full chain (port 3200) exit 0, 113 passed, 0 warnings, 0 temp files; no e2e lines removed.
+- [x] 1. n/a. - [x] 2. n/a. - [x] 3. n/a.
+- [ ] Done when: (slice) T32-T33 pending.
+
+## 2026-11-26 build T32
+- Read: build/SKILL.md 141fcec
+- Did: builder: per-column `columnTasks` drives cards + "No tasks"; "No tasks match the search or filters" status when shown>0 && visible==0; NON_BLANK pattern on both project inputs. New e2e/empty-states.spec.ts + AC50 in projects.spec.ts, 4 red first. Commit f2e4d52.
+- Controller proof at f2e4d52: full chain (port 3201) exit 0, 117 passed, 0 warnings, 0 temp files; no e2e lines removed. Looked at /tmp/t32-shots/empty-board-390.png (the one the builder skipped): "No tasks" in each stacked column, no overflow.
+- [x] 1. n/a. - [x] 2. n/a. - [x] 3. n/a.
+- [ ] Done when: (slice) T33 pending.
+
+## 2026-11-26 build T33
+- Read: build/SKILL.md 141fcec
+- Did: builder: guard `/^[\t\r]|^\s*[=+\-@]/`, `'` before the original value; AC51 test stores 4 descriptions via writable DB, red first. Commits 0b46b87, 5977cf4.
+- Controller proof at 5977cf4 (exit code taken without a pipe; the builder's was after `| tail`): full chain (port 3202) exit 0, 118 passed, 0 warnings, 0 temp files; no e2e lines removed.
+- [x] 1. n/a. - [x] 2. n/a. - [x] 3. n/a.
+- [x] Done when: T31-T33 committed, proofs run by the controller.
+
+## 2026-11-26 verify slice task-feedback
+- Read: verify/SKILL.md 02888d9 (same file, this run)
+- [x] 1. Clean tree at 5977cf4 (+ state commits only).
+- [x] 2. Project checks: 118 passed, 0 skipped, 0 warnings, 0 temp files, no `data/`.
+- [x] 3. AC47 -> checklist.spec.ts (2); AC48 -> edit-task.spec.ts; AC49 -> empty-states.spec.ts; AC50 -> projects.spec.ts; AC51 -> export.spec.ts. All in the 118.
+- [x] 4. Bites: builders red-first for every new test + mutants (alert not cleared). Controller mutant: "no match" shown on an empty project -> empty-states 1 failed; restored, tree clean.
+- [x] 5. Real thing: e2e in a real browser (CI); builder T32 isolated server, no console errors.
+- [x] 6. Screens: /tmp/t32-shots/{empty-board,filtered-board}-{1280,390}.png (builder viewed three, controller viewed empty-board-390): placeholders and match message laid out, no overflow. Task-page checklist alert: covered by e2e text/role checks; red text styled like `.board-error` (globals.css).
+- [x] 7. Nothing weaker: no e2e line removed in the slice; no any/ts-ignore/eslint-disable.
+- [x] 8. No new warnings (0).
+- Not verified: (resolved below) the checklist alert's look; I had assumed it reused the board alert style.
+- [x] Done when: ticked.
+- Follow-up (controller): a temporary spec (copy of AC47 + screenshot, deleted afterwards) shot /tmp/s10-shots/checklist-alert-{1280,390}.png: the alert was plain black text, not red. The assumption was wrong. Builder fix 09bae42 (colour test red first). The builder noted all form alerts were plain -> AC52/T34 added: one `main [role="alert"]` rule, commit bb590c8, login + task-form colour tests red first.
+- Controller at bb590c8: full chain (port 3205, exit code unpiped) exit 0, 118 passed, 0 warnings, 0 temp files; no e2e lines removed; re-shot checklist-alert-390.png: red bold. Not verified: none.
+
+## 2026-11-26 review slice task-feedback
+- Read: review/SKILL.md aac908c (same file, this run)
+- Reviewer 1 (297f9a4): pass, 1 nit ("No items yet" above the alert when the last item fails) -> backlog. Its runs: 70 passed on 9 specs; 3 mutants red; screens 1280/390; 0 console errors.
+- Reviewer 2, Focus: security and failure modes (after reviewer 1): fix-needed. Important: double-click on checklist Delete deletes the item but shows a false `Could not update` alert (3/3 repro; new in this slice). Nit: no test proved a non-member's refused delete does not redirect (mutant stayed green).
+- Fix: fresh builder (debug skill): row disables its Delete + checkbox while its own delete is pending (useTransition); new dblclick test red 6/6 before, green after; edit-task tamper test now asserts B's URL (red with the always-redirect mutant). Commits 074528d, c724786.
+- Controller at c724786: full chain (port 3207, unpiped) exit 0, 119 passed, 0 warnings, 0 temp files; dblclick test --repeat-each=5: 5 passed; e2e removals are a refactor of `tampered()` that now returns B's page (assertion added, none removed).
+- Small-fix exception used: one important finding, ~15 changed code lines in checklist-item.tsx, verify passed, test seen red before the fix -> no third review round.
+- Worktrees removed; no servers listening.
+- [x] Done when: no open important findings, verify passed after the last fix, nits fixed or in backlog.md.

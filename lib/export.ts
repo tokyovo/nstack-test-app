@@ -5,9 +5,9 @@ import type { Task } from "@/lib/tasks";
 
 const CSV_HEADER = ["id", "title", "description", "status", "assignee", "due_date"];
 
-/** Prefixes `'` to a value a spreadsheet would run as a formula. */
+/** Prefixes `'` to a value a spreadsheet would run as a formula, even after leading spaces. */
 function guardFormula(value: string): string {
-  return /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
+  return /^[\t\r]|^\s*[=+\-@]/.test(value) ? `'${value}` : value;
 }
 
 /** One RFC 4180 cell: quoted, with inner quotes doubled, when it holds a comma, quote, CR or LF. */
