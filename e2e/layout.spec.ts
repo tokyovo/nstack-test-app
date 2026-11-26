@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Browser, type Page } from "@playwright/test";
 import Database from "better-sqlite3";
 import { cards, column, createProject, newEmail, newUser, signUp, type ColumnName } from "./helpers";
 
@@ -173,4 +173,93 @@ test("AC41: at 1280x800 a checklist item's Delete button sits within the form wi
   const button = (await remove.boundingBox())!;
   const field = (await page.getByLabel("New item").boundingBox())!;
   expect(button.x + button.width).toBeLessThanOrEqual(field.x + field.width);
+});
+
+/**
+ * A board like the seed's: the viewer has a 60+ char email (the widest assignee option), one label
+ * and a few tasks. Returns the page on the board at `viewport`.
+ */
+async function seedLikeBoard(browser: Browser, viewport: { width: number; height: number }): Promise<Page> {
+  const page = await (await browser.newContext({ viewport })).newPage();
+  await signUp(page, `long-address-${"x".repeat(40)}-${newEmail()}`);
+  await expect(page).toHaveURL("/projects");
+  const url = await createProject(page, "Fold");
+  await page.goto(url);
+  await page.getByLabel("Label name").fill("Bug");
+  await page.getByRole("button", { name: "Create label" }).click();
+  await expect(page.getByRole("list", { name: "Labels" }).getByText("Bug")).toBeVisible();
+  for (const [i, title] of ["First", "Second", "Third"].entries()) {
+    await addTask(page, title);
+    await expect(cards(page, "To do")).toHaveCount(i + 1);
+  }
+  await page.goto(url);
+  return page;
+}
+
+/** The board's filter field labels, in page order: Search tasks, Show tasks for, Label. */
+function filterLabels(page: Page) {
+  return [
+    page.locator("label.board-search"),
+    page.locator("label.board-filter").filter({ hasText: /^Show tasks for/ }),
+    page.locator("label.board-filter").filter({ hasText: /^Label/ }),
+  ];
+}
+
+async function filterBoxes(page: Page) {
+  return Promise.all(filterLabels(page).map(async (label) => (await label.boundingBox())!));
+}
+
+test("AC42: at 1280x800 the columns start above the fold and the three filters share one row", async ({ browser }) => {
+  const page = await seedLikeBoard(browser, DESKTOP);
+  const heading = (await page.getByRole("heading", { name: "To do", exact: true }).boundingBox())!;
+  expect(heading.y).toBeLessThanOrEqual(400);
+
+  const boxes = await filterBoxes(page);
+  expect(Math.abs(boxes[1].y - boxes[0].y)).toBeLessThanOrEqual(4);
+  expect(Math.abs(boxes[2].y - boxes[0].y)).toBeLessThanOrEqual(4);
+  expect(boxes[1].x).toBeGreaterThan(boxes[0].x);
+  expect(boxes[2].x).toBeGreaterThan(boxes[1].x);
+
+  // Each control stays in its own cell: the long-email assignee select does not reach into the Label cell.
+  const labels = filterLabels(page);
+  for (const i of [0, 1]) {
+    const control = (await labels[i].locator(":is(input, select)").boundingBox())!;
+    expect(control.x + control.width).toBeLessThanOrEqual(boxes[i + 1].x);
+  }
+});
+
+test("AC42: at 390x844 the three filters stack and the board has no horizontal scroll", async ({ browser }) => {
+  const page = await seedLikeBoard(browser, PHONE);
+  const boxes = await filterBoxes(page);
+  expect(boxes[1].y).toBeGreaterThanOrEqual(boxes[0].y + boxes[0].height);
+  expect(boxes[2].y).toBeGreaterThanOrEqual(boxes[1].y + boxes[1].height);
+  await expectNoHorizontalScroll(page);
+});
+
+test("AC43: the new-task form sits after the board under 'New task', and the 'New task' link jumps to it", async ({
+  browser,
+}) => {
+  const page = await seedLikeBoard(browser, DESKTOP);
+  const done = (await column(page, "Done").boundingBox())!;
+  const heading = page.getByRole("heading", { name: "New task", exact: true });
+  const form = page.locator("form").filter({ has: page.getByRole("button", { name: "Add task" }) });
+  expect((await heading.boundingBox())!.y).toBeGreaterThanOrEqual(done.y + done.height);
+  expect((await form.boundingBox())!.y).toBeGreaterThanOrEqual(done.y + done.height);
+  await expect(page.locator("section#new-task").getByRole("heading", { name: "New task", exact: true })).toBeVisible();
+  await expect(page.locator("section#new-task form")).toHaveCount(1);
+
+  await page.getByRole("link", { name: "New task", exact: true }).click();
+  await expect(page).toHaveURL(/#new-task$/);
+  await expect(page.getByLabel("Title")).toBeInViewport();
+});
+
+test("AC44: at 1280 the Export CSV, Export JSON and New task links are at least 8px apart", async ({ browser }) => {
+  const page = await seedLikeBoard(browser, DESKTOP);
+  const names = ["Export CSV", "Export JSON", "New task"];
+  const boxes = await Promise.all(
+    names.map(async (name) => (await page.getByRole("link", { name, exact: true }).boundingBox())!),
+  );
+  for (const i of [0, 1]) {
+    expect(boxes[i + 1].x - (boxes[i].x + boxes[i].width)).toBeGreaterThanOrEqual(8);
+  }
 });

@@ -137,3 +137,39 @@ test("AC8: a create request naming a project the user is not a member of adds no
   await expect(column(a.page, "To do")).toBeVisible();
   await expect(cards(a.page, "To do")).toHaveCount(0);
 });
+
+test("AC46: after adding a task the new-task form says what it added; the next submit replaces or clears it", async ({
+  browser,
+}) => {
+  const a = await newUser(browser);
+  const url = await createProject(a.page, "Busy board");
+  await a.page.setViewportSize({ width: 1280, height: 800 });
+  await a.page.goto(url);
+  const form = a.page.locator("form").filter({ has: a.page.getByRole("button", { name: "Add task" }) });
+  const status = form.getByRole("status");
+  const title = a.page.getByLabel("Title");
+  const add = a.page.getByRole("button", { name: "Add task" });
+
+  for (const name of ["First task", "Second task", "Third task", "Fourth task"]) {
+    await title.fill(name);
+    await add.click();
+    await expect(status).toHaveText(`Added "${name}"`);
+    await expect(status).toBeInViewport();
+  }
+  await expect(cards(a.page, "To do")).toHaveCount(4);
+
+  await title.evaluate((input) => input.removeAttribute("required"));
+  await title.fill("   ");
+  await add.click();
+  await expect(taskError(a.page)).toHaveText("Title is required");
+  await expect(status).toHaveCount(0);
+
+  // The edit-task form shares the component but never shows a status.
+  await cards(a.page, "To do").first().getByRole("link").first().click();
+  const saved = a.page.waitForResponse((response) => response.request().method() === "POST");
+  await a.page.getByRole("button", { name: "Save changes" }).click();
+  await saved;
+  const editForm = a.page.locator("form").filter({ has: a.page.getByRole("button", { name: "Save changes" }) });
+  await expect(editForm.getByRole("button", { name: "Save changes" })).toBeEnabled();
+  await expect(editForm.getByRole("status")).toHaveCount(0);
+});

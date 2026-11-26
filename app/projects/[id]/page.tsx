@@ -36,9 +36,9 @@ export default async function ProjectPage({ params, searchParams }: PageProps<"/
         </a>{" "}
         <a href={`/projects/${project.id}/export?format=json`} download>
           Export JSON
-        </a>
+        </a>{" "}
+        <a href="#new-task">New task</a>
       </p>
-      <TaskForm action={createTaskAction.bind(null, project.id)} members={members} />
       <Board
         projectId={project.id}
         tasks={tasks}
@@ -51,6 +51,11 @@ export default async function ProjectPage({ params, searchParams }: PageProps<"/
         initialAssignee={first(query.for)}
         initialLabel={first(query.label)}
       />
+      {/* After the board so the columns show without scrolling; the "New task" link above jumps here. */}
+      <section id="new-task">
+        <h3>New task</h3>
+        <TaskForm action={createTaskAction.bind(null, project.id)} members={members} />
+      </section>
       <section>
         <h3>Labels</h3>
         {labels.length === 0 && <p>No labels yet</p>}

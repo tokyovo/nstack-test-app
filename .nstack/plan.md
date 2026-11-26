@@ -8,4 +8,5 @@
 - forms-layout: T18, PR #8
 - board-feedback: T19-T22, PR #10
 - export: T23-T24, PR #11
-- labels-checklist: T25-T28, PR #<pending>
+- labels-checklist: T25-T28, PR #13
+- board-fold: T29-T30, PR #14
