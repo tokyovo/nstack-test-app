@@ -5,9 +5,10 @@ import { redirect } from "next/navigation";
 import type { FormState } from "@/app/auth-actions";
 import { requireUser } from "@/lib/auth";
 import { createProject, deleteProject, inviteMember, renameProject } from "@/lib/projects";
+import { addChecklistItem, deleteChecklistItem, setChecklistItemDone } from "@/lib/checklist";
 import { addComment } from "@/lib/comments";
 import { createLabel, setTaskLabels } from "@/lib/labels";
-import { MAX_LABEL_LENGTH, MAX_TITLE_LENGTH } from "@/lib/limits";
+import { MAX_CHECKLIST_ITEM_LENGTH, MAX_LABEL_LENGTH, MAX_TITLE_LENGTH } from "@/lib/limits";
 import { isStatus } from "@/lib/statuses";
 import { createTask, deleteTask, moveTask, updateTask, type NewTask } from "@/lib/tasks";
 
@@ -194,4 +195,49 @@ export async function saveTaskLabelsAction(
   revalidatePath(`/projects/${projectId}`);
   revalidatePath(`/projects/${projectId}/tasks/${taskId}`);
   return { saved: true };
+}
+
+export type ChecklistFormState = FormState & { values?: { text: string } };
+
+/** The board (card progress) and the task page show the checklist. */
+function revalidateChecklist(projectId: number, taskId: number) {
+  revalidatePath(`/projects/${projectId}`);
+  revalidatePath(`/projects/${projectId}/tasks/${taskId}`);
+}
+
+export async function addChecklistItemAction(
+  projectId: number,
+  taskId: number,
+  _prev: ChecklistFormState,
+  formData: FormData,
+): Promise<ChecklistFormState> {
+  const user = await requireUser();
+  const typed = String(formData.get("text") ?? "");
+  const text = typed.trim();
+  if (!text) return { error: "Item is required", values: { text: typed } };
+  if (text.length > MAX_CHECKLIST_ITEM_LENGTH) {
+    return { error: `Item must be at most ${MAX_CHECKLIST_ITEM_LENGTH} characters`, values: { text: typed } };
+  }
+  if (!addChecklistItem(user.id, projectId, taskId, text)) return { error: "Task not found", values: { text: typed } };
+  revalidateChecklist(projectId, taskId);
+  return {};
+}
+
+/** Ticks or unticks a checklist item; called from the task page with an untrusted argument. True when stored. */
+export async function toggleChecklistItemAction(
+  projectId: number,
+  taskId: number,
+  itemId: number,
+  done: unknown,
+): Promise<boolean> {
+  const user = await requireUser();
+  if (typeof done !== "boolean") return false;
+  if (!setChecklistItemDone(user.id, projectId, taskId, itemId, done)) return false;
+  revalidateChecklist(projectId, taskId);
+  return true;
+}
+
+export async function deleteChecklistItemAction(projectId: number, taskId: number, itemId: number): Promise<void> {
+  const user = await requireUser();
+  if (deleteChecklistItem(user.id, projectId, taskId, itemId)) revalidateChecklist(projectId, taskId);
 }

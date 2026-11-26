@@ -70,7 +70,7 @@ const KEY_STEPS: Record<string, -1 | 1> = { ArrowLeft: -1, ArrowRight: 1 };
  * The project's tasks in three columns, one per status. Drag a card to another column,
  * or focus it and press ArrowLeft / ArrowRight, to move it. A card's title links to the task page.
  * A move the server refuses puts the card back and shows an alert until the next move succeeds.
- * Cards past their due date and not in Done say "Overdue".
+ * Cards past their due date and not in Done say "Overdue"; a card with a checklist shows "Checklist <done>/<total>".
  * The search box shows only tasks whose title or description contains the query (any case);
  * the assignee filter narrows that further to all, the viewer's, unassigned, or one member's tasks,
  * and the label filter to the tasks with one label. All three live in the URL, so a reload or a shared link shows the same board.
@@ -231,6 +231,9 @@ export function Board({
                       <p>{task.assigneeEmail ?? "Unassigned"}</p>
                       <p>{task.dueDate ? `Due ${task.dueDate}` : "No due date"}</p>
                       {overdue && <p className="overdue-label">Overdue</p>}
+                      {task.checklistTotal > 0 && (
+                        <p className="checklist-progress">{`Checklist ${task.checklistDone}/${task.checklistTotal}`}</p>
+                      )}
                       {task.labels.length > 0 && (
                         <ul aria-label="Task labels" className="task-labels">
                           {task.labels.map((label) => (

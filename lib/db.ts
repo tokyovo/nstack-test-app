@@ -54,6 +54,12 @@ CREATE TABLE IF NOT EXISTS task_labels (
   label_id INTEGER NOT NULL REFERENCES labels(id) ON DELETE CASCADE,
   PRIMARY KEY (task_id, label_id)
 );
+CREATE TABLE IF NOT EXISTS checklist_items (
+  id INTEGER PRIMARY KEY,
+  task_id INTEGER NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
+  text TEXT NOT NULL,
+  done INTEGER NOT NULL DEFAULT 0 CHECK (done IN (0, 1))
+);
 `;
 
 let db: Database.Database | undefined;

@@ -176,3 +176,33 @@ label > :is(input, select, textarea) {
   width: auto;
   margin: 0;
 }
+
+/* A task page checklist: one row per item, box and text on the left, Delete on the right. */
+.checklist {
+  padding: 0;
+  list-style: none;
+}
+
+.checklist-item {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.checklist-item > .checkbox-row {
+  flex: 1;
+  min-width: 0;
+}
+
+.checklist-item form {
+  margin: 0;
+}
+
+.checklist-item span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.checklist-progress {
+  font-size: 0.875rem;
+}

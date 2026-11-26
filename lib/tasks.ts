@@ -13,11 +13,16 @@ export type Task = {
   assigneeEmail: string | null;
   /** The task's labels in name order (any case). */
   labels: { id: number; name: string }[];
+  /** Checklist items ticked, and all items; both 0 for a task without a checklist. */
+  checklistDone: number;
+  checklistTotal: number;
 };
 
 type TaskRow = Omit<Task, "labels">;
 
-const TASK_SELECT = `SELECT tasks.id, tasks.title, tasks.description, tasks.status, tasks.due_date AS dueDate, tasks.assignee_id AS assigneeId, users.email AS assigneeEmail
+const TASK_SELECT = `SELECT tasks.id, tasks.title, tasks.description, tasks.status, tasks.due_date AS dueDate, tasks.assignee_id AS assigneeId, users.email AS assigneeEmail,
+       (SELECT COUNT(*) FROM checklist_items WHERE task_id = tasks.id) AS checklistTotal,
+       (SELECT COALESCE(SUM(done), 0) FROM checklist_items WHERE task_id = tasks.id) AS checklistDone
        FROM tasks LEFT JOIN users ON users.id = tasks.assignee_id`;
 
 /** The rows with each task's labels attached, read in one query. */
@@ -95,7 +100,7 @@ export function updateTask(userId: number, projectId: number, taskId: number, ta
   return result.changes > 0 ? "updated" : "not-found";
 }
 
-/** Deletes the task (and, by cascade, its comments) if it is in the project and the user is a member. */
+/** Deletes the task (and, by cascade, its comments, labels and checklist) if it is in the project and the user is a member. */
 export function deleteTask(userId: number, projectId: number, taskId: number): boolean {
   if (!getProject(userId, projectId)) return false;
   return getDb().prepare("DELETE FROM tasks WHERE id = ? AND project_id = ?").run(taskId, projectId).changes > 0;

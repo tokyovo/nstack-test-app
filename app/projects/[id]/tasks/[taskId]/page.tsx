@@ -1,14 +1,25 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth";
+import { listChecklist } from "@/lib/checklist";
 import { listComments } from "@/lib/comments";
 import { listLabels } from "@/lib/labels";
 import { getProject, listMembers } from "@/lib/projects";
 import { COLUMN_NAMES } from "@/lib/statuses";
 import { getTask } from "@/lib/tasks";
-import { addCommentAction, deleteTaskAction, saveTaskLabelsAction, updateTaskAction } from "../../../actions";
+import {
+  addChecklistItemAction,
+  addCommentAction,
+  deleteChecklistItemAction,
+  deleteTaskAction,
+  saveTaskLabelsAction,
+  toggleChecklistItemAction,
+  updateTaskAction,
+} from "../../../actions";
 import { ConfirmButton } from "../../../confirm-button";
 import { TaskForm } from "../../task-form";
+import { ChecklistForm } from "./checklist-form";
+import { ChecklistItem } from "./checklist-item";
 import { CommentForm } from "./comment-form";
 import { TaskLabelsForm } from "./task-labels-form";
 
@@ -24,6 +35,7 @@ export default async function TaskPage({ params }: PageProps<"/projects/[id]/tas
   const comments = listComments(user.id, project.id, task.id);
   const members = listMembers(user.id, project.id);
   const labels = listLabels(user.id, project.id);
+  const checklist = listChecklist(user.id, project.id, task.id);
   return (
     <main>
       <p>
@@ -65,6 +77,21 @@ export default async function TaskPage({ params }: PageProps<"/projects/[id]/tas
             checked={task.labels.map((label) => label.id)}
           />
         )}
+      </section>
+      <section aria-labelledby="checklist-heading">
+        <h3 id="checklist-heading">Checklist</h3>
+        {checklist.length === 0 && <p>No items yet</p>}
+        <ul aria-label="Checklist" className="checklist">
+          {checklist.map((item) => (
+            <ChecklistItem
+              key={item.id}
+              item={item}
+              toggle={toggleChecklistItemAction.bind(null, project.id, task.id, item.id)}
+              remove={deleteChecklistItemAction.bind(null, project.id, task.id, item.id)}
+            />
+          ))}
+        </ul>
+        <ChecklistForm action={addChecklistItemAction.bind(null, project.id, task.id)} />
       </section>
       <section>
         <h3>Comments</h3>
