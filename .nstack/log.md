@@ -610,3 +610,23 @@
 - Controller proof at f2e4d52: full chain (port 3201) exit 0, 117 passed, 0 warnings, 0 temp files; no e2e lines removed. Looked at /tmp/t32-shots/empty-board-390.png (the one the builder skipped): "No tasks" in each stacked column, no overflow.
 - [x] 1. n/a. - [x] 2. n/a. - [x] 3. n/a.
 - [ ] Done when: (slice) T33 pending.
+
+## 2026-11-26 build T33
+- Read: build/SKILL.md 141fcec
+- Did: builder: guard `/^[\t\r]|^\s*[=+\-@]/`, `'` before the original value; AC51 test stores 4 descriptions via writable DB, red first. Commits 0b46b87, 5977cf4.
+- Controller proof at 5977cf4 (exit code taken without a pipe; the builder's was after `| tail`): full chain (port 3202) exit 0, 118 passed, 0 warnings, 0 temp files; no e2e lines removed.
+- [x] 1. n/a. - [x] 2. n/a. - [x] 3. n/a.
+- [x] Done when: T31-T33 committed, proofs run by the controller.
+
+## 2026-11-26 verify slice task-feedback
+- Read: verify/SKILL.md 02888d9 (same file, this run)
+- [x] 1. Clean tree at 5977cf4 (+ state commits only).
+- [x] 2. Project checks: 118 passed, 0 skipped, 0 warnings, 0 temp files, no `data/`.
+- [x] 3. AC47 -> checklist.spec.ts (2); AC48 -> edit-task.spec.ts; AC49 -> empty-states.spec.ts; AC50 -> projects.spec.ts; AC51 -> export.spec.ts. All in the 118.
+- [x] 4. Bites: builders red-first for every new test + mutants (alert not cleared). Controller mutant: "no match" shown on an empty project -> empty-states 1 failed; restored, tree clean.
+- [x] 5. Real thing: e2e in a real browser (CI); builder T32 isolated server, no console errors.
+- [x] 6. Screens: /tmp/t32-shots/{empty-board,filtered-board}-{1280,390}.png (builder viewed three, controller viewed empty-board-390): placeholders and match message laid out, no overflow. Task-page checklist alert: covered by e2e text/role checks; red text styled like `.board-error` (globals.css).
+- [x] 7. Nothing weaker: no e2e line removed in the slice; no any/ts-ignore/eslint-disable.
+- [x] 8. No new warnings (0).
+- Not verified: the checklist alert's look on screen (not screenshotted; it reuses the board alert style). Accepted: covered by role/text tests, reviewer to look.
+- [x] Done when: ticked.
