@@ -156,3 +156,21 @@ test("AC41: at 390x844 a 40-char label on a card and a 200-char unbroken checkli
   await page.goto(taskUrl);
   await expectNoHorizontalScroll(page);
 });
+
+test("AC41: at 1280x800 a checklist item's Delete button sits within the form width, near its item", async ({ browser }) => {
+  const page = await (await browser.newContext({ viewport: DESKTOP })).newPage();
+  await signUp(page, newEmail());
+  await expect(page).toHaveURL("/projects");
+  const url = await createProject(page, "Wide checklist");
+  await page.goto(url);
+  await addTask(page, "A card");
+  await page.getByRole("link", { name: "A card" }).click();
+  await page.getByLabel("New item").fill("Proofread");
+  await page.getByRole("button", { name: "Add item" }).click();
+  const remove = page.getByRole("button", { name: 'Delete item "Proofread"' });
+  await expect(remove).toBeVisible();
+
+  const button = (await remove.boundingBox())!;
+  const field = (await page.getByLabel("New item").boundingBox())!;
+  expect(button.x + button.width).toBeLessThanOrEqual(field.x + field.width);
+});

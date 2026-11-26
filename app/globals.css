@@ -177,8 +177,10 @@ label > :is(input, select, textarea) {
   margin: 0;
 }
 
-/* A task page checklist: one row per item, box and text on the left, Delete on the right. */
+/* A task page checklist: one row per item, box and text on the left, Delete on the right,
+   no wider than the fields so each Delete stays next to its item. */
 .checklist {
+  max-width: 32rem;
   padding: 0;
   list-style: none;
 }
