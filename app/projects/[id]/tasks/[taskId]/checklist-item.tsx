@@ -6,7 +6,7 @@ import type { ChecklistItem as Item } from "@/lib/checklist";
 type Props = {
   item: Item;
   /** Stores the new state; the page then re-renders with it. */
-  toggle: (done: boolean) => Promise<boolean>;
+  toggle: (done: boolean) => Promise<void>;
   remove: () => Promise<void>;
 };
 
@@ -30,11 +30,9 @@ export function ChecklistItem({ item, toggle, remove }: Props) {
         />{" "}
         <span>{item.text}</span>
       </label>
-      <form action={remove}>
-        <button type="submit" aria-label={`Delete item "${item.text}"`}>
-          Delete
-        </button>
-      </form>
+      <button type="button" aria-label={`Delete item "${item.text}"`} onClick={() => startTransition(remove)}>
+        Delete
+      </button>
     </li>
   );
 }

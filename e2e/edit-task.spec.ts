@@ -190,6 +190,24 @@ test("AC17: deleting a task asks first; dismissing keeps it, accepting removes i
   expect((await a.page.goto(taskUrl))?.status()).toBe(404);
 });
 
+test("AC48: deleting a task already deleted in another tab lands on the project board", async ({ browser }) => {
+  const a = await newUser(browser);
+  const url = await createProject(a.page, "Stale delete");
+  await addTask(a.page, url, "Gone task");
+  const taskUrl = await openTask(a.page, "Gone task");
+
+  const other = await a.page.context().newPage();
+  await other.goto(taskUrl);
+  await deleteTask(other);
+  await expect(other).toHaveURL(url);
+  await other.close();
+
+  await deleteTask(a.page);
+  await expect(a.page).toHaveURL(url);
+  await expect(a.page.getByRole("heading", { name: "Stale delete", exact: true })).toBeVisible();
+  await expect(cards(a.page, "To do")).toHaveCount(0);
+});
+
 async function deleteTask(page: Page) {
   page.once("dialog", (dialog) => void dialog.accept());
   await page.getByRole("button", { name: "Delete task" }).click();

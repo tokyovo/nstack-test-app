@@ -233,3 +233,59 @@ async function tamperedByNonMember(browser: Browser) {
 test("AC39: a non-member's checklist requests change nothing", async ({ browser }) => {
   await tamperedByNonMember(browser);
 });
+
+function checklistAlert(page: Page) {
+  return checklist(page).getByRole("alert");
+}
+
+/** Deletes the item from a second tab of the same user, leaving `page`'s checklist stale. */
+async function deleteItemInOtherTab(page: Page, text: string) {
+  const other = await page.context().newPage();
+  await other.goto(page.url());
+  await checklist(other).getByRole("button", { name: `Delete item "${text}"` }).click();
+  await expect(box(other, text)).toHaveCount(0);
+  await other.close();
+}
+
+test("AC47: ticking an item deleted in another tab shows an alert and drops the row; the next tick clears it", async ({
+  browser,
+}) => {
+  const a = await newUser(browser);
+  const url = await createProject(a.page, "Stale ticks");
+  await addTask(a.page, url, "Two tabs");
+  await openTask(a.page, "Two tabs");
+  await addItem(a.page, "Live");
+  await addItem(a.page, "Gone");
+  await setDone(a.page, "Live", true);
+  await expect(checklistAlert(a.page)).toHaveCount(0);
+
+  await deleteItemInOtherTab(a.page, "Gone");
+  await box(a.page, "Gone").check();
+  await expect(checklistAlert(a.page)).toHaveText('Could not update "Gone"');
+  await expect(items(a.page)).toHaveText([/Live/]);
+
+  await setDone(a.page, "Live", false);
+  await expect(checklistAlert(a.page)).toHaveCount(0);
+  await expect(box(a.page, "Live")).not.toBeChecked();
+});
+
+test("AC47: deleting an item already deleted in another tab shows an alert and drops the row; the next delete clears it", async ({
+  browser,
+}) => {
+  const a = await newUser(browser);
+  const url = await createProject(a.page, "Stale deletes");
+  await addTask(a.page, url, "Two tabs");
+  await openTask(a.page, "Two tabs");
+  await addItem(a.page, "Keep");
+  await addItem(a.page, "Drop");
+  await addItem(a.page, "Gone");
+
+  await deleteItemInOtherTab(a.page, "Gone");
+  await checklist(a.page).getByRole("button", { name: 'Delete item "Gone"' }).click();
+  await expect(checklistAlert(a.page)).toHaveText('Could not update "Gone"');
+  await expect(items(a.page)).toHaveText([/Keep/, /Drop/]);
+
+  await checklist(a.page).getByRole("button", { name: 'Delete item "Drop"' }).click();
+  await expect(items(a.page)).toHaveText([/Keep/]);
+  await expect(checklistAlert(a.page)).toHaveCount(0);
+});

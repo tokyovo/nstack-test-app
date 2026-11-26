@@ -207,10 +207,6 @@ label > :is(input, select, textarea) {
   min-width: 0;
 }
 
-.checklist-item form {
-  margin: 0;
-}
-
 .checklist-item span {
   min-width: 0;
   overflow-wrap: anywhere;
