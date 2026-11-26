@@ -1,4 +1,4 @@
-import { expect, test, type Browser, type Page } from "@playwright/test";
+import { expect, test, type Browser, type Page, type Request } from "@playwright/test";
 import { cards, createProject, newUser, persistedMove, tamperBoundIds } from "./helpers";
 
 async function addTask(page: Page, projectUrl: string, title: string) {
@@ -287,6 +287,35 @@ test("AC47: deleting an item already deleted in another tab shows an alert and d
   await expect(items(a.page)).toHaveText([/Keep/, /Drop/]);
 
   await checklist(a.page).getByRole("button", { name: 'Delete item "Drop"' }).click();
+  await expect(items(a.page)).toHaveText([/Keep/]);
+  await expect(checklistAlert(a.page)).toHaveCount(0);
+});
+
+/** Runs `act`, then waits until every server action it sent has been answered and the page has re-rendered. */
+async function settledActions(page: Page, act: () => Promise<void>) {
+  let sent = 0;
+  let answered = 0;
+  const isAction = (request: Request) => request.method() === "POST" && !!request.headers()["next-action"];
+  const onRequest = (request: Request) => void (isAction(request) && sent++);
+  const onFinished = (request: Request) => void (isAction(request) && answered++);
+  page.on("request", onRequest);
+  page.on("requestfinished", onFinished);
+  await act();
+  await expect.poll(() => sent > 0 && answered === sent).toBe(true);
+  await page.waitForLoadState("networkidle");
+  page.off("request", onRequest);
+  page.off("requestfinished", onFinished);
+}
+
+test("AC47: double-clicking Delete removes the item and shows no alert", async ({ browser }) => {
+  const a = await newUser(browser);
+  const url = await createProject(a.page, "Quick hands");
+  await addTask(a.page, url, "Double click");
+  await openTask(a.page, "Double click");
+  await addItem(a.page, "Keep");
+  await addItem(a.page, "Twice");
+
+  await settledActions(a.page, () => checklist(a.page).getByRole("button", { name: 'Delete item "Twice"' }).dblclick());
   await expect(items(a.page)).toHaveText([/Keep/]);
   await expect(checklistAlert(a.page)).toHaveCount(0);
 });
