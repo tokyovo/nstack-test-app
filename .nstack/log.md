@@ -423,3 +423,13 @@
   - [x] 5.2. Fresh Explore reader: 15 questions (card counting, list name clash, placement, URL order, tamper mechanics, toggle wait, seed, screens, CSS); all answered under "Fresh-reader answers"; AC37 list renamed "Task labels", AC41 seed moved to the commented task so screens show it.
   - [x] 5.3. Slice in plan.md with branch nstack/labels-checklist; finished slices compacted to `## Done` lines (format in state.md; earlier runs had kept full sections).
 - [x] Done when: every criterion has a proof, the fresh reader's questions are answered, slice in plan.md.
+
+## 2026-11-26 build T25
+- Read: build/SKILL.md 141fcec
+- Did: builder: labels/task_labels tables, lib/labels.ts, LabelForm on the board, TaskLabelsForm on the task page, card chips, e2e/labels.spec.ts (8 tests), helpers count `li.task-card`. Commits 061d106, 9807a22.
+- Decision (builder): smoke.spec table list adds labels, task_labels (spec change: the plan adds the tables). Task page shows only "No labels yet" (no form) when the project has no labels. Tests use goto() not reload() (Chromium restores checkbox state on reload).
+- Controller proof at 9807a22: `rm -rf .next; lint && typecheck && build && E2E_PORT=3191 npm run check:e2e-temp` exit 0, 92 passed, 0 temp files, no `data/`. Diff of existing tests: only the planned helper/seed locator change and the two table names.
+- [x] 1. n/a: first attempt passed.
+- [x] 2. n/a: first attempt passed.
+- [x] 3. n/a: nothing parked.
+- [ ] Done when: (slice) T26-T28 pending.
