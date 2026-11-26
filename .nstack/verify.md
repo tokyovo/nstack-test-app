@@ -9,7 +9,7 @@ Run from the repo root. This machine has 2 CPUs: two full e2e suites at once pus
 ## Full checks
 - `npm run build` — `next build` (production). 2026-11-25 T1: pass.
 - `npm run test:e2e` — Playwright, Chromium headless. Starts `next start -p 3100` on the existing build (run `npm run build` first) with `DATABASE_PATH` set to a fresh temp SQLite file per run; tests read the same file via `process.env.E2E_DATABASE_PATH`. 2026-11-25 T1: 2 passed (e2e/smoke.spec.ts).
-- `npm run check:e2e-temp [-- <playwright args>]` — runs `playwright test`, then exits 1 if any `taskboard-e2e-<that run's pid>-*` file (db, -wal, -shm) is left in the OS temp dir (AC31); else the suite's exit code. 2026-11-25 T22: 0 left.
+- `npm run check:e2e-temp [-- <playwright args>]` — runs `playwright test`, then exits 1 if any `taskboard-e2e-<that run's pid>-*` file (db, -wal, -shm) is left in the OS temp dir (AC31); else the suite's exit code. 2026-11-25 T22: 0 left. 2026-11-26 slice labels-checklist (67c86df): exit 0, 105 passed, 0 left.
 
 ## Proof chain (T1)
 - `npm run lint && npm run typecheck && npm run build && npm run test:e2e` — 2026-11-25 T1: exit 0; no `data/` dir created (tests isolated from dev DB).

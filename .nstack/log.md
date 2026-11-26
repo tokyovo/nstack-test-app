@@ -461,3 +461,16 @@
 - [x] 2. n/a.
 - [x] 3. n/a.
 - [x] Done when: T25-T28 committed on nstack/labels-checklist, each proof + fast checks run by the controller at its commit (entries above).
+
+## 2026-11-26 verify slice labels-checklist
+- Read: verify/SKILL.md 02888d9
+- [x] 1. Clean tree. Code identical to 67c86df (HEAD differs only in .nstack/); `git status` clean after the mutant.
+- [x] 2. Project checks. lint, typecheck, build, check:e2e-temp at 67c86df: exit 0, 105 passed, 0 skipped, 0 warnings in the log, 0 temp files, no `data/`.
+- [x] 3. AC36,37 -> e2e/labels.spec.ts (8); AC38 -> labels.spec.ts (4); AC39,40 -> e2e/checklist.spec.ts (7); AC41 -> seed.spec.ts + layout.spec.ts + screens. All in the 105.
+- [x] 4. Every new check bites. Builders: each spec red first + guard mutants (label project_id, getTask guards, `AND task_id`, URL label check, CSS nowrap/overflow-wrap). Controller mutant: card done count = total -> checklist AC40 + seed tests failed (2), restored, tree clean.
+- [x] 5. The real thing runs. Saved Playwright e2e in CI; plus isolated `next start -p 3401` + `npm run screens -- /tmp/s8-shots` exit 0 (no console errors), server stopped, temp DB removed.
+- [x] 6. Screens: /tmp/t28-shots/{board,task}-{1280,390}.png looked at (same build): chips + "Checklist 1/3" on card, label checkboxes, checklist rows with Delete beside items, Label select, no overflow at 390. /tmp/s8-shots/ re-shot by the controller.
+- [x] 7. Nothing got weaker. `git diff main...HEAD`: no any/ts-ignore/eslint-disable/skip/only; e2e removals are only the planned `li.task-card` locator change; smoke.spec adds 3 table names (spec change, logged in T25/T27).
+- [x] 8. No new warnings: build and test logs grep "warn" = 0 (slice 7: 0). verify.md Last result updated.
+- Not verified: none.
+- [x] Done when: all ticked, Not verified empty.
