@@ -16,9 +16,11 @@ test("the app creates its schema in the DATABASE_PATH file", async ({ page }) =>
   db.close();
   expect(tables).toEqual([
     "comments",
+    "labels",
     "project_members",
     "projects",
     "sessions",
+    "task_labels",
     "tasks",
     "users",
   ]);

@@ -146,3 +146,33 @@ label > :is(input, select, textarea) {
 .project-row form {
   margin: 0;
 }
+
+/* A card's labels: small rounded chips that wrap onto more lines. */
+.board-column .task-labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-top: 0.25rem;
+}
+
+.task-labels .label {
+  padding: 0 0.4rem;
+  border: 1px solid #c7d2fe;
+  border-radius: 999px;
+  background: #eef2ff;
+  font-size: 0.75rem;
+  overflow-wrap: anywhere;
+}
+
+/* A checkbox and its text on one line (the text wraps), unlike the stacked field labels. */
+.checkbox-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.checkbox-row > input {
+  display: inline;
+  width: auto;
+  margin: 0;
+}

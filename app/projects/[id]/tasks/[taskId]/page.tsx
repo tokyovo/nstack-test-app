@@ -2,13 +2,15 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { listComments } from "@/lib/comments";
+import { listLabels } from "@/lib/labels";
 import { getProject, listMembers } from "@/lib/projects";
 import { COLUMN_NAMES } from "@/lib/statuses";
 import { getTask } from "@/lib/tasks";
-import { addCommentAction, deleteTaskAction, updateTaskAction } from "../../../actions";
+import { addCommentAction, deleteTaskAction, saveTaskLabelsAction, updateTaskAction } from "../../../actions";
 import { ConfirmButton } from "../../../confirm-button";
 import { TaskForm } from "../../task-form";
 import { CommentForm } from "./comment-form";
+import { TaskLabelsForm } from "./task-labels-form";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +23,7 @@ export default async function TaskPage({ params }: PageProps<"/projects/[id]/tas
   if (!project || !task) notFound();
   const comments = listComments(user.id, project.id, task.id);
   const members = listMembers(user.id, project.id);
+  const labels = listLabels(user.id, project.id);
   return (
     <main>
       <p>
@@ -50,6 +53,18 @@ export default async function TaskPage({ params }: PageProps<"/projects/[id]/tas
             Delete task
           </ConfirmButton>
         </form>
+      </section>
+      <section aria-labelledby="task-labels-heading">
+        <h3 id="task-labels-heading">Labels</h3>
+        {labels.length === 0 ? (
+          <p>No labels yet</p>
+        ) : (
+          <TaskLabelsForm
+            action={saveTaskLabelsAction.bind(null, project.id, task.id)}
+            labels={labels}
+            checked={task.labels.map((label) => label.id)}
+          />
+        )}
       </section>
       <section>
         <h3>Comments</h3>

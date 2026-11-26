@@ -186,6 +186,15 @@ export function Board({ projectId, tasks, members, userId, today, move, initialQ
                       <p>{task.assigneeEmail ?? "Unassigned"}</p>
                       <p>{task.dueDate ? `Due ${task.dueDate}` : "No due date"}</p>
                       {overdue && <p className="overdue-label">Overdue</p>}
+                      {task.labels.length > 0 && (
+                        <ul aria-label="Task labels" className="task-labels">
+                          {task.labels.map((label) => (
+                            <li key={label.id} className="label">
+                              {label.name}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
                     </li>
                   );
                 })}
