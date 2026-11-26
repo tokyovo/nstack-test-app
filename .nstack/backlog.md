@@ -1,7 +1,8 @@
 # Backlog
-Rescored 2026-11-25 after slice 5 (UX pass on T18 `npm run screens` output, /tmp/t18-shots/). Slice 4 and 5 shipped; items below are open.
+Rescored 2026-11-26 after slice 8 (UX pass on /tmp/s8-shots/). Earlier: rescored 2026-11-25 after slice 5 (UX pass on T18 `npm run screens` output, /tmp/t18-shots/). Slice 4 and 5 shipped; items below are open.
 Scored 2026-11-25 (value + risk + cost, cost 5 = cheapest). Sources: UX pass (headless Chromium, screenshots /tmp/ux-shots/), research.md (29 sources), earlier reviews.
 
+- 7 (v3 r1 c3) Board below the fold: at 1280x800 the stacked new-task form, search, "Show tasks for" and (since slice 8) "Label" push the column headings to y~788, so no task is visible without scrolling (/tmp/s8-shots/board-1280.png). Was 6 at T18; slice 8 added a third stacked control. Group with the search/filter margin nit and the export-links gap (same screen, same CSS). (UX 2026-11-26)
 - 6 (v2 r1 c3) Duplicate a task / templates. Evidence: 4 sources, research.md
 - 6 (v2 r1 c4) Silent feedback: whitespace project name does nothing; no "no results" on empty search; no visible drop area in empty columns. (UX)
 - 5 (v2 r1 c2) Calendar view. Evidence: 5 sources, research.md
@@ -12,7 +13,6 @@ Scored 2026-11-25 (value + risk + cost, cost 5 = cheapest). Sources: UX pass (he
 - Rejected: login timing leaks whether an email exists (signup/invite reveal it by design, AC2/AC7).
 - Needs human (changes the goal's fixed three columns): custom columns / swimlanes, research.md.
 - 6 (v2 r1 c3) (review nit, slice 2) `deleteTaskAction` (app/projects/actions.ts) does nothing visible when the delete is refused, e.g. the task was already deleted in another tab; the edit path shows "Task not found". Show the same error or redirect to the board.
-- 6 (v2 r1 c3) (T18 screens) At 1280px the stacked new-task form, search and filter take ~600px above the board, so the columns start below the fold on a laptop. Collapse the new-task form behind an "Add task" toggle, or put search + filter in one row.
 - 4 (v1 r1 c2) (T18 review nit) Board Search and "Show tasks for" labels get the label margin on top of the grid gap (~40px between them vs ~12px elsewhere), app/globals.css:47-51.
 - 3 (v1 r1 c1) (T18 review nit) Project rename fields do not line up across rows (start after each link); project list keeps the default ul indent at 390px.
 - 5 (v2 r2 c1) (T22) e2e/seed.spec.ts AC22 takes 19-29s against the 30s default test timeout (1 worker, 2 CPUs); under load from a parallel run it timed out twice in T22 `check:e2e-temp` full runs. Give it `test.setTimeout(60_000)` (it seeds twice through the UI) or speed up seed.

@@ -482,3 +482,43 @@
 - Nits: both in backlog.md (not cheap: each needs UI + test + re-verify; neither is in the ACs).
 - Worktrees of both reviewers removed; no servers listening.
 - [x] Done when: latest round no important findings; verify passed at 67c86df (code unchanged since); nits in backlog.md.
+
+## 2026-11-26 ship slice labels-checklist
+- Read: ship/SKILL.md 47e5182
+- [x] 1. Commit. 14 commits on nstack/labels-checklist incl. .nstack/ updates.
+- [x] 2. Sync. `git log HEAD..origin/main` = 0 commits; nothing came in.
+- [x] 3. Push. nstack/labels-checklist pushed.
+- [x] 4. Open the PR. https://github.com/tokyovo/nstack-test-app/pull/13 (verification table, screens paths, merge danger: additive tables, revert-safe).
+- [x] 5. Wait for CI. runs 45762737460, 45762764350 pass; 105 passed.
+- [x] 6. Merge. `merge: auto`, no important findings: squash-merged as 2e520c3.
+- [x] 7. Confirm and clean up. main pulled at 2e520c3; lint + typecheck pass; CI on main run 45763196340 success. `git fetch --prune`: no nstack/* branches left on the remote (incl. nstack/ci); no local ones.
+- [x] Done when: merged, main CI green, fast checks pass on main.
+
+## 2026-11-26 improve
+- Read: improve/SKILL.md 762f257
+- [x] 1. Gather evidence
+  - [x] 1.1. Broken things. CI on main green (45763196340, 105 passed); build/test logs 0 warnings.
+  - [x] 1.2. Known problems. `gh issue list`: none open. needs-human: `nstack/ci` gone from the remote (resolved). backlog.md read.
+  - [x] 1.3. Gaps against the goal. None: every feature, incl. labels and checklist, has e2e in CI.
+  - [x] 1.4. Outside demand. research.md dated 2026-11-25 (<7 days), not re-run; its candidates are already in backlog.md (labels, checklists now shipped).
+  - [x] 1.5. Risk. `npm audit --omit=dev`: 0 vulnerabilities; slice 8 security review clean.
+  - [x] 1.6. User experience. Looked at /tmp/s8-shots/ board and task at 1280/390: at 1280x800 the column headings sit at y~788 (below the fold), worse since slice 8 added a third stacked filter.
+  - [x] 1.7. Code health. Nothing slowing work; O(tasks x labels) note in backlog (4).
+- [x] 2. Score. backlog.md rescored: board below the fold 7 (v3 r1 c3); next 6s (silent checklist failure, silent task delete, duplicate task, silent feedback, label rename/delete).
+- [x] 3. Decide. 7 meets bar 7 -> slice board-fold planned (T29, AC42-45), grouped with the margin nit and export-links gap.
+- [x] Done when: every source checked, candidates scored, slice planned.
+
+## 2026-11-26 plan slice board-fold
+- Read: plan/SKILL.md 59d57d8 (same file as the slice 8 plan entry, this run)
+- [x] 1. Learn the ground truth. globals.css, task-form.tsx, board.tsx classes, count of specs using the new-task form (15).
+- [x] 2. Interrogate the goal yourself
+  - [x] 2.1. Questions: hide vs move the form, where filters go, what "above the fold" means numerically, AC24/25 interaction.
+  - [x] 2.2. From code: AC24/25 apply to task forms only; filters already in the board grid.
+  - [x] 2.3. Decision: move the form below the board + skip link (no test churn).
+- [x] 3. Write the spec. AC42-45.
+- [x] 4. Cut tickets. T29, one ticket (CSS + one markup move).
+- [x] 5. Check the plan
+  - [x] 5.1. AC42-44 -> layout.spec.ts tests; AC45 -> screens review.
+  - [x] 5.2. Fresh Explore reader: 10 questions, answered under "Fresh-reader answers" (margin rule location corrected, measurement boxes, link order, hash, locators).
+  - [x] 5.3. Slice in plan.md, branch nstack/board-fold.
+- [x] Done when: every criterion has a proof, questions answered, slice in plan.md.
