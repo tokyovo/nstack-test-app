@@ -88,7 +88,8 @@ label > :is(input, select, textarea) {
   color: #6b7280;
 }
 
-.board-error {
+.board-error,
+.checklist-error {
   margin: 0;
   color: #b91c1c;
   font-weight: 600;

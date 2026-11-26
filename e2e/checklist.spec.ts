@@ -262,6 +262,7 @@ test("AC47: ticking an item deleted in another tab shows an alert and drops the 
   await deleteItemInOtherTab(a.page, "Gone");
   await box(a.page, "Gone").check();
   await expect(checklistAlert(a.page)).toHaveText('Could not update "Gone"');
+  await expect(checklistAlert(a.page)).toHaveCSS("color", "rgb(185, 28, 28)");
   await expect(items(a.page)).toHaveText([/Live/]);
 
   await setDone(a.page, "Live", false);

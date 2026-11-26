@@ -33,7 +33,11 @@ export function Checklist({ rows }: { rows: Row[] }) {
 
   return (
     <>
-      {error && <p role="alert">{error}</p>}
+      {error && (
+        <p role="alert" className="checklist-error">
+          {error}
+        </p>
+      )}
       <ul aria-label="Checklist" className="checklist">
         {rows.map(({ item, toggle, remove }) => (
           <ChecklistItem
