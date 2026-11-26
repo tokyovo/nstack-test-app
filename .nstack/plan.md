@@ -11,6 +11,7 @@ Acceptance criteria (Playwright e2e in e2e/layout.spec.ts unless stated; seed-li
 42. At 1280x800 the "To do" column heading's top is at most 400px from the top of the page (no scrolling). Search tasks, Show tasks for and Label fields have the same top (within 4px) and increasing left edges. At 390x844 they stack (each one's top below the previous one's bottom) and the board still has no horizontal scroll (AC15 tests unchanged and passing).
 43. The new-task form is after the board columns in the page (its top is below the "Done" column's bottom at 1280) under an h3 "New task"; clicking the "New task" link moves to `#new-task` (URL hash) and the Title field is in the viewport. All existing specs that create tasks pass unchanged.
 44. "Export CSV", "Export JSON" and "New task" links have at least 8px between neighbours (right edge to next left edge) at 1280.
+46. After "Add task" succeeds in the new-task form, a `<p role="status">` inside that form says `Added "<title>"` and is in the viewport (the new card may be off-screen above); the next submit (success or error) replaces or clears it. Edit-task form unchanged (no status). Added 2026-11-26 from slice 9 review nit.
 45. `npm run screens` at 1280 and 390 reviewed by eye: board fits as described, nothing overlaps.
 
 Out of scope: collapsing forms, sticky filters, per-column add buttons.
@@ -29,6 +30,7 @@ Fresh-reader answers (2026-11-26):
 - AC43: `expect(page).toHaveURL(/#new-task$/)` and `expect(page.getByLabel("Title")).toBeInViewport()` (the new-task Title; Playwright's default ratio, any part visible).
 - AC45: screens.mts stays full-page (no new file, AC23's 10 files unchanged); the above-the-fold claim is proven by AC42's test, and the reviewer of the screens judges layout. Seed already has labels and a 60+ char member (T17, T28); no seed change.
 
+- [ ] T30 New-task form says what it added (AC46). Proof: e2e in e2e/tasks.spec.ts at 1280 on a board with tasks: add, status text in viewport; then an empty-title error clears it; red first; full chain. Needs: T29
 - [x] T29 Board above the fold (AC42-45). Proof: new tests in e2e/layout.spec.ts, red first; full chain; screens reviewed. Needs: none
 
 ## Done
