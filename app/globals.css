@@ -68,8 +68,12 @@ label > :is(input, select, textarea) {
   align-items: start;
 }
 
-.board-search,
-.board-filter,
+/* Search and the two filters share one row above the columns, one grid cell each (a cell is narrower than the
+   32rem field cap, so each field fills it); the grid gap spaces them. */
+.board > label {
+  margin: 0;
+}
+
 .board-error {
   grid-column: 1 / -1;
 }
@@ -118,6 +122,13 @@ label > :is(input, select, textarea) {
   .board {
     grid-template-columns: minmax(0, 1fr);
   }
+}
+
+/* The board's links (exports, "New task") on one row with room between them. */
+.export-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
 }
 
 .task-card.overdue {
