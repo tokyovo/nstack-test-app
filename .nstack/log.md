@@ -595,3 +595,11 @@
   - [x] 5.2. Fresh Explore reader: 10 questions, answered under "Fresh-reader answers" (AC48 changed: no redirect for non-members).
   - [x] 5.3. Slice in plan.md, branch nstack/task-feedback.
 - [x] Done when: met.
+
+## 2026-11-26 build T31
+- Read: build/SKILL.md 141fcec
+- Did: builder: new client `checklist.tsx` owns one alert + refresh on refusal (moveTo pattern, unstable_rethrow); checklist delete returns boolean, called from a button; deleteTaskAction redirects members to the board on refusal. 3 tests red first; mutant (success doesn't clear alert) red. Commit 67b913c.
+- Decision (builder): a tampered delete naming another project's task, by a member of their own board, now lands on their own board (A's task untouched; test still passes).
+- Controller proof at 67b913c: full chain (port 3200) exit 0, 113 passed, 0 warnings, 0 temp files; no e2e lines removed.
+- [x] 1. n/a. - [x] 2. n/a. - [x] 3. n/a.
+- [ ] Done when: (slice) T32-T33 pending.
