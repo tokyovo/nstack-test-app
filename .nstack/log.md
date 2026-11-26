@@ -387,13 +387,13 @@
 ## 2026-11-26 go labels + checklist
 - Read: go/SKILL.md c1fd976
 - [x] 1. Never wait on a person. Goal addition applied without asking; decisions logged in plan.md.
-- [ ] 2. Nothing is done until it is proven.
+- [x] 2. Nothing is done until it is proven. Controller re-ran every ticket's full chain (unpiped) and own mutants per slice.
 - [x] 3. Smallest change that meets the goal. Out of scope list in plan.md (colors, rename/delete, export).
-- [ ] 4. Fix root causes.
-- [ ] 5. State lives in files.
-- [ ] 6. Guard the context window.
-- [ ] 7. Start every step with `step`.
-- [ ] 8. Turn lessons into structure.
+- [x] 4. Fix root causes. Double-click false alert fixed at the cause (pending row disabled), via debug skill.
+- [x] 5. State lives in files. .nstack/ committed with each slice; state-only PR at the end.
+- [x] 6. Guard the context window. Builders/reviewers/readers got file pointers; one at a time (2 CPUs).
+- [x] 7. Start every step with `step`. Entries below each start from step output.
+- [x] 8. Turn lessons into structure. Backlog sums now checked by a script assert before deciding; nstack tooling suggestion logged in backlog.md.
 - [x] 1. n/a: existing project.
 - [x] 2. n/a: existing project.
 - [x] 3. n/a: existing project.
@@ -404,10 +404,10 @@
 - [x] 4. `npm run lint` 0 problems; `npm run typecheck` pass (main 6c30825).
 - [x] 5. Policy settings and Drive section present. goal.md updated with the owner's addition (labels, checklist).
 - [x] 6. needs-human: `git ls-remote --heads origin nstack/ci` still lists it (optional, user's call). No `Retry when` in plan.md.
-- [ ] 1. Pick work.
-- [ ] 2. For each ticket in the slice:
-- [ ] 3. When every ticket is done:
-- [ ] 4. Record it:
+- [x] 1. Pick work. Goal changed -> plan slice 8; then improve -> slices 9, 10; then nothing at bar 7.
+- [x] 2. For each ticket: T25-T34 built by builders, proof + fast checks re-run by the controller at each commit.
+- [x] 3. verify, review, ship per slice: PRs #13, #14, #15.
+- [x] 4. Record it: plan.md `## Done` lines per slice, on the slice branch before ship.
 
 ## 2026-11-26 plan slice 8 labels + checklist
 - Read: plan/SKILL.md 59d57d8
@@ -642,3 +642,33 @@
 - Small-fix exception used: one important finding, ~15 changed code lines in checklist-item.tsx, verify passed, test seen red before the fix -> no third review round.
 - Worktrees removed; no servers listening.
 - [x] Done when: no open important findings, verify passed after the last fix, nits fixed or in backlog.md.
+
+## 2026-11-26 ship slice task-feedback
+- Read: ship/SKILL.md 47e5182 (same file, this run)
+- [x] 1. Commit. T31-T34 + fixes + state on nstack/task-feedback.
+- [x] 2. Sync. 0 new commits on origin/main.
+- [x] 3. Push. done.
+- [x] 4. Open the PR. https://github.com/tokyovo/nstack-test-app/pull/15
+- [x] 5. Wait for CI. runs 45777606102, 45777630766 pass; 119 passed.
+- [x] 6. Merge. `merge: auto`, no open important findings: squash-merged as 26a9415.
+- [x] 7. Confirm and clean up. main at 26a9415: lint + typecheck pass; CI run 45778821562 (26a9415) success; remote branch deleted; no worktrees.
+- [x] Done when: merged, main CI green, fast checks pass.
+
+## 2026-11-26 improve
+- Read: improve/SKILL.md 762f257 (same file, this run)
+- [x] 1. Gather evidence
+  - [x] 1.1. Broken things. CI on main green (45778821562, 119 passed), 0 warnings.
+  - [x] 1.2. Known problems. No open issues; needs-human all resolved; backlog: shipped items removed (CSV guard, checklist silence, silent feedback, task delete silence, non-member redirect test).
+  - [x] 1.3. Gaps against the goal. None.
+  - [x] 1.4. Outside demand. research.md 2026-11-25 (<7 days); candidates already in backlog (duplicate task 6, multiple assignees 5, calendar 5).
+  - [x] 1.5. Risk. npm audit 0 earlier this run, deps unchanged since; slice 10 security review done.
+  - [x] 1.6. User experience. Screens of every screen touched this run looked at (s8, t29, t32, s10 shots); remaining UX items in backlog at <=6.
+  - [x] 1.7. Code health. Nothing blocking.
+- [x] 2. Score. All sums re-checked by script (assert v+r+c == score): top three 6 (label rename/delete/colors), 6 (duplicate task), 6 (search box height / header link hint).
+- [x] 3. Decide. Nothing meets bar 7. Stop.
+- [x] Done when: met.
+
+## 2026-11-26 hand-off (controller)
+- Audit: every step this run has a `step` entry with its checklist ticked (go, plan x3, build T25-T34, verify x3, review x3, ship x3, improve x2). Gaps found and fixed during the run: slice 10 verify first left "Not verified: checklist alert look"; checked with a screenshot, found a real defect, fixed (T34). The go entry's loop lines are ticked below.
+- Servers: none listening; no worktrees; no stray temp DBs; no browsers.
+- Slowed the run: backlog score arithmetic was wrong in 7 lines (the previous run stopped on it); a builder's exit code came after `| tail` (I re-ran every full chain unpiped); no prettier config (backlog).
