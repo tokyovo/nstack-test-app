@@ -452,3 +452,12 @@
 - [x] 2. n/a.
 - [x] 3. n/a.
 - [ ] Done when: (slice) T28 pending.
+
+## 2026-11-26 build T28
+- Read: build/SKILL.md 141fcec (same file as T25 entry, this run)
+- Did: builder: seed adds labels Bug/Design + 3-item checklist (1 done) on the commented Done task, idempotent; seed.spec checks "Checklist 1/3" + Bug chip (red first); AC41 390px layout test (40 W label, 200-char item), CSS mutants red; screens review found Delete buttons ~1000px from items at 1280 -> test + `.checklist { max-width: 32rem }`. Commits 5ba4bf0, 67c86df.
+- Controller proof at 67c86df: full chain via check:e2e-temp (port 3194) exit 0, 105 passed, 0 temp files, no `data/`. Looked at /tmp/t28-shots/task-1280.png and board-390.png: labels ticked, checklist rows with Delete beside them, card chips + "Checklist 1/3", no overflow.
+- [x] 1. n/a: first attempt passed.
+- [x] 2. n/a.
+- [x] 3. n/a.
+- [x] Done when: T25-T28 committed on nstack/labels-checklist, each proof + fast checks run by the controller at its commit (entries above).
