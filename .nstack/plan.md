@@ -12,6 +12,8 @@ Acceptance criteria (Playwright e2e):
 50. Project names: the new-project and rename inputs reject a whitespace-only name in the browser (`pattern` requiring a non-space character, with `title="Name cannot be blank"`); the input is `:invalid` and submitting creates/renames nothing (server already ignores blank names).
 51. CSV export: the formula guard looks at the first character after leading spaces: a cell like `  =HYPERLINK("x")` (spaces then `=`/`+`/`-`/`@`) is written as `'  =HYPERLINK("x")` (quote prepended to the original value, spaces kept). Values without such a character are unchanged. Test in e2e/export.spec.ts with a description stored with leading spaces (descriptions are trimmed on save, so set it in the DB at `process.env.E2E_DATABASE_PATH`, as earlier specs read it).
 
+52. Every error alert in the app's forms and the board/checklist (`<p role="alert">` inside `main`) shows in the same red (#b91c1c) bold style: one CSS rule on `main [role="alert"]` replaces the per-class colour rules (`.board-error` keeps only its grid placement). e2e: a login error, a task-form error and the checklist alert each have computed color rgb(185, 28, 28). Added 2026-11-26 from the controller's screens check (checklist alert was plain text) and the builder's note that all form alerts were.
+
 Out of scope: undo, toasts, retrying, server-side error messages for project forms (no useActionState rewrite).
 
 Decision: task delete refused -> redirect to the board rather than an error message: the task is gone, the board is where the user goes next when the user is a member of the project; a non-member's refused delete still does nothing (no redirect), so the existing tamper tests keep their meaning.
@@ -29,6 +31,7 @@ Fresh-reader answers (2026-11-26):
 
 - [x] T31 Checklist and task-delete failures are not silent (AC47, AC48). Proof: e2e in e2e/checklist.spec.ts and e2e/edit-task.spec.ts, red first; full chain. Needs: none
 - [x] T32 Board empty states and blank project names (AC49, AC50). Proof: e2e in e2e/search.spec.ts (or a new e2e/empty-states.spec.ts) and e2e/projects.spec.ts, red first; full chain; screens of an empty and a filtered-to-nothing board at 1280/390 looked at. Needs: T31 (one builder at a time, 2 CPUs)
+- [ ] T34 All error alerts styled alike (AC52). Proof: e2e colour checks (login, task form, checklist), red first; full chain. Needs: T33
 - [x] T33 CSV formula guard after leading spaces (AC51). Proof: e2e in e2e/export.spec.ts, red first; full chain. Needs: T32
 
 ## Done
