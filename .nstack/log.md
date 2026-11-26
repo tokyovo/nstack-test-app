@@ -628,5 +628,7 @@
 - [x] 6. Screens: /tmp/t32-shots/{empty-board,filtered-board}-{1280,390}.png (builder viewed three, controller viewed empty-board-390): placeholders and match message laid out, no overflow. Task-page checklist alert: covered by e2e text/role checks; red text styled like `.board-error` (globals.css).
 - [x] 7. Nothing weaker: no e2e line removed in the slice; no any/ts-ignore/eslint-disable.
 - [x] 8. No new warnings (0).
-- Not verified: the checklist alert's look on screen (not screenshotted; it reuses the board alert style). Accepted: covered by role/text tests, reviewer to look.
+- Not verified: (resolved below) the checklist alert's look; I had assumed it reused the board alert style.
 - [x] Done when: ticked.
+- Follow-up (controller): a temporary spec (copy of AC47 + screenshot, deleted afterwards) shot /tmp/s10-shots/checklist-alert-{1280,390}.png: the alert was plain black text, not red. The assumption was wrong. Builder fix 09bae42 (colour test red first). The builder noted all form alerts were plain -> AC52/T34 added: one `main [role="alert"]` rule, commit bb590c8, login + task-form colour tests red first.
+- Controller at bb590c8: full chain (port 3205, exit code unpiped) exit 0, 118 passed, 0 warnings, 0 temp files; no e2e lines removed; re-shot checklist-alert-390.png: red bold. Not verified: none.

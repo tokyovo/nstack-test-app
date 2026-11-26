@@ -31,7 +31,7 @@ Fresh-reader answers (2026-11-26):
 
 - [x] T31 Checklist and task-delete failures are not silent (AC47, AC48). Proof: e2e in e2e/checklist.spec.ts and e2e/edit-task.spec.ts, red first; full chain. Needs: none
 - [x] T32 Board empty states and blank project names (AC49, AC50). Proof: e2e in e2e/search.spec.ts (or a new e2e/empty-states.spec.ts) and e2e/projects.spec.ts, red first; full chain; screens of an empty and a filtered-to-nothing board at 1280/390 looked at. Needs: T31 (one builder at a time, 2 CPUs)
-- [ ] T34 All error alerts styled alike (AC52). Proof: e2e colour checks (login, task form, checklist), red first; full chain. Needs: T33
+- [x] T34 All error alerts styled alike (AC52). Proof: e2e colour checks (login, task form, checklist), red first; full chain. Needs: T33
 - [x] T33 CSV formula guard after leading spaces (AC51). Proof: e2e in e2e/export.spec.ts, red first; full chain. Needs: T32
 
 ## Done
