@@ -2,10 +2,12 @@ import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { getProject, listMembers } from "@/lib/projects";
 import { localToday } from "@/lib/due-dates";
+import { listLabels } from "@/lib/labels";
 import { listTasks } from "@/lib/tasks";
-import { createTaskAction, inviteMemberAction, moveTaskAction } from "../actions";
+import { createLabelAction, createTaskAction, inviteMemberAction, moveTaskAction } from "../actions";
 import { Board } from "./board";
 import { InviteForm } from "./invite-form";
+import { LabelForm } from "./label-form";
 import { TaskForm } from "./task-form";
 
 export const dynamic = "force-dynamic";
@@ -22,6 +24,7 @@ export default async function ProjectPage({ params, searchParams }: PageProps<"/
   if (!project) notFound();
   const members = listMembers(user.id, project.id);
   const tasks = listTasks(user.id, project.id);
+  const labels = listLabels(user.id, project.id);
   const query = await searchParams;
   return (
     <main>
@@ -46,6 +49,16 @@ export default async function ProjectPage({ params, searchParams }: PageProps<"/
         initialQuery={first(query.q)}
         initialAssignee={first(query.for)}
       />
+      <section>
+        <h3>Labels</h3>
+        {labels.length === 0 && <p>No labels yet</p>}
+        <ul aria-label="Labels">
+          {labels.map((label) => (
+            <li key={label.id}>{label.name}</li>
+          ))}
+        </ul>
+        <LabelForm action={createLabelAction.bind(null, project.id)} />
+      </section>
       <section>
         <h3>Members</h3>
         <ul aria-label="Members">

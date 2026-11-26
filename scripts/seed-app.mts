@@ -115,7 +115,7 @@ async function ensureTask(page: Page, task: SeedTask) {
 function card(page: Page, column: Column, title: string) {
   return page
     .getByRole("region", { name: column, exact: true })
-    .getByRole("listitem")
+    .locator("li.task-card")
     .filter({ has: taskLink(page, title) });
 }
 

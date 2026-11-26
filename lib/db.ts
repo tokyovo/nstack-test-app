@@ -43,6 +43,17 @@ CREATE TABLE IF NOT EXISTS comments (
   body TEXT NOT NULL,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+CREATE TABLE IF NOT EXISTS labels (
+  id INTEGER PRIMARY KEY,
+  project_id INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  UNIQUE (project_id, name COLLATE NOCASE)
+);
+CREATE TABLE IF NOT EXISTS task_labels (
+  task_id INTEGER NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
+  label_id INTEGER NOT NULL REFERENCES labels(id) ON DELETE CASCADE,
+  PRIMARY KEY (task_id, label_id)
+);
 `;
 
 let db: Database.Database | undefined;

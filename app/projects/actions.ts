@@ -6,7 +6,8 @@ import type { FormState } from "@/app/auth-actions";
 import { requireUser } from "@/lib/auth";
 import { createProject, deleteProject, inviteMember, renameProject } from "@/lib/projects";
 import { addComment } from "@/lib/comments";
-import { MAX_TITLE_LENGTH } from "@/lib/limits";
+import { createLabel, setTaskLabels } from "@/lib/labels";
+import { MAX_LABEL_LENGTH, MAX_TITLE_LENGTH } from "@/lib/limits";
 import { isStatus } from "@/lib/statuses";
 import { createTask, deleteTask, moveTask, updateTask, type NewTask } from "@/lib/tasks";
 
@@ -151,4 +152,46 @@ export async function addCommentAction(
   if (!addComment(user.id, projectId, taskId, body)) return { error: "Task not found" };
   revalidatePath(`/projects/${projectId}/tasks/${taskId}`);
   return {};
+}
+
+export type LabelFormState = FormState & { values?: { name: string } };
+
+const LABEL_ERRORS = {
+  "not-found": "Project not found",
+  duplicate: "That label already exists",
+} as const;
+
+export async function createLabelAction(
+  projectId: number,
+  _prev: LabelFormState,
+  formData: FormData,
+): Promise<LabelFormState> {
+  const user = await requireUser();
+  const typed = String(formData.get("name") ?? "");
+  const name = typed.trim();
+  if (!name) return { error: "Label name is required", values: { name: typed } };
+  if (name.length > MAX_LABEL_LENGTH) {
+    return { error: `Label name must be at most ${MAX_LABEL_LENGTH} characters`, values: { name: typed } };
+  }
+  const result = createLabel(user.id, projectId, name);
+  if (result !== "created") return { error: LABEL_ERRORS[result], values: { name: typed } };
+  revalidatePath(`/projects/${projectId}`);
+  return {};
+}
+
+export type SaveLabelsState = FormState & { saved?: boolean };
+
+/** Sets a task's labels to the checked boxes; ids that are not labels of the project are ignored. */
+export async function saveTaskLabelsAction(
+  projectId: number,
+  taskId: number,
+  _prev: SaveLabelsState,
+  formData: FormData,
+): Promise<SaveLabelsState> {
+  const user = await requireUser();
+  const labelIds = formData.getAll("labelId").map(Number).filter(Number.isInteger);
+  if (!setTaskLabels(user.id, projectId, taskId, labelIds)) return { error: "Task not found" };
+  revalidatePath(`/projects/${projectId}`);
+  revalidatePath(`/projects/${projectId}/tasks/${taskId}`);
+  return { saved: true };
 }

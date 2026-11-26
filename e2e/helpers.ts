@@ -49,7 +49,7 @@ export function column(page: Page, name: ColumnName) {
 
 /** The task cards in a board column. */
 export function cards(page: Page, name: ColumnName) {
-  return column(page, name).getByRole("listitem");
+  return column(page, name).locator("li.task-card");
 }
 
 /**
