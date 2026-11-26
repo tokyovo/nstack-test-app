@@ -554,3 +554,44 @@
 - Small-fix exception used: one finding, 4 changed code lines, verify passed, test seen red before the fix -> no new review round.
 - Worktree removed; no servers listening.
 - [x] Done when: no important findings; verify passed after the last fix (110 passed at 74072ab); nit fixed.
+
+## 2026-11-26 ship slice board-fold
+- Read: ship/SKILL.md 47e5182 (same file as the slice 8 ship entry, this run)
+- [x] 1. Commit. T29, T30 + state on nstack/board-fold.
+- [x] 2. Sync. 0 new commits on origin/main.
+- [x] 3. Push. nstack/board-fold.
+- [x] 4. Open the PR. https://github.com/tokyovo/nstack-test-app/pull/14
+- [x] 5. Wait for CI. runs 45766836409, 45766858110 pass; 110 passed.
+- [x] 6. Merge. `merge: auto`: squash-merged as a63733e.
+- [x] 7. Confirm and clean up. main at a63733e: lint + typecheck pass; CI run 45768015387 (a63733e) success; remote branch deleted by --delete-branch; no worktrees.
+- [x] Done when: merged, CI green on main, fast checks pass.
+
+## 2026-11-26 improve
+- Read: improve/SKILL.md 762f257 (same file as the earlier improve entry, this run)
+- [x] 1. Gather evidence
+  - [x] 1.1. Broken things. CI on main green (45768015387, 110 passed).
+  - [x] 1.2. Known problems. No open issues; needs-human all resolved; backlog re-summed by script: 7 scores were wrong (e.g. "6 (v2 r2 c3)", "4 (v1 r2 c4)"); the 2026-11-25 "nothing at bar 7" stop rested on these miscounts.
+  - [x] 1.3. Gaps against the goal. None.
+  - [x] 1.4. Outside demand. research.md 2026-11-25 (<7 days); candidates in backlog.
+  - [x] 1.5. Risk. npm audit 0 (earlier this run); CSV guard gap (7) is the risk item.
+  - [x] 1.6. User experience. /tmp/t29-shots/ reviewed at T29; nothing new beyond backlog items.
+  - [x] 1.7. Code health. Nothing blocking.
+- [x] 2. Score. Re-summed; fixed items (board fold, export gap, filter margin) removed. At 7: silent checklist failure, silent board/project feedback, CSV guard after spaces.
+- [x] 3. Decide. Slice task-feedback (T31-T33, AC47-51), grouped with the 6 "task delete refused is silent".
+- Lesson: score sums were wrong in 7 of ~20 backlog lines, twice across runs. Structure: the backlog is now re-summed with a script before deciding (the python one-liner in this entry's step); added to backlog.md hand-off notes as an nstack tooling suggestion (a `scripts/` check belongs in nstack, not this app).
+- [x] Done when: sources checked, candidates scored, slice planned.
+
+## 2026-11-26 plan slice task-feedback
+- Read: plan/SKILL.md 59d57d8 (same file, this run)
+- [x] 1. Ground truth: checklist-item.tsx, project forms, lib/export.ts guard, deleteTaskAction.
+- [x] 2. Interrogate: questions on refusal UX, redirect vs message, blank names, guard scope; answered + Decision lines.
+  - [x] 2.1. listed in plan answers.
+  - [x] 2.2. from code (board moveTo pattern, tamper helpers).
+  - [x] 2.3. Decisions logged in plan.md.
+- [x] 3. Spec AC47-51.
+- [x] 4. Tickets T31-T33, sequential (2 CPUs).
+- [x] 5. Check the plan
+  - [x] 5.1. AC47,48->T31; AC49,50->T32; AC51->T33.
+  - [x] 5.2. Fresh Explore reader: 10 questions, answered under "Fresh-reader answers" (AC48 changed: no redirect for non-members).
+  - [x] 5.3. Slice in plan.md, branch nstack/task-feedback.
+- [x] Done when: met.
