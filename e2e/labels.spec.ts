@@ -231,3 +231,129 @@ test("AC37: a save-labels request naming a project the user is not a member of c
 test("AC37: a save-labels request naming another project's task id changes nothing", async ({ browser }) => {
   await tamperedSave(browser, (a) => [null, a.taskId]); // keeps B's own project id
 });
+
+/** Ticks `names` on the task's page and saves, then returns to the board. */
+async function labelTask(page: Page, projectUrl: string, title: string, names: string[]) {
+  await page.goto(projectUrl);
+  await openTask(page, title);
+  for (const name of names) await page.getByRole("checkbox", { name, exact: true }).check();
+  await saveLabels(page);
+  await page.goto(projectUrl);
+}
+
+/** The titles of every card on the board, in board order. */
+function cardTitles(page: Page) {
+  return page.locator("[data-task-id] strong");
+}
+
+/** The board's label select; its name also holds the chosen option ("Label All labels"), as with "Show tasks for". */
+function labelFilter(page: Page) {
+  return page.getByRole("combobox", { name: /^Label\b/ });
+}
+
+function query(page: Page, key: string) {
+  return new URL(page.url()).searchParams.get(key);
+}
+
+/** A project with labels Bug and Design and four tasks; "Fix login" is assigned to the creator. */
+async function labelledBoard(browser: Browser) {
+  const a = await newUser(browser);
+  const url = await createProject(a.page, "Filter by label");
+  await a.page.goto(url);
+  await createLabel(a.page, "Design");
+  await createLabel(a.page, "Bug");
+  await a.page.getByLabel("Title").fill("Fix login");
+  await a.page.getByLabel("Assignee").selectOption({ label: a.email });
+  await a.page.getByRole("button", { name: "Add task" }).click();
+  await expect(cards(a.page, "To do").filter({ hasText: "Fix login" })).toHaveCount(1);
+  await addTask(a.page, url, "Fix logo");
+  await addTask(a.page, url, "Draw icons");
+  await addTask(a.page, url, "Plain");
+  await labelTask(a.page, url, "Fix login", ["Bug"]);
+  await labelTask(a.page, url, "Fix logo", ["Bug", "Design"]);
+  await labelTask(a.page, url, "Draw icons", ["Design"]);
+  return { ...a, url };
+}
+
+test("AC38: the label filter shows only tasks with that label and combines with search and assignee", async ({
+  browser,
+}) => {
+  const a = await labelledBoard(browser);
+  const filter = labelFilter(a.page);
+  await expect(filter).toHaveValue("all");
+  await expect(filter.locator("option")).toHaveText(["All labels", "Bug", "Design"]);
+  await expect(cardTitles(a.page)).toHaveCount(4);
+
+  await filter.selectOption({ label: "Bug" });
+  await expect(cardTitles(a.page)).toHaveText(["Fix login", "Fix logo"]);
+  await filter.selectOption({ label: "Design" });
+  await expect(cardTitles(a.page)).toHaveText(["Fix logo", "Draw icons"]);
+
+  await a.page.getByLabel("Search tasks").fill("fix");
+  await expect(cardTitles(a.page)).toHaveText(["Fix logo"]);
+  await filter.selectOption({ label: "Bug" });
+  await expect(cardTitles(a.page)).toHaveText(["Fix login", "Fix logo"]);
+  await a.page.getByLabel("Show tasks for").selectOption({ label: "My tasks" });
+  await expect(cardTitles(a.page)).toHaveText(["Fix login"]);
+  await filter.selectOption({ label: "Design" });
+  await expect(cardTitles(a.page)).toHaveCount(0);
+
+  await filter.selectOption({ label: "All labels" });
+  await expect(cardTitles(a.page)).toHaveText(["Fix login"]);
+});
+
+test("AC38: a board with no labels still has the label filter with only All labels", async ({ browser }) => {
+  const a = await newUser(browser);
+  const url = await createProject(a.page, "No labels");
+  await addTask(a.page, url, "Lonely");
+  await expect(labelFilter(a.page).locator("option")).toHaveText(["All labels"]);
+  await expect(cardTitles(a.page)).toHaveText(["Lonely"]);
+});
+
+test("AC38: the label filter lives in the URL without adding history; a reload keeps it", async ({ browser }) => {
+  const a = await labelledBoard(browser);
+  const historyLength = await a.page.evaluate(() => history.length);
+  const bugId = await labelFilter(a.page).locator("option", { hasText: "Bug" }).getAttribute("value");
+  expect(bugId).toMatch(/^\d+$/);
+
+  await labelFilter(a.page).selectOption({ label: "Bug" });
+  await expect.poll(() => query(a.page, "label")).toBe(bugId);
+  await a.page.getByLabel("Search tasks").fill("logo");
+  await expect.poll(() => query(a.page, "q")).toBe("logo");
+  await a.page.getByLabel("Show tasks for").selectOption({ label: "Unassigned" });
+  await expect.poll(() => query(a.page, "for")).toBe("unassigned");
+  expect(query(a.page, "label")).toBe(bugId);
+  expect(await a.page.evaluate(() => history.length)).toBe(historyLength);
+  await expect(cardTitles(a.page)).toHaveText(["Fix logo"]);
+
+  await a.page.reload();
+  await expect(labelFilter(a.page)).toHaveValue(bugId!);
+  await expect(a.page.getByLabel("Search tasks")).toHaveValue("logo");
+  await expect(a.page.getByLabel("Show tasks for")).toHaveValue("unassigned");
+  await expect(cardTitles(a.page)).toHaveText(["Fix logo"]);
+
+  await labelFilter(a.page).selectOption({ label: "All labels" });
+  await expect.poll(() => query(a.page, "label")).toBeNull();
+  expect(query(a.page, "q")).toBe("logo");
+  expect(query(a.page, "for")).toBe("unassigned");
+  expect(await a.page.evaluate(() => history.length)).toBe(historyLength);
+});
+
+test("AC38: an unknown or another project's label id shows all labels", async ({ browser }) => {
+  const a = await labelledBoard(browser);
+  const other = await createProject(a.page, "Elsewhere");
+  await a.page.goto(other);
+  await createLabel(a.page, "Foreign");
+  const foreignId = await labelFilter(a.page).locator("option", { hasText: "Foreign" }).getAttribute("value");
+  expect(foreignId).toMatch(/^\d+$/);
+
+  for (const id of ["999999", foreignId!, "bogus"]) {
+    await a.page.goto(`${a.url}?label=${id}`);
+    await expect(labelFilter(a.page)).toHaveValue("all");
+    await expect(cardTitles(a.page)).toHaveCount(4);
+  }
+  await a.page.getByLabel("Search tasks").fill("Plain");
+  await expect.poll(() => query(a.page, "q")).toBe("Plain");
+  expect(query(a.page, "label")).toBeNull();
+  await expect(cardTitles(a.page)).toHaveText(["Plain"]);
+});

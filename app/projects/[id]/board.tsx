@@ -6,21 +6,24 @@ import { startTransition, useEffect, useOptimistic, useRef, useState, type DragE
 import { isOverdue } from "@/lib/due-dates";
 import { COLUMN_NAMES, STATUSES, neighborStatus, type Status } from "@/lib/statuses";
 import type { Member } from "@/lib/projects";
+import type { Label } from "@/lib/labels";
 import type { Task } from "@/lib/tasks";
 
 type Props = {
   projectId: number;
   tasks: Task[];
   members: Member[];
+  labels: Label[];
   /** The viewer; "My tasks" shows the tasks assigned to them. */
   userId: number;
   /** The server's local date (YYYY-MM-DD); cards due before it, and not Done, are marked overdue. */
   today: string;
   /** Resolves true when the server stored the move. */
   move: (taskId: number, status: Status) => Promise<boolean>;
-  /** The URL's `q` and `for` on load; an unknown `for` shows all tasks. */
+  /** The URL's `q`, `for` and `label` on load; an unknown `for` or `label` shows all tasks. */
   initialQuery: string;
   initialAssignee: string;
+  initialLabel: string;
 };
 type Move = { id: number; status: Status };
 
@@ -40,11 +43,23 @@ function isAssignee(value: string, members: Member[]): boolean {
   return [ALL, MINE, UNASSIGNED].includes(value) || members.some((member) => String(member.id) === value);
 }
 
-/** Mirrors the search and filter in the URL (`?q=&for=`) without adding a history entry. */
-function replaceUrl(query: string, assignee: string) {
+/** Label filter values: "all" or a project label's id. */
+function isLabel(value: string, labels: Label[]): boolean {
+  return value === ALL || labels.some((label) => String(label.id) === value);
+}
+
+function matchesLabel(task: Task, label: string): boolean {
+  return label === ALL || task.labels.some((taskLabel) => String(taskLabel.id) === label);
+}
+
+type Filters = { query: string; assignee: string; label: string };
+
+/** Mirrors the search and filters in the URL (`?q=&for=&label=`) without adding a history entry. */
+function replaceUrl({ query, assignee, label }: Filters) {
   const params = new URLSearchParams();
   if (query.trim()) params.set("q", query);
   if (assignee !== ALL) params.set("for", assignee);
+  if (label !== ALL) params.set("label", label);
   const search = params.toString();
   window.history.replaceState(null, "", search ? `?${search}` : window.location.pathname);
 }
@@ -57,10 +72,21 @@ const KEY_STEPS: Record<string, -1 | 1> = { ArrowLeft: -1, ArrowRight: 1 };
  * A move the server refuses puts the card back and shows an alert until the next move succeeds.
  * Cards past their due date and not in Done say "Overdue".
  * The search box shows only tasks whose title or description contains the query (any case);
- * the assignee filter narrows that further to all, the viewer's, unassigned, or one member's tasks.
- * Both live in the URL, so a reload or a shared link shows the same board.
+ * the assignee filter narrows that further to all, the viewer's, unassigned, or one member's tasks,
+ * and the label filter to the tasks with one label. All three live in the URL, so a reload or a shared link shows the same board.
  */
-export function Board({ projectId, tasks, members, userId, today, move, initialQuery, initialAssignee }: Props) {
+export function Board({
+  projectId,
+  tasks,
+  members,
+  labels,
+  userId,
+  today,
+  move,
+  initialQuery,
+  initialAssignee,
+  initialLabel,
+}: Props) {
   const [shown, applyMove] = useOptimistic(tasks, (current: Task[], { id, status }: Move) =>
     current.map((task) => (task.id === id ? { ...task, status } : task)),
   );
@@ -70,10 +96,12 @@ export function Board({ projectId, tasks, members, userId, today, move, initialQ
   const [moveError, setMoveError] = useState<string | null>(null);
   const [query, setQuery] = useState(initialQuery);
   const [assignee, setAssignee] = useState(() => (isAssignee(initialAssignee, members) ? initialAssignee : ALL));
+  const [label, setLabel] = useState(() => (isLabel(initialLabel, labels) ? initialLabel : ALL));
   const needle = query.trim().toLowerCase();
   const visible = shown.filter(
     (task) =>
       matchesAssignee(task, assignee, userId) &&
+      matchesLabel(task, label) &&
       (!needle || [task.title, task.description].some((text) => text.toLowerCase().includes(needle))),
   );
   useEffect(() => {
@@ -125,7 +153,7 @@ export function Board({ projectId, tasks, members, userId, today, move, initialQ
           value={query}
           onChange={(event) => {
             setQuery(event.target.value);
-            replaceUrl(event.target.value, assignee);
+            replaceUrl({ query: event.target.value, assignee, label });
           }}
         />
       </label>
@@ -135,7 +163,7 @@ export function Board({ projectId, tasks, members, userId, today, move, initialQ
           value={assignee}
           onChange={(event) => {
             setAssignee(event.target.value);
-            replaceUrl(query, event.target.value);
+            replaceUrl({ query, assignee: event.target.value, label });
           }}
         >
           <option value={ALL}>All</option>
@@ -144,6 +172,23 @@ export function Board({ projectId, tasks, members, userId, today, move, initialQ
           {members.map((member) => (
             <option key={member.id} value={member.id}>
               {member.email}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className="board-filter">
+        Label{" "}
+        <select
+          value={label}
+          onChange={(event) => {
+            setLabel(event.target.value);
+            replaceUrl({ query, assignee, label: event.target.value });
+          }}
+        >
+          <option value={ALL}>All labels</option>
+          {labels.map((option) => (
+            <option key={option.id} value={option.id}>
+              {option.name}
             </option>
           ))}
         </select>

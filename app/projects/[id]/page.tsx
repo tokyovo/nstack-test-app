@@ -43,11 +43,13 @@ export default async function ProjectPage({ params, searchParams }: PageProps<"/
         projectId={project.id}
         tasks={tasks}
         members={members}
+        labels={labels}
         userId={user.id}
         today={localToday()}
         move={moveTaskAction.bind(null, project.id)}
         initialQuery={first(query.q)}
         initialAssignee={first(query.for)}
+        initialLabel={first(query.label)}
       />
       <section>
         <h3>Labels</h3>
