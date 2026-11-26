@@ -2,8 +2,6 @@
 Rescored 2026-11-25 after slice 5 (UX pass on T18 `npm run screens` output, /tmp/t18-shots/). Slice 4 and 5 shipped; items below are open.
 Scored 2026-11-25 (value + risk + cost, cost 5 = cheapest). Sources: UX pass (headless Chromium, screenshots /tmp/ux-shots/), research.md (29 sources), earlier reviews.
 
-- 6 (v2 r1 c3) Labels/tags with filtering. Evidence: 4 sources, research.md
-- 6 (v2 r1 c3) Checklists/subtasks. Evidence: 4 sources, research.md
 - 6 (v2 r1 c3) Duplicate a task / templates. Evidence: 4 sources, research.md
 - 6 (v2 r1 c4) Silent feedback: whitespace project name does nothing; no "no results" on empty search; no visible drop area in empty columns. (UX)
 - 5 (v2 r1 c2) Calendar view. Evidence: 5 sources, research.md
