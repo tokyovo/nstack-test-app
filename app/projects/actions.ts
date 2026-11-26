@@ -71,7 +71,8 @@ const TASK_ERRORS = {
 /** The task form fields as typed, sent back with an error so the form can be refilled. */
 export type TaskFormValues = { title: string; description: string; assigneeId: string; dueDate: string };
 
-export type TaskFormState = FormState & { values?: TaskFormValues };
+/** `added` is the title of the task just created, so the new-task form can confirm it. */
+export type TaskFormState = FormState & { values?: TaskFormValues; added?: string };
 
 function typedTask(formData: FormData): TaskFormValues {
   const field = (name: string) => String(formData.get(name) ?? "");
@@ -103,7 +104,7 @@ export async function createTaskAction(
   const result = createTask(user.id, projectId, task);
   if (result !== "created") return { error: TASK_ERRORS[result], values: typedTask(formData) };
   revalidatePath(`/projects/${projectId}`);
-  return {};
+  return { added: task.title };
 }
 
 export async function updateTaskAction(

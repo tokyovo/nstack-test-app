@@ -30,6 +30,7 @@ export function TaskForm({ action, members, task, submitLabel = "Add task" }: Pr
   return (
     <form action={formAction}>
       {state.error && <p role="alert">{state.error}</p>}
+      {state.added && <p role="status">Added &quot;{state.added}&quot;</p>}
       <label>
         Title <input name="title" required maxLength={MAX_TITLE_LENGTH} defaultValue={values.title} />
       </label>
