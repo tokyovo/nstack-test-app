@@ -433,3 +433,12 @@
 - [x] 2. n/a: first attempt passed.
 - [x] 3. n/a: nothing parked.
 - [ ] Done when: (slice) T26-T28 pending.
+
+## 2026-11-26 build T26
+- Read: build/SKILL.md 141fcec (same file as T25 entry, this run)
+- Did: builder: "Label" select in Board (All labels + each label), `labels`/`initialLabel` props, URL `label=` via replaceUrl({query, assignee, label}); 4 AC38 tests in e2e/labels.spec.ts, red first; mutant (accept any URL label id) red. Commit c54d51a.
+- Controller proof at c54d51a: full chain via check:e2e-temp (port 3192) exit 0, 96 passed, 0 temp files, no `data/`; no existing test changed (diff stat: board.tsx, page.tsx, labels.spec.ts).
+- [x] 1. n/a: first attempt passed.
+- [x] 2. n/a.
+- [x] 3. n/a.
+- [ ] Done when: (slice) T27-T28 pending.

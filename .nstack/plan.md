@@ -35,7 +35,7 @@ Fresh-reader answers (2026-11-26):
 - CSS (app/globals.css): card label chips are inline-block `li.label` with small padding, rounded border, light background, wrapping (`overflow-wrap: anywhere`); `.checklist-progress` is plain small text. Checklist rows: checkbox and text in one flex row, text with `min-width: 0; overflow-wrap: anywhere`. Checked against the global rule at globals.css:16 by the AC41 layout test.
 
 - [x] T25 Labels: create on the board, assign on the task page, show on cards (AC36, AC37). Proof: new e2e/labels.spec.ts (create, errors incl. duplicate in other case, per-project, assign/unassign, persist, card chips, tamper via a second user's action call), red first; full chain. Needs: none
-- [ ] T26 Filter the board by label, in the URL (AC38). Proof: e2e in e2e/labels.spec.ts (filter, AND with search and assignee, URL + reload, history length unchanged, `label=999999` shows all), red first; full chain. Needs: T25
+- [x] T26 Filter the board by label, in the URL (AC38). Proof: e2e in e2e/labels.spec.ts (filter, AND with search and assignee, URL + reload, history length unchanged, `label=999999` shows all), red first; full chain. Needs: T25
 - [ ] T27 Checklist on the task page with progress on the card (AC39, AC40). Proof: new e2e/checklist.spec.ts (add, errors, toggle persist, delete, card count updates, no element when empty, tamper), red first; full chain. Needs: T26 (same files: lib/tasks.ts, board.tsx, task page)
 - [ ] T28 Seed, layout and screens (AC41). Proof: e2e/seed.spec.ts and e2e/layout.spec.ts extended, red first; `npm run screens` at 1280/390 reviewed; full chain. Needs: T27
 
