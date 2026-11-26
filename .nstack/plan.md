@@ -29,7 +29,7 @@ Fresh-reader answers (2026-11-26):
 - AC43: `expect(page).toHaveURL(/#new-task$/)` and `expect(page.getByLabel("Title")).toBeInViewport()` (the new-task Title; Playwright's default ratio, any part visible).
 - AC45: screens.mts stays full-page (no new file, AC23's 10 files unchanged); the above-the-fold claim is proven by AC42's test, and the reviewer of the screens judges layout. Seed already has labels and a 60+ char member (T17, T28); no seed change.
 
-- [ ] T29 Board above the fold (AC42-45). Proof: new tests in e2e/layout.spec.ts, red first; full chain; screens reviewed. Needs: none
+- [x] T29 Board above the fold (AC42-45). Proof: new tests in e2e/layout.spec.ts, red first; full chain; screens reviewed. Needs: none
 
 ## Done
 - task-board v1: T1-T8, PR #1

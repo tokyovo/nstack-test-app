@@ -522,3 +522,26 @@
   - [x] 5.2. Fresh Explore reader: 10 questions, answered under "Fresh-reader answers" (margin rule location corrected, measurement boxes, link order, hash, locators).
   - [x] 5.3. Slice in plan.md, branch nstack/board-fold.
 - [x] Done when: every criterion has a proof, questions answered, slice in plan.md.
+
+## 2026-11-26 build T29
+- Read: build/SKILL.md 141fcec
+- Did: builder: TaskForm moved below the board in `<section id="new-task">` + "New task" link; filters one grid cell each; `.board > label { margin: 0 }`; `.export-links` flex gap 0.75rem; 4 tests in e2e/layout.spec.ts (3 red first; AC42@390 a guard); mutant (no link gap) red. Commit d927469.
+- Decision (builder): left out the planned `width: 100%` filter rule: cells (~362px) are under the 32rem cap, AC42's no-overlap check passes without it (principle 2).
+- Controller proof at d927469: full chain via check:e2e-temp (port 3196) exit 0, 109 passed, 0 warnings, 0 temp files, no `data/`; e2e diff removes only an import line (re-added with more names).
+- [x] 1. n/a: first attempt passed.
+- [x] 2. n/a.
+- [x] 3. n/a.
+- [x] Done when: T29 committed with proof + fast checks run by the controller.
+
+## 2026-11-26 verify slice board-fold
+- Read: verify/SKILL.md 02888d9 (same file as the slice 8 verify entry, this run)
+- [x] 1. Clean tree. d927469; only my needs-human.md edit (state) uncommitted, committed with this entry.
+- [x] 2. Project checks. full chain 109 passed, 0 skipped, 0 warnings.
+- [x] 3. AC42-44 -> e2e/layout.spec.ts (4 tests); AC45 -> screens below.
+- [x] 4. Bites: builder red-first (3) + gap mutant; controller mutant (filters back to full-width rows) -> AC42 failed, restored, tree clean.
+- [x] 5. Real thing: e2e in a real browser in CI; builder's isolated server + `npm run screens` exit 0 (/tmp/t29-shots/).
+- [x] 6. Screens: /tmp/t29-shots/board-1280.png looked at by the controller: links spaced, three filters on one row, "To do" at y~270, New task below the columns, nothing overlaps.
+- [x] 7. Nothing weaker: no test removed or loosened; forms-layout.spec and AC15 tests unchanged and passing.
+- [x] 8. No new warnings (0, as before).
+- Not verified: none.
+- [x] Done when: all ticked.

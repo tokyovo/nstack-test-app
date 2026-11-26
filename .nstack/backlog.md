@@ -23,3 +23,4 @@ Scored 2026-11-25 (value + risk + cost, cost 5 = cheapest). Sources: UX pass (he
 - 4 (v1 r1 c2) `withLabels` in lib/tasks.ts matches labels to tasks with a filter per row (O(tasks x labels)); a Map if boards get large. Evidence: T25 builder.
 - 6 (v2 r2 c3) A checklist tick or delete the server refuses (item deleted in another tab) undoes silently and leaves the stale row; show an alert and refresh, like the board's failed move (AC29). Evidence: slice 8 reviewers 1 and 2 (two-session repro).
 - 4 (v1 r1 c3) Label duplicate check and name order are ASCII-only (`COLLATE NOCASE`): "Été" and "été" can both exist. Same limit as user emails. Evidence: slice 8 security reviewer (better-sqlite3 repro).
+- 3 (v1 r1 c4) Board search box is a few px taller than the two filter selects (browser default heights), board-1280.png. Evidence: T29 builder.
