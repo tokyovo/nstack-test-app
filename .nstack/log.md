@@ -474,3 +474,11 @@
 - [x] 8. No new warnings: build and test logs grep "warn" = 0 (slice 7: 0). verify.md Last result updated.
 - Not verified: none.
 - [x] Done when: all ticked, Not verified empty.
+
+## 2026-11-26 review slice labels-checklist
+- Read: review/SKILL.md aac908c
+- Reviewer 1 (worktree, 47e623a): pass, 1 nit (failed checklist toggle/delete is silent). Its runs: lint/typecheck/build pass; 6 specs 33 passed; mutants (labels project_id, checklist task_id) red; screens 10 PNGs, no console errors.
+- Reviewer 2, Focus: security and failure modes (after reviewer 1, 2-CPU limit): pass, 2 nits (same silent-failure nit, two-session repro; NOCASE is ASCII-only, "Été"/"été" both stored). Its runs: 29 passed; same mutants red; screens; servers stopped.
+- Nits: both in backlog.md (not cheap: each needs UI + test + re-verify; neither is in the ACs).
+- Worktrees of both reviewers removed; no servers listening.
+- [x] Done when: latest round no important findings; verify passed at 67c86df (code unchanged since); nits in backlog.md.
