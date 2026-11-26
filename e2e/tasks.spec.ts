@@ -82,6 +82,7 @@ test("AC8: the title is required, also when the browser check is bypassed", asyn
   await a.page.getByRole("button", { name: "Add task" }).click();
 
   await expect(taskError(a.page)).toHaveText("Title is required");
+  await expect(taskError(a.page)).toHaveCSS("color", "rgb(185, 28, 28)");
   await expect(cards(a.page, "To do")).toHaveCount(0);
 });
 

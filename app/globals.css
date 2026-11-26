@@ -77,9 +77,6 @@ label > :is(input, select, textarea) {
 .board-error,
 .board-empty {
   grid-column: 1 / -1;
-}
-
-.board-empty {
   margin: 0;
 }
 
@@ -88,9 +85,7 @@ label > :is(input, select, textarea) {
   color: #6b7280;
 }
 
-.board-error,
-.checklist-error {
-  margin: 0;
+main [role="alert"] {
   color: #b91c1c;
   font-weight: 600;
 }

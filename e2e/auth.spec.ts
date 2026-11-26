@@ -77,6 +77,7 @@ test("AC3: a wrong password shows 'Invalid email or password'", async ({ page })
 
   await logIn(page, email, "wrong-password");
   await expect(page.locator("form").getByRole("alert")).toHaveText("Invalid email or password");
+  await expect(page.locator("form").getByRole("alert")).toHaveCSS("color", "rgb(185, 28, 28)");
   await expect(page).toHaveURL("/login");
 });
 
