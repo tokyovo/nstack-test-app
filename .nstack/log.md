@@ -603,3 +603,10 @@
 - Controller proof at 67b913c: full chain (port 3200) exit 0, 113 passed, 0 warnings, 0 temp files; no e2e lines removed.
 - [x] 1. n/a. - [x] 2. n/a. - [x] 3. n/a.
 - [ ] Done when: (slice) T32-T33 pending.
+
+## 2026-11-26 build T32
+- Read: build/SKILL.md 141fcec
+- Did: builder: per-column `columnTasks` drives cards + "No tasks"; "No tasks match the search or filters" status when shown>0 && visible==0; NON_BLANK pattern on both project inputs. New e2e/empty-states.spec.ts + AC50 in projects.spec.ts, 4 red first. Commit f2e4d52.
+- Controller proof at f2e4d52: full chain (port 3201) exit 0, 117 passed, 0 warnings, 0 temp files; no e2e lines removed. Looked at /tmp/t32-shots/empty-board-390.png (the one the builder skipped): "No tasks" in each stacked column, no overflow.
+- [x] 1. n/a. - [x] 2. n/a. - [x] 3. n/a.
+- [ ] Done when: (slice) T33 pending.

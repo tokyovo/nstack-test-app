@@ -28,7 +28,7 @@ Fresh-reader answers (2026-11-26):
 - AC51: "leading spaces" = any characters matched by JS `\s` before the first non-space; guard regex becomes `/^\s*[=+\-@]/` OR the existing leading `\t`/`\r` rule (keep both). An all-space value is unchanged. Test: new test in export.spec.ts; open `E2E_DATABASE_PATH` writable with better-sqlite3 (`busy_timeout` 5000), UPDATE one task's description to `  =HYPERLINK("x")`, close, then export; WAL handles the concurrent writer.
 
 - [x] T31 Checklist and task-delete failures are not silent (AC47, AC48). Proof: e2e in e2e/checklist.spec.ts and e2e/edit-task.spec.ts, red first; full chain. Needs: none
-- [ ] T32 Board empty states and blank project names (AC49, AC50). Proof: e2e in e2e/search.spec.ts (or a new e2e/empty-states.spec.ts) and e2e/projects.spec.ts, red first; full chain; screens of an empty and a filtered-to-nothing board at 1280/390 looked at. Needs: T31 (one builder at a time, 2 CPUs)
+- [x] T32 Board empty states and blank project names (AC49, AC50). Proof: e2e in e2e/search.spec.ts (or a new e2e/empty-states.spec.ts) and e2e/projects.spec.ts, red first; full chain; screens of an empty and a filtered-to-nothing board at 1280/390 looked at. Needs: T31 (one builder at a time, 2 CPUs)
 - [ ] T33 CSV formula guard after leading spaces (AC51). Proof: e2e in e2e/export.spec.ts, red first; full chain. Needs: T32
 
 ## Done
