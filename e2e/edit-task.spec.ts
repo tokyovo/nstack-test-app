@@ -126,7 +126,10 @@ test("AC17: edits get the same validation as new tasks", async ({ browser }) => 
   await expect(a.page.locator("dl")).toContainText("Unassigned");
 });
 
-/** B acts on B's own task page while the bound [projectId, taskId] are rewritten to `ids` (null keeps one). */
+/**
+ * B acts on B's own task page while the bound [projectId, taskId] are rewritten to `ids` (null keeps one).
+ * Returns B's page and B's task path.
+ */
 async function tampered(
   browser: Browser,
   ids: (a: { projectId: number; taskId: number }) => (number | null)[],
@@ -139,7 +142,7 @@ async function tampered(
   const taskUrlA = await openTask(a.page, "A's task");
   const urlB = await createProject(b.page, "Mine");
   await addTask(b.page, urlB, "B's task");
-  await openTask(b.page, "B's task");
+  const taskUrlB = await openTask(b.page, "B's task");
 
   const [, , projectId, , taskId] = taskUrlA.split("/");
   const answered = await tamperBoundIds(b.page, ids({ projectId: Number(projectId), taskId: Number(taskId) }));
@@ -148,6 +151,7 @@ async function tampered(
 
   await a.page.reload();
   await expect(a.page.getByRole("heading", { name: "A's task", exact: true })).toBeVisible();
+  return { page: b.page, taskUrl: taskUrlB };
 }
 
 async function editTitle(page: Page) {
@@ -214,7 +218,8 @@ async function deleteTask(page: Page) {
 }
 
 test("AC17: a delete request naming a project the user is not a member of deletes nothing", async ({ browser }) => {
-  await tampered(browser, (a) => [a.projectId, a.taskId], deleteTask);
+  const b = await tampered(browser, (a) => [a.projectId, a.taskId], deleteTask);
+  await expect(b.page).toHaveURL(b.taskUrl); // AC48: a non-member is not sent to that project's board
 });
 
 test("AC17: a delete request naming another project's task id deletes nothing", async ({ browser }) => {
