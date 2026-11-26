@@ -74,6 +74,7 @@ const KEY_STEPS: Record<string, -1 | 1> = { ArrowLeft: -1, ArrowRight: 1 };
  * The search box shows only tasks whose title or description contains the query (any case);
  * the assignee filter narrows that further to all, the viewer's, unassigned, or one member's tasks,
  * and the label filter to the tasks with one label. All three live in the URL, so a reload or a shared link shows the same board.
+ * An empty column says "No tasks"; when the project has tasks but none match, the board says so above the columns.
  */
 export function Board({
   projectId,
@@ -198,9 +199,15 @@ export function Board({
           {moveError}
         </p>
       )}
+      {shown.length > 0 && visible.length === 0 && (
+        <p role="status" className="board-empty">
+          No tasks match the search or filters
+        </p>
+      )}
       {STATUSES.map((status) => {
         const name = COLUMN_NAMES[status];
         const headingId = `column-${status}`;
+        const columnTasks = visible.filter((task) => task.status === status);
         return (
           <section
             key={status}
@@ -211,42 +218,41 @@ export function Board({
           >
             <h3 id={headingId}>{name}</h3>
             <ul>
-              {visible
-                .filter((task) => task.status === status)
-                .map((task) => {
-                  const overdue = isOverdue(task, today);
-                  return (
-                    <li
-                      key={task.id}
-                      data-task-id={task.id}
-                      className={overdue ? "task-card overdue" : "task-card"}
-                      tabIndex={0}
-                      draggable
-                      onDragStart={(event) => event.dataTransfer.setData("text/plain", String(task.id))}
-                      onKeyDown={(event) => onKeyDown(event, task)}
-                    >
-                      <strong>
-                        <Link href={`/projects/${projectId}/tasks/${task.id}`}>{task.title}</Link>
-                      </strong>
-                      <p>{task.assigneeEmail ?? "Unassigned"}</p>
-                      <p>{task.dueDate ? `Due ${task.dueDate}` : "No due date"}</p>
-                      {overdue && <p className="overdue-label">Overdue</p>}
-                      {task.checklistTotal > 0 && (
-                        <p className="checklist-progress">{`Checklist ${task.checklistDone}/${task.checklistTotal}`}</p>
-                      )}
-                      {task.labels.length > 0 && (
-                        <ul aria-label="Task labels" className="task-labels">
-                          {task.labels.map((label) => (
-                            <li key={label.id} className="label">
-                              {label.name}
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </li>
-                  );
-                })}
+              {columnTasks.map((task) => {
+                const overdue = isOverdue(task, today);
+                return (
+                  <li
+                    key={task.id}
+                    data-task-id={task.id}
+                    className={overdue ? "task-card overdue" : "task-card"}
+                    tabIndex={0}
+                    draggable
+                    onDragStart={(event) => event.dataTransfer.setData("text/plain", String(task.id))}
+                    onKeyDown={(event) => onKeyDown(event, task)}
+                  >
+                    <strong>
+                      <Link href={`/projects/${projectId}/tasks/${task.id}`}>{task.title}</Link>
+                    </strong>
+                    <p>{task.assigneeEmail ?? "Unassigned"}</p>
+                    <p>{task.dueDate ? `Due ${task.dueDate}` : "No due date"}</p>
+                    {overdue && <p className="overdue-label">Overdue</p>}
+                    {task.checklistTotal > 0 && (
+                      <p className="checklist-progress">{`Checklist ${task.checklistDone}/${task.checklistTotal}`}</p>
+                    )}
+                    {task.labels.length > 0 && (
+                      <ul aria-label="Task labels" className="task-labels">
+                        {task.labels.map((label) => (
+                          <li key={label.id} className="label">
+                            {label.name}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
+            {columnTasks.length === 0 && <p className="column-empty">No tasks</p>}
           </section>
         );
       })}

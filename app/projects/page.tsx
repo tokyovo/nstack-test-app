@@ -6,6 +6,9 @@ import { ConfirmButton } from "./confirm-button";
 
 export const dynamic = "force-dynamic";
 
+/** The browser refuses a whitespace-only name; the server ignores one anyway. */
+const NON_BLANK = { pattern: ".*\\S.*", title: "Name cannot be blank" };
+
 export default async function ProjectsPage() {
   const user = await requireUser();
   const projects = listProjects(user.id);
@@ -14,7 +17,7 @@ export default async function ProjectsPage() {
       <h2>Projects</h2>
       <form action={createProjectAction}>
         <label>
-          New project name <input name="name" required />
+          New project name <input name="name" required {...NON_BLANK} />
         </label>
         <button type="submit">Create project</button>
       </form>
@@ -24,7 +27,7 @@ export default async function ProjectsPage() {
             <Link href={`/projects/${project.id}`}>{project.name}</Link>
             <form action={renameProjectAction}>
               <input type="hidden" name="projectId" value={project.id} />
-              <input name="name" required defaultValue={project.name} aria-label={`Rename ${project.name}`} />
+              <input name="name" required {...NON_BLANK} defaultValue={project.name} aria-label={`Rename ${project.name}`} />
               <button type="submit">Rename</button>
             </form>
             <form action={deleteProjectAction}>
