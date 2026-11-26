@@ -21,3 +21,4 @@ Scored 2026-11-25 (value + risk + cost, cost 5 = cheapest). Sources: UX pass (he
 - 4 (v1 r1 c4) (slice 6 screens) Header "Task board" link has no hover/focus hint, so users may not find the way back to Projects; and Next's default 404 page body uses a different font from the app. Add a hover underline and an app/not-found.tsx.
 - 4 (v1 r1 c5) (slice 7 review nit) "Export CSV" and "Export JSON" are separated only by a space (`.export-links` has no CSS), so they read like one link; add a gap.
 - 4 (v1 r2 c4) (slice 7 review nit) CSV formula guard checks only the first character; a description with leading spaces before `=` (e.g. `  =HYPERLINK(...)`) is not prefixed. Some importers evaluate it. Guard on the first non-space character.
+- 6 (v3 r1 c2) Rename / delete labels, label colors (slice 8 left them out; the goal names create, assign, filter). Evidence: plan.md slice labels-checklist, Out of scope.

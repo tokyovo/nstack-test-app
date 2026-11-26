@@ -383,3 +383,43 @@
 - Hand-off audit: every step entry this run has its checklist ticked; skill files read per step (named in entries). Servers: none listening (ss). Removed all stale `/tmp/taskboard-e2e-*` files from earlier runs (570; T22 stops new ones). Worktrees: none left; stale `worktree-agent-*` branches deleted.
 - Slowed down: a previous session ended with three builders in flight, so this run started by finding and merging their work; two parallel e2e suites on 2 CPUs timed out the seed test (now a note at the top of verify.md).
 - Stopping: goal met, full checks green on main, nothing in improve meets bar 7.
+
+## 2026-11-26 go labels + checklist
+- Read: go/SKILL.md c1fd976
+- [x] 1. Never wait on a person. Goal addition applied without asking; decisions logged in plan.md.
+- [ ] 2. Nothing is done until it is proven.
+- [x] 3. Smallest change that meets the goal. Out of scope list in plan.md (colors, rename/delete, export).
+- [ ] 4. Fix root causes.
+- [ ] 5. State lives in files.
+- [ ] 6. Guard the context window.
+- [ ] 7. Start every step with `step`.
+- [ ] 8. Turn lessons into structure.
+- [x] 1. n/a: existing project.
+- [x] 2. n/a: existing project.
+- [x] 3. n/a: existing project.
+- [x] 4. n/a: existing project.
+- [x] 1. git status clean at 6c30825; no worktrees; no unmerged nstack/* branches; no open nstack PRs; main == origin/main; last log entry fully ticked.
+- [x] 2. Nothing to resume.
+- [x] 3. n/a: no local-only commits on main.
+- [x] 4. `npm run lint` 0 problems; `npm run typecheck` pass (main 6c30825).
+- [x] 5. Policy settings and Drive section present. goal.md updated with the owner's addition (labels, checklist).
+- [x] 6. needs-human: `git ls-remote --heads origin nstack/ci` still lists it (optional, user's call). No `Retry when` in plan.md.
+- [ ] 1. Pick work.
+- [ ] 2. For each ticket in the slice:
+- [ ] 3. When every ticket is done:
+- [ ] 4. Record it:
+
+## 2026-11-26 plan slice 8 labels + checklist
+- Read: plan/SKILL.md 59d57d8
+- [x] 1. Learn the ground truth. Read lib/db.ts, lib/tasks.ts, lib/comments.ts, app/projects/actions.ts, board page/board.tsx/task page, e2e/helpers.ts, scripts/seed-app.mts.
+- [x] 2. Interrogate the goal yourself
+  - [x] 2.1. Questions: where labels are created, how assigned, color, uniqueness, limits, rename/delete; checklist toggle UX, delete confirm, card format, tamper.
+  - [x] 2.2. Answered from code patterns (comments, invite form, AC20 keep-values, AC30 URL state, tamperBoundIds).
+  - [x] 2.3. Decision lines in plan.md (no colors, SQL uniqueness, no label rename/delete, no confirm on item delete, text progress).
+- [x] 3. Write the spec. AC36-41 in plan.md.
+- [x] 4. Cut tickets. T25-T28, sequential (shared files: lib/tasks.ts, board.tsx, task page).
+- [x] 5. Check the plan
+  - [x] 5.1. AC36,37->T25; AC38->T26; AC39,40->T27; AC41->T28.
+  - [x] 5.2. Fresh Explore reader: 15 questions (card counting, list name clash, placement, URL order, tamper mechanics, toggle wait, seed, screens, CSS); all answered under "Fresh-reader answers"; AC37 list renamed "Task labels", AC41 seed moved to the commented task so screens show it.
+  - [x] 5.3. Slice in plan.md with branch nstack/labels-checklist; finished slices compacted to `## Done` lines (format in state.md; earlier runs had kept full sections).
+- [x] Done when: every criterion has a proof, the fresh reader's questions are answered, slice in plan.md.

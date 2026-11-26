@@ -1,174 +1,49 @@
-# Plan: task board v1
+# Plan
 
-## Spec
-Users of a small team manage shared task boards in the browser.
+## Slice: labels-checklist (branch nstack/labels-checklist)
+Goal addition from the owner (2026-11-26): tasks can have labels (create, assign, filter the board by label) and a checklist of subtasks with progress shown on the card.
 
-Design: Next.js App Router with Server Components + Server Actions (no separate API layer); `better-sqlite3` on a file at `DATABASE_PATH` (default `./data/app.db`), schema created on first open; passwords hashed with Node `crypto.scrypt` + per-user salt; sessions = random token in a `sessions` table, sent as an httpOnly, SameSite=Lax cookie. Drag-and-drop uses native HTML5 DnD (no library); keyboard: focus a task card and press `ArrowRight`/`ArrowLeft` to move it to the next/previous column. Alternative considered: @dnd-kit (gives both) — rejected as more code/deps than native DnD + two key handlers.
+What changes for the user: on a board, members create the project's labels ("Bug", "Design") and filter the board by one. On a task page, they tick which labels the task has, and keep a checklist of subtasks (add, tick, delete). Cards show their labels and "Checklist 2/3".
 
-Acceptance criteria (each is a Playwright test in `e2e/`):
-1. Visiting `/` while logged out redirects to `/login`.
-2. A new user can sign up with email + password (min 8 chars), lands on `/projects`, and the header shows their email. Signing up with an already-used email shows an error.
-3. Log out returns to `/login`; afterwards `/projects` redirects to `/login`. Logging back in with the right password works; a wrong password shows "Invalid email or password".
-4. Passwords are not stored in plain text (unit/integration check on the DB row: hash != password).
-5. A user can create a project, rename it, and delete it; the list updates each time.
-6. User B does not see user A's project in their list, and visiting A's project URL as B gives a 404 (not found) page.
-7. A can invite B by email; B then sees the project. Inviting an unknown email shows "No user with that email". Inviting an existing member shows an error.
-8. In a project, a member can create a task with title (required), description, assignee (a project member, optional), due date (optional); it appears in "To do" showing title, assignee and due date.
-9. Dragging a task card to "In progress" / "Done" moves it, and the move persists after reload.
-10. Focusing a task card and pressing ArrowRight moves it one column right, ArrowLeft one left; persists after reload.
-11. Opening a task shows its details; a member can add a comment, which appears with author email and persists after reload.
-12. Searching in a project filters the board to tasks whose title or description contains the query (case-insensitive); clearing shows all.
-13. CI (GitHub Actions) runs lint, typecheck, build and all Playwright tests on push and PR, and is green on main.
-
-Out of scope: see goal.md.
-
-## Tickets
-- [x] T1 Harness: Next.js app scaffold, SQLite db module with schema bootstrap, Playwright config (starts the built app on a temp DB), one smoke e2e test, npm scripts (lint, typecheck, build, test:e2e), GitHub Actions CI. Proof: `npm run lint && npm run typecheck && npm run build && npm run test:e2e` pass locally; CI green on the PR. Needs: none. Evidence: CI green on PR #1 at bd433c8 (run 45535731993, 41 passed).
-- [x] T2 Auth: signup, login, logout, session cookie, redirect guard. Proof: e2e for AC 1-4. Needs: T1
-- [x] T3 Projects: create, rename, delete, member-only visibility + 404 for non-members. Proof: e2e for AC 5-6. Needs: T2
-- [x] T4 Invite existing user by email. Proof: e2e for AC 7. Needs: T3
-- [x] T5 Tasks: create with fields; three-column board. Proof: e2e for AC 8. Needs: T4 (assignee needs members)
-- [x] T6 Move tasks by drag-and-drop and by keyboard. Proof: e2e for AC 9-10. Needs: T5
-- [x] T7 Comments on a task. Proof: e2e for AC 11. Needs: T5
-- [x] T8 Search tasks in a project. Proof: e2e for AC 12. Needs: T5
-
-AC13 met: PR #1 merged to main as e2ecb58; CI on main green (run 45541011124, 41 passed).
-
-# Plan: slice 2 "usable board" (from improve, 2026-11-25)
-
-## Spec
-Evidence: UX pass + research (see backlog.md, research.md). Keep it small: plain CSS in `app/globals.css` (no CSS framework), no new deps.
-
-Acceptance criteria (each a Playwright test in `e2e/`):
-14. Clicking a project's Delete asks for confirmation; dismissing it keeps the project; accepting deletes it.
-15. On the board at 1280x800, the three columns sit side by side (same top, different left); at 390x844 the page has no horizontal scroll (document scrollWidth <= viewport width). A task with a 400-char unbroken title causes no horizontal scroll on the board or task page at either size. Title length is capped server-side at 200 chars (longer is rejected with an error).
-16. A task whose due date is before today (server's local date) and that is not in Done is marked overdue on its card (visible text "Overdue" and a CSS class); a future-dated task and a past-dated task in Done are not.
-17. A member can edit a task's title, description, assignee and due date from the task page; changes persist after reload and show on the board. A member can delete a task (with confirmation); it disappears from the board and its URL then 404s. Non-members cannot edit/delete (server-side check, tamper test).
-
-## Tickets
-- [x] T9 Confirm before project delete. Proof: e2e AC14. Needs: none
-- [x] T10 Base stylesheet: side-by-side columns, responsive at 390px, word-wrap long text, 200-char title cap. Proof: e2e AC15. Needs: none
-- [x] T11 Overdue flag on cards. Proof: e2e AC16. Needs: T10 (same board files)
-- [x] T12 Edit and delete tasks. Proof: e2e AC17. Needs: T11
-
-Slice 2 shipped: PR #2 merged to main as 5f950cf; CI on main green (run 45552549785, 56 passed).
-
-# Plan: slice 3 "hardening + my tasks" (from improve, 2026-11-25)
-
-## Spec
-Evidence: backlog.md items scored 8 (bar 8 in goal.md). No new deps.
-
-Acceptance criteria:
-18. CI uses Node-24-based action majors (actions/checkout@v6+, actions/setup-node@v6+, actions/upload-artifact@v6+ or the latest major), and CI is green with no "Node.js 20 is deprecated" annotation.
-19. A session older than 30 days is rejected: the user is treated as logged out and the expired row is deleted (e2e: set the session row's created_at to 31 days ago in the DB, then `/projects` redirects to `/login`; a 29-day-old session still works). The session cookie has a 30-day maxAge (e2e checks its expiry is ~30 days out) and `secure: true` when NODE_ENV is production, unless `INSECURE_COOKIES=1` (set by the Playwright webServer, which serves http).
-20. After a validation error, forms keep what the user typed: signup/login keep the email (not the password); new-task and edit-task forms keep title, description, assignee and due date. e2e per form: submit invalid input, see the error, and the fields still hold the typed values.
-21. The board has an assignee filter ("All", "My tasks", "Unassigned", each member's email). Choosing one shows only matching tasks; it combines with search (AND); "All" restores the board. e2e covers My tasks, a specific member, Unassigned, combined with search.
-
-## Tickets
-- [x] T13 Bump CI action majors. Proof: AC18, CI green on the PR and the run log has no Node 20 deprecation annotation. Needs: none Evidence: PR #5 CI runs 45558869560, 45558876172 green, no annotations.
-- [x] T14 Session expiry (30 days) + cookie maxAge + secure in production. Proof: e2e AC19. Needs: none Evidence: 9a84ee8, full chain 59 passed (verify.md).
-- [x] T15 Forms keep typed values after a validation error. Proof: e2e AC20. Needs: none Evidence: f8be80b, full chain 61 passed (verify.md).
-- [x] T16 Assignee filter on the board. Proof: e2e AC21. Needs: T15 (both touch board files; run in sequence) Evidence: 4016f7c, full chain 66 passed (verify.md).
-
-Slice 3 shipped: PR #5 merged to main as 6d9be09; CI on main green (run 45559280150, 66 passed).
-
-# Plan: slice 4 "drive harness" (from go step 0, 2026-11-25)
-
-## Spec
-verify.md had no Drive section and no one command takes screenshots of the main screens, so agents (improve's UX pass, reviewers) drive the app by hand each time. Add a seed and a screens command. No new deps (`@playwright/test` already ships the browser API); scripts run with Node 24's built-in TypeScript type stripping.
-
-Acceptance criteria:
-22. `BASE_URL=<url> npm run seed` fills a running app, through its UI, with realistic data: user demo@example.com / correct-horse-1 (created, or logged in if it exists), a second member with a long email, a project "Website relaunch" with tasks in all three columns (one overdue, one with a 200-char title, one assigned, one with a comment), and an empty project. It prints the sign-in and the board URL. e2e/seed.spec.ts runs the seed function against the e2e server and checks the board shows tasks in all three columns, an "Overdue" card and a comment on a task; runs in CI.
-23. `BASE_URL=<url> npm run screens -- <dir>` seeds (as in 22), then saves PNG screenshots of /login, /signup, /projects, the board and a task page at 1280x800 and 390x844 (10 files, full page) into <dir>, and exits non-zero if any page logs a console error other than the favicon 404. Proof: run against an isolated server; 10 files exist and are non-empty.
-
-## Tickets
-- [x] T17 Seed and screens commands. Proof: e2e AC22 in the full chain; AC23 run once against an isolated server (`ls <dir>` shows 10 non-empty PNGs). Needs: none Evidence: acd877b, full chain 67 passed; controller verify + review in log.md (2026-11-25 Slice 4 verify + review).
-
-# Plan: slice 5 "forms look finished" (from improve, 2026-11-25)
-
-## Spec
-Evidence: UX pass on `npm run screens` output (/tmp/t17-shots/, 1280 and 390 px). Every form puts its label inline before the field, so fields and buttons wrap raggedly; the edit-task Title field is ~160px and cuts off the title; the Assignee and "Show tasks for" selects stretch to the longest member email (~530px); each project row stacks a rename field and a Delete button under the link. Score 8 (v3 r1 c4), bar 8. Plain CSS in `app/globals.css`, markup changes only where CSS cannot do it; no new deps.
-
-Acceptance criteria (e2e, Playwright, at 1280x800 unless stated; seed data or a long-email member as in AC15):
-24. In the new-task and edit-task forms, the comment form, the invite form, the new-project form and login/signup, each label sits above its field (label's bottom <= field's top) and the fields of one form share a left edge.
-25. Text inputs, textareas and selects in the task forms are between 280px and 512px wide at 1280px, also with a member whose email is 60+ chars (selects no longer stretch to the longest email); the edit-task Title field shows a 40-char title in full (input scrollWidth <= clientWidth).
-26. On /projects at 1280px, a project's link, rename field, Rename and Delete buttons are on one row (their vertical centers within 4px of each other).
-27. Nothing regresses: the AC15 tests (no horizontal scroll at 390px, long text wraps) still pass, and the screens at 1280 and 390 px are reviewed by eye.
-
-## Tickets
-- [x] T18 Form and project-row layout. Proof: e2e AC24-26 (new e2e/forms-layout.spec.ts), full chain, `npm run screens` reviewed at both widths. Needs: none Evidence: 20cf901, full chain 71 passed; controller verify + review in log.md (2026-11-25 Slice 5 verify + review).
-
-Slices 4-5 shipped: PR #7 merged as ac360ee (CI 67 passed), PR #8 merged as c30759b (CI run 45567398138, 71 passed).
-
-# Plan: slice 6 "board feedback" (from improve, 2026-11-25, bar 7)
-
-## Spec
-Evidence: backlog.md items scored 7 (bar lowered to 7 by the owner, 52442f7): no way back to Projects from a board, task page or 404 page; a move the server refuses snaps the card back with no message; search and filter are lost on reload and cannot be shared; every e2e run leaves its SQLite file in the OS temp dir. All but the last touch the board screen.
+Design: two new tables in `lib/db.ts` SCHEMA (`CREATE TABLE IF NOT EXISTS`, so existing DB files get them on next open, no migration): `labels (id, project_id → projects ON DELETE CASCADE, name, UNIQUE(project_id, name COLLATE NOCASE))`, `task_labels (task_id → tasks CASCADE, label_id → labels CASCADE, PRIMARY KEY(task_id, label_id))`, `checklist_items (id, task_id → tasks CASCADE, text, done INTEGER NOT NULL DEFAULT 0 CHECK (done IN (0,1)))`. New `lib/labels.ts` and `lib/checklist.ts` beside `lib/comments.ts`, same pattern (membership via `getProject`/`getTask`, return false/result codes). `Task` gains `labels: { id: number; name: string }[]`, `checklistDone: number`, `checklistTotal: number`, filled by `listTasks` and `getTask`. Server actions in `app/projects/actions.ts`, forms as small client components like `comment-form.tsx`. Alternative considered: label checkboxes inside the shared TaskForm (create + edit): rejected, it widens the keep-values logic (AC20) and both task forms for no user gain over one "Save labels" form on the task page.
 
 Acceptance criteria (Playwright e2e unless stated):
-28. When logged in, the header's "Task board" title is a link to /projects, on every page (board, task page, a 404 such as /projects/999999); clicking it on the board lands on /projects. Logged out (/login), the title is plain text (not a link).
-29. When the server refuses a move (the task was deleted in another tab, then the card is dragged or moved with ArrowRight), the card ends up back in its original column and an element with role="alert" says `Could not move "<title>"` ; the next successful move clears that message. A successful move shows no alert.
-30. Typing in Search tasks and choosing "Show tasks for" updates the URL query (`?q=<text>&for=<all|mine|unassigned|member id>`, a key left out when empty / "all") without adding history entries; loading the board with that URL shows the same filtered board with the inputs filled. Unknown `for` values behave as "all".
-31. (Script check) After `npm run test:e2e` exits, no `taskboard-e2e-*` file from that run (db, -wal, -shm) remains in the OS temp dir.
+36. The board has a "Labels" section (h3 "Labels", a list with aria-label "Labels" of the project's labels in name order, case-insensitive) and a form: field labelled "Label name", button "Create label". Creating "Bug" adds it to the list. Errors (role="alert"): empty after trim → "Label name is required"; over 40 chars → "Label name must be at most 40 characters"; a name already in this project, ignoring case and surrounding spaces → "That label already exists". The form keeps the typed name after an error (as AC20). Labels belong to one project: another project's board does not list them, and the same name can exist in two projects.
+37. A task page has a "Labels" section: one checkbox per project label (accessible name = label name, checked when the task has it) and a "Save labels" button. Saving sets the task's labels to exactly the checked ones; after reload the boxes stay as saved; the board card shows the task's labels in a list with aria-label "Task labels" (name order), each `<li className="label">`; a task with no labels shows no such list. Tamper (direct action call / edited form): a label id from another project is ignored; a non-member changes nothing. A project with no labels shows "No labels yet" in place of the checkboxes.
+38. The board has a select labelled "Label" with "All labels" (value `all`) and each label by name (value = its id). Choosing one shows only tasks that have that label; it combines (AND) with search and "Show tasks for". It lives in the URL as `label=<id>` the same way as AC30 (replaceState, no history entries, left out when "all", reload restores board and select); an unknown id or another project's label id shows all labels.
+39. A task page has a "Checklist" section: items in the order added, each a checkbox whose accessible name is the item text, checked when done, plus a button with accessible name `Delete item "<text>"`. A form with field "New item" and button "Add item" adds an item (unchecked) to the end. Errors: empty after trim → "Item is required"; over 200 chars → "Item must be at most 200 characters". Ticking and unticking a box is saved without a separate button and persists after reload; Delete removes the item (no confirm). Tamper: a non-member, or an item id that belongs to another task, toggles/deletes nothing.
+40. A board card whose task has at least one checklist item shows `<p className="checklist-progress">Checklist <done>/<total></p>` (e.g. "Checklist 1/3"); a task with no items shows no such element. After ticking an item on the task page and going back to the board (link or reload), the count is updated.
+41. Nothing regresses and it looks finished: the seed (AC22) also creates labels "Bug" and "Design" and gives both, plus a 3-item checklist with 1 done, to the commented Done task (the one `npm run screens` shoots); e2e/seed.spec.ts checks a card shows "Checklist 1/3" and a "Bug" label. At 390x844, a card with a 40-char label name and a task page with a 200-char unbroken checklist item have no horizontal scroll (as AC15). `npm run screens` output at 1280 and 390 reviewed by eye.
 
-Out of scope: breadcrumbs, a nav menu, retrying failed moves, persisting filters per user.
+Out of scope: label colors, renaming or deleting labels, editing checklist item text, reordering items, labels/checklist in export, search over label names, labels in the new-task form.
 
-Decision: header link (one element in app/layout.tsx) rather than per-page back links: covers board, task page and 404 with one change. The task page already links to its board.
-Decision: `moveTaskAction` returns `boolean` (true when stored); the board shows the alert when it returns false or throws. The optimistic state reverts on its own when the transition ends, so no extra revert code.
-Decision: URL state via `window.history.replaceState` (Next App Router syncs it with useSearchParams; no navigation, no server round trip); the page passes the initial `q` / `for` from `searchParams` as props so the board needs no Suspense boundary. replace, not push: typing should not fill the back button.
-Decision: temp DB cleanup in a Playwright `globalTeardown` that removes `E2E_DATABASE_PATH` and its -wal/-shm (missing files ignored). If the webServer is still running when it runs, unlinking open files is fine on Linux (local and CI); the builder confirms the order in the Playwright version pinned. Check AC31 by counting `taskboard-e2e-*` in the temp dir before and after a run.
+Decision: no label colors in v1: smallest change; a color column can be added later without touching assignments.
+Decision: label uniqueness in SQL (`UNIQUE(project_id, name COLLATE NOCASE)`), the action maps the constraint error to "That label already exists"; names are trimmed before insert.
+Decision: no delete/rename of labels this slice: the goal names create, assign and filter; backlog item added.
+Decision: checklist item delete has no confirm: it is one line of text, cheap to retype (task delete confirms because it takes comments with it).
+Decision: card progress is text "Checklist d/t" (readable, testable, no extra element styling needed); a `<progress>` bar can come later.
 
-Fresh-reader answers (2026-11-25):
-- Alerts: Next's route announcer also has role="alert", so the move alert is `<p role="alert" className="board-error">` inside `.board`, and tests scope it as `page.locator(".board").getByRole("alert")`. Text exactly `Could not move "<title>"` (no period).
-- AC28: the Link goes inside the existing `<h1>` (heading "Task board" stays; smoke test unchanged). /signup counts as logged out like /login. `header h1 a` may be styled to look like the title (inherit color, no underline).
-- AC29 errors: the board catches only to show the alert and rethrows Next redirect/not-found errors (`unstable_rethrow` from next/navigation) so an expired session still redirects to /login. Invalid taskId/status returns false. On a false result the board calls `router.refresh()`, so a task deleted elsewhere disappears from the board; the alert stays. "Back in its original column" means: not shown in the target column; after the refresh a deleted card is gone. Test: after the failed move the card is not in the target column and the alert shows.
-- AC29 timing: one alert at a time, cleared when the next move succeeds (a new failure replaces the text). tamperedMove tests need no change.
-- AC30: an array value takes the first entry. `for` is valid when it is all/mine/unassigned or the id of a current member; anything else shows "all" and is dropped from the URL on the next replace (not rewritten on load). `q` is written as typed (untrimmed) and dropped when it trims to empty. Tests compare `new URL(page.url()).searchParams.get(...)`, not raw strings. The board does not need to react to back/forward (replaceState adds no entries).
-- AC30 history: baseline `history.length` right after `goto`; checked again after typing and after choosing a filter.
-- AC31: teardown deletes only the file the config generated (config sets a flag, e.g. an env var `E2E_DB_GENERATED=1`, when it fills the default), plus its -wal/-shm. If the server could recreate files after unlink, kill order must be handled; builder checks in 1.65 by running and counting. Interrupted runs: best effort only. Proof: count files matching this run's pid-based name after the run (0), not a global before/after count; red first without the teardown (1+).
+Fresh-reader answers (2026-11-26):
+- Card counting: `cards()` in e2e/helpers.ts and `card()` in scripts/seed-app.mts switch from `getByRole("listitem")` to `locator("li.task-card")`, so label `<li>`s inside a card are not counted (T25). The card's list is named "Task labels"; the board section's list is "Labels" (no strict-mode clash).
+- Board Labels section: in page.tsx after `<Board>`, before Members: `<section><h3>Labels</h3><ul aria-label="Labels">` (+ "No labels yet" `<p>` when empty) and a client `LabelForm` (useActionState, like invite-form.tsx). It refills the typed name after an error (state.values, as AC20) and is empty after a successful create. Input `maxLength={40}`; the server limit counts the trimmed name; inner spaces are kept as typed (only trim). Duplicate check is the SQL NOCASE unique index on the trimmed name.
+- Label filter: inside `Board`, after "Show tasks for"; Board gets `labels` and `initialLabel` (from `first(query.label)`). Always rendered, even with no labels (only "All labels"). URL keys in order q, for, label; tests compare `searchParams.get`, not raw strings. A label created on the board shows in the select after the action's `revalidatePath` (server props); the chosen filter is client state and survives that refresh. Validity of the URL value checked on load only (labels cannot be deleted this slice).
+- Task page Labels: `<section><h3>Labels</h3><form>` with `<label><input type="checkbox" name="labelId" value={id} defaultChecked/> {name}</label>` per label and button "Save labels", action bound `(projectId, taskId)`. Success shows `<p role="status">Labels saved</p>`; failure (task gone / not a member) `<p role="alert">Task not found</p>`. Server keeps only ids that are labels of this project, then replaces the task's rows in one transaction.
+- Label tamper: foreign label id = edit a checkbox's `value` in the DOM (`evaluate`) to another project's label id, check it, save; the task gets no label and the other project's label is unassigned anywhere. Non-member = `tamperBoundIds(page, [projectId, taskId])` from the attacker's own task page, as comments.spec does; the victim's task labels are unchanged.
+- Checklist actions are bound on the server and passed as props: add `(projectId, taskId)`, toggle `(projectId, taskId, itemId)` called with `done: boolean`, delete `(projectId, taskId, itemId)`. The server checks the item belongs to that task and the task to that project (one UPDATE/DELETE with `WHERE id = ? AND task_id = ?` after `getTask`). Tamper tests use `tamperBoundIds` with 3 ids: same user, item id of another task in the same project → nothing changes; another user's project/task/item ids → nothing changes.
+- Toggle: a client component, checkbox `onChange` calls the toggle action in a transition with `useOptimistic`; tests wrap the click in `persistedMove` (it waits for any next-action POST; reuse as is) before reloading. Add form: `role="alert"` error inside the form, input `maxLength={200}` (the over-200 test removes the attribute, as the AC15 title test does), refills on error, empty after a successful add.
+- Seed: labels "Bug" and "Design" created if missing (by name in the Labels list); on the commented Done task both are ticked and saved if not already; checklist items "Write the copy" (done), "Pick screenshots", "Proofread" added if absent by text. `Seeded` is unchanged, so seed.spec's idempotency check stays as is; seed.spec adds: that card shows "Checklist 1/3" and a "Bug" label.
+- CSS (app/globals.css): card label chips are inline-block `li.label` with small padding, rounded border, light background, wrapping (`overflow-wrap: anywhere`); `.checklist-progress` is plain small text. Checklist rows: checkbox and text in one flex row, text with `min-width: 0; overflow-wrap: anywhere`. Checked against the global rule at globals.css:16 by the AC41 layout test.
 
-## Tickets
-Slice 6 done 2026-11-25: T19-T22 merged on nstack/board-feedback, slice verify + review passed at 8d017f5.
-- [x] T19 Header title links to /projects when logged in (AC28). Proof: new e2e/nav.spec.ts, red first; full chain. Needs: none
-- [x] T20 Failed move shows an alert and the card stays put (AC29). Proof: e2e in e2e/move.spec.ts (second page deletes the task, first page drags and keyboard-moves it), red first; full chain. Needs: none
-- [x] T21 Search and assignee filter live in the URL (AC30). Proof: e2e in e2e/search.spec.ts and e2e/assignee-filter.spec.ts (type, check URL, reload, check board and inputs; history length unchanged; `for=bogus` shows all), red first; full chain. Needs: T20 (same file, board.tsx)
-- [x] T22 e2e run removes its temp SQLite files (AC31). Proof: after `npm run test:e2e`, no file named for that run (taskboard-e2e-<pid>-*) remains in the temp dir (red first: 1+ without the teardown); full chain. Needs: none
+- [ ] T25 Labels: create on the board, assign on the task page, show on cards (AC36, AC37). Proof: new e2e/labels.spec.ts (create, errors incl. duplicate in other case, per-project, assign/unassign, persist, card chips, tamper via a second user's action call), red first; full chain. Needs: none
+- [ ] T26 Filter the board by label, in the URL (AC38). Proof: e2e in e2e/labels.spec.ts (filter, AND with search and assignee, URL + reload, history length unchanged, `label=999999` shows all), red first; full chain. Needs: T25
+- [ ] T27 Checklist on the task page with progress on the card (AC39, AC40). Proof: new e2e/checklist.spec.ts (add, errors, toggle persist, delete, card count updates, no element when empty, tamper), red first; full chain. Needs: T26 (same files: lib/tasks.ts, board.tsx, task page)
+- [ ] T28 Seed, layout and screens (AC41). Proof: e2e/seed.spec.ts and e2e/layout.spec.ts extended, red first; `npm run screens` at 1280/390 reviewed; full chain. Needs: T27
 
-# Plan: slice 7 "export" (from improve, 2026-11-25, bar 7)
-Branch: nstack/export
-
-## Spec
-Evidence: backlog.md 7 (v3 r1 c3), research.md candidate 8 (4 sources: planka #670, kanboard #4795, TRELLO-1064, ...): users want a project's tasks out of the app for backup or a spreadsheet.
-
-What changes for the user: on a board, "Export CSV" and "Export JSON" links download every task in the project.
-
-Design: one GET route handler `app/projects/[id]/export/route.ts` taking `?format=csv|json`, reusing `getCurrentUser` and `listTasks` (which already returns [] for non-members) plus `getProject` for the 404. Alternative considered: a server action returning a string the client turns into a Blob: rejected, more client code and no plain URL to test with a request.
-
-Acceptance criteria (Playwright e2e unless stated):
-32. The board shows links "Export CSV" and "Export JSON" (`download` attribute). Clicking "Export CSV" downloads `project-<id>-tasks.csv`: UTF-8 with a BOM, rows end in CRLF, header `id,title,description,status,assignee,due_date`, then one row per task in id order. `status` is the column name (To do / In progress / Done); no assignee or due date is an empty cell; a value containing a comma, double quote, CR or LF is wrapped in double quotes with inner quotes doubled (RFC 4180).
-33. In the CSV, a value that starts with `=`, `+`, `-`, `@`, tab or CR is prefixed with a single quote `'` (spreadsheet formula injection).
-34. Clicking "Export JSON" downloads `project-<id>-tasks.json`, which parses to `{"project":{"id":<n>,"name":"..."},"tasks":[{"id","title","description","status","assignee","dueDate"}]}` in id order; `status` is the stored key (todo / in_progress / done); `assignee` is the email or null; `dueDate` is `YYYY-MM-DD` or null.
-35. (Request checks via Playwright `request`) Logged out: 307 with Location ending in `/login`. Logged in but not a member, or an unknown project id: 404 and the body contains none of the project's task titles. `format` missing or other than csv/json: 400. Both formats send `Cache-Control: no-store` and `Content-Disposition: attachment; filename="project-<id>-tasks.<ext>"`; Content-Type `text/csv; charset=utf-8` / `application/json; charset=utf-8`.
-
-Out of scope: comments, members, importing, exporting only the filtered tasks, other formats.
-
-Decision: export ignores the board's search and filter (backup is the main use; a filtered export can come later).
-Decision: CSV gets a BOM so Excel reads non-ASCII titles correctly; JSON does not.
-Decision: filename uses the project id, not the name, so no escaping of user text in a header.
-Decision: logged out redirects to /login like every page (requireUser), rather than 401.
-
-## Tickets
-Slice 7 done 2026-11-25: T23-T24 on nstack/export, slice verify + two reviews passed at 5005a44.
-- [x] T23 CSV export route and board links (AC32, AC33, AC35 for csv). Proof: new e2e/export.spec.ts (download event, read file; tasks with comma/quote/newline/leading `=`/non-ASCII; request checks), red first; full chain. Needs: none
-- [x] T24 JSON export (AC34, AC35 for json). Proof: e2e in e2e/export.spec.ts, red first; full chain. Needs: T23 (same route file)
-
-Fresh-reader answers (2026-11-25):
-- Links: plain `<a href download>` (not next/link: no prefetch or client navigation of a route handler), in page.tsx next to the project `<h2>`, inside `<p className="export-links">`. Href `/projects/<id>/export?format=csv|json`; `download` with no value (filename from Content-Disposition).
-- Order of checks: auth first (307), then id/project (404), then format (400). So logged out + bad format = 307; unknown project + bad format = 404. A non-integer id is 404, same `Number.isInteger` check as page.tsx.
-- Logged out: `NextResponse.redirect(new URL("/login", request.url), 307)`; tests check status 307 and `new URL(location).pathname === "/login"`. 404 and 400 are plain-text responses (`Not found`, `Unknown format`), not the HTML 404 page.
-- BOM: the string starts with U+FEFF, encoded as UTF-8; the test checks the first three bytes of the file are EF BB BF and decodes the rest.
-- CRLF after every row including the last (file ends with CRLF). Values are written exactly as stored (no newline normalizing). The test parses the CSV with a small RFC 4180 parser in the spec and compares each description cell to the stored value read from the DB at `process.env.E2E_DATABASE_PATH` (as earlier specs do).
-- Formula guard: applied to every cell before RFC 4180 quoting (`'=x,y` is then quoted); a no-op for id, status and due_date. In e2e: comma/quote/newline cases in the description, `=`/`+`/`-`/`@` cases in titles. Leading tab/CR cannot survive the server's trim, so those two prefixes are covered by reading the code and the same function; not separately in e2e.
-- No unit runner: proof is e2e through the route only. CSV code may live in `lib/export.ts` if the route reads better that way (builder's call).
-- Requests: logged-in checks use `page.request` (shares the context cookie); logged-out uses a fresh `request` context with `maxRedirects: 0`. Add a helper for the project id to e2e/helpers.ts only if two specs need it.
-- JSON: compact `JSON.stringify({ project, tasks })`, key order as in AC34; `project.name` from `getProject` (current name). Test compares parsed values, not raw text.
+## Done
+- task-board v1: T1-T8, PR #1
+- usable-board: T9-T12, PR #2
+- slice3 (hardening + my tasks): T13-T16, PR #5
+- drive harness: T17, PR #7
+- forms-layout: T18, PR #8
+- board-feedback: T19-T22, PR #10
+- export: T23-T24, PR #11
