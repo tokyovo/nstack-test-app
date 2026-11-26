@@ -383,3 +383,102 @@
 - Hand-off audit: every step entry this run has its checklist ticked; skill files read per step (named in entries). Servers: none listening (ss). Removed all stale `/tmp/taskboard-e2e-*` files from earlier runs (570; T22 stops new ones). Worktrees: none left; stale `worktree-agent-*` branches deleted.
 - Slowed down: a previous session ended with three builders in flight, so this run started by finding and merging their work; two parallel e2e suites on 2 CPUs timed out the seed test (now a note at the top of verify.md).
 - Stopping: goal met, full checks green on main, nothing in improve meets bar 7.
+
+## 2026-11-26 go labels + checklist
+- Read: go/SKILL.md c1fd976
+- [x] 1. Never wait on a person. Goal addition applied without asking; decisions logged in plan.md.
+- [ ] 2. Nothing is done until it is proven.
+- [x] 3. Smallest change that meets the goal. Out of scope list in plan.md (colors, rename/delete, export).
+- [ ] 4. Fix root causes.
+- [ ] 5. State lives in files.
+- [ ] 6. Guard the context window.
+- [ ] 7. Start every step with `step`.
+- [ ] 8. Turn lessons into structure.
+- [x] 1. n/a: existing project.
+- [x] 2. n/a: existing project.
+- [x] 3. n/a: existing project.
+- [x] 4. n/a: existing project.
+- [x] 1. git status clean at 6c30825; no worktrees; no unmerged nstack/* branches; no open nstack PRs; main == origin/main; last log entry fully ticked.
+- [x] 2. Nothing to resume.
+- [x] 3. n/a: no local-only commits on main.
+- [x] 4. `npm run lint` 0 problems; `npm run typecheck` pass (main 6c30825).
+- [x] 5. Policy settings and Drive section present. goal.md updated with the owner's addition (labels, checklist).
+- [x] 6. needs-human: `git ls-remote --heads origin nstack/ci` still lists it (optional, user's call). No `Retry when` in plan.md.
+- [ ] 1. Pick work.
+- [ ] 2. For each ticket in the slice:
+- [ ] 3. When every ticket is done:
+- [ ] 4. Record it:
+
+## 2026-11-26 plan slice 8 labels + checklist
+- Read: plan/SKILL.md 59d57d8
+- [x] 1. Learn the ground truth. Read lib/db.ts, lib/tasks.ts, lib/comments.ts, app/projects/actions.ts, board page/board.tsx/task page, e2e/helpers.ts, scripts/seed-app.mts.
+- [x] 2. Interrogate the goal yourself
+  - [x] 2.1. Questions: where labels are created, how assigned, color, uniqueness, limits, rename/delete; checklist toggle UX, delete confirm, card format, tamper.
+  - [x] 2.2. Answered from code patterns (comments, invite form, AC20 keep-values, AC30 URL state, tamperBoundIds).
+  - [x] 2.3. Decision lines in plan.md (no colors, SQL uniqueness, no label rename/delete, no confirm on item delete, text progress).
+- [x] 3. Write the spec. AC36-41 in plan.md.
+- [x] 4. Cut tickets. T25-T28, sequential (shared files: lib/tasks.ts, board.tsx, task page).
+- [x] 5. Check the plan
+  - [x] 5.1. AC36,37->T25; AC38->T26; AC39,40->T27; AC41->T28.
+  - [x] 5.2. Fresh Explore reader: 15 questions (card counting, list name clash, placement, URL order, tamper mechanics, toggle wait, seed, screens, CSS); all answered under "Fresh-reader answers"; AC37 list renamed "Task labels", AC41 seed moved to the commented task so screens show it.
+  - [x] 5.3. Slice in plan.md with branch nstack/labels-checklist; finished slices compacted to `## Done` lines (format in state.md; earlier runs had kept full sections).
+- [x] Done when: every criterion has a proof, the fresh reader's questions are answered, slice in plan.md.
+
+## 2026-11-26 build T25
+- Read: build/SKILL.md 141fcec
+- Did: builder: labels/task_labels tables, lib/labels.ts, LabelForm on the board, TaskLabelsForm on the task page, card chips, e2e/labels.spec.ts (8 tests), helpers count `li.task-card`. Commits 061d106, 9807a22.
+- Decision (builder): smoke.spec table list adds labels, task_labels (spec change: the plan adds the tables). Task page shows only "No labels yet" (no form) when the project has no labels. Tests use goto() not reload() (Chromium restores checkbox state on reload).
+- Controller proof at 9807a22: `rm -rf .next; lint && typecheck && build && E2E_PORT=3191 npm run check:e2e-temp` exit 0, 92 passed, 0 temp files, no `data/`. Diff of existing tests: only the planned helper/seed locator change and the two table names.
+- [x] 1. n/a: first attempt passed.
+- [x] 2. n/a: first attempt passed.
+- [x] 3. n/a: nothing parked.
+- [ ] Done when: (slice) T26-T28 pending.
+
+## 2026-11-26 build T26
+- Read: build/SKILL.md 141fcec (same file as T25 entry, this run)
+- Did: builder: "Label" select in Board (All labels + each label), `labels`/`initialLabel` props, URL `label=` via replaceUrl({query, assignee, label}); 4 AC38 tests in e2e/labels.spec.ts, red first; mutant (accept any URL label id) red. Commit c54d51a.
+- Controller proof at c54d51a: full chain via check:e2e-temp (port 3192) exit 0, 96 passed, 0 temp files, no `data/`; no existing test changed (diff stat: board.tsx, page.tsx, labels.spec.ts).
+- [x] 1. n/a: first attempt passed.
+- [x] 2. n/a.
+- [x] 3. n/a.
+- [ ] Done when: (slice) T27-T28 pending.
+
+## 2026-11-26 build T27
+- Read: build/SKILL.md 141fcec (same file as T25 entry, this run)
+- Did: builder: checklist_items table, lib/checklist.ts, add/toggle/delete actions (ids bound, `AND task_id = ?`), ChecklistForm + ChecklistItem (useOptimistic), card "Checklist d/t", e2e/checklist.spec.ts (7 tests, red first); 3 guard mutants red. Commit bd39eeb.
+- Decision (builder): empty checklist shows "No items yet" (matches "No labels yet"); smoke.spec table list adds checklist_items (spec change, the plan adds the table).
+- Controller proof at bd39eeb: full chain via check:e2e-temp (port 3193) exit 0, 103 passed, 0 temp files, no `data/`; smoke.spec diff is the one table name.
+- [x] 1. n/a: first attempt passed.
+- [x] 2. n/a.
+- [x] 3. n/a.
+- [ ] Done when: (slice) T28 pending.
+
+## 2026-11-26 build T28
+- Read: build/SKILL.md 141fcec (same file as T25 entry, this run)
+- Did: builder: seed adds labels Bug/Design + 3-item checklist (1 done) on the commented Done task, idempotent; seed.spec checks "Checklist 1/3" + Bug chip (red first); AC41 390px layout test (40 W label, 200-char item), CSS mutants red; screens review found Delete buttons ~1000px from items at 1280 -> test + `.checklist { max-width: 32rem }`. Commits 5ba4bf0, 67c86df.
+- Controller proof at 67c86df: full chain via check:e2e-temp (port 3194) exit 0, 105 passed, 0 temp files, no `data/`. Looked at /tmp/t28-shots/task-1280.png and board-390.png: labels ticked, checklist rows with Delete beside them, card chips + "Checklist 1/3", no overflow.
+- [x] 1. n/a: first attempt passed.
+- [x] 2. n/a.
+- [x] 3. n/a.
+- [x] Done when: T25-T28 committed on nstack/labels-checklist, each proof + fast checks run by the controller at its commit (entries above).
+
+## 2026-11-26 verify slice labels-checklist
+- Read: verify/SKILL.md 02888d9
+- [x] 1. Clean tree. Code identical to 67c86df (HEAD differs only in .nstack/); `git status` clean after the mutant.
+- [x] 2. Project checks. lint, typecheck, build, check:e2e-temp at 67c86df: exit 0, 105 passed, 0 skipped, 0 warnings in the log, 0 temp files, no `data/`.
+- [x] 3. AC36,37 -> e2e/labels.spec.ts (8); AC38 -> labels.spec.ts (4); AC39,40 -> e2e/checklist.spec.ts (7); AC41 -> seed.spec.ts + layout.spec.ts + screens. All in the 105.
+- [x] 4. Every new check bites. Builders: each spec red first + guard mutants (label project_id, getTask guards, `AND task_id`, URL label check, CSS nowrap/overflow-wrap). Controller mutant: card done count = total -> checklist AC40 + seed tests failed (2), restored, tree clean.
+- [x] 5. The real thing runs. Saved Playwright e2e in CI; plus isolated `next start -p 3401` + `npm run screens -- /tmp/s8-shots` exit 0 (no console errors), server stopped, temp DB removed.
+- [x] 6. Screens: /tmp/t28-shots/{board,task}-{1280,390}.png looked at (same build): chips + "Checklist 1/3" on card, label checkboxes, checklist rows with Delete beside items, Label select, no overflow at 390. /tmp/s8-shots/ re-shot by the controller.
+- [x] 7. Nothing got weaker. `git diff main...HEAD`: no any/ts-ignore/eslint-disable/skip/only; e2e removals are only the planned `li.task-card` locator change; smoke.spec adds 3 table names (spec change, logged in T25/T27).
+- [x] 8. No new warnings: build and test logs grep "warn" = 0 (slice 7: 0). verify.md Last result updated.
+- Not verified: none.
+- [x] Done when: all ticked, Not verified empty.
+
+## 2026-11-26 review slice labels-checklist
+- Read: review/SKILL.md aac908c
+- Reviewer 1 (worktree, 47e623a): pass, 1 nit (failed checklist toggle/delete is silent). Its runs: lint/typecheck/build pass; 6 specs 33 passed; mutants (labels project_id, checklist task_id) red; screens 10 PNGs, no console errors.
+- Reviewer 2, Focus: security and failure modes (after reviewer 1, 2-CPU limit): pass, 2 nits (same silent-failure nit, two-session repro; NOCASE is ASCII-only, "Été"/"été" both stored). Its runs: 29 passed; same mutants red; screens; servers stopped.
+- Nits: both in backlog.md (not cheap: each needs UI + test + re-verify; neither is in the ACs).
+- Worktrees of both reviewers removed; no servers listening.
+- [x] Done when: latest round no important findings; verify passed at 67c86df (code unchanged since); nits in backlog.md.

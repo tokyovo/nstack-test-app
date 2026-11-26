@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import { seed, DEMO_EMAIL, PROJECT_NAME } from "../scripts/seed-app.mts";
 import { cards, logIn, PASSWORD } from "./helpers";
 
-test("AC22: seed fills the app with a demo user, a busy board and an empty project; re-running adds nothing", async ({
+test("AC22, AC41: seed fills the app with a demo user, a busy board and an empty project; re-running adds nothing", async ({
   browser,
   baseURL,
 }) => {
@@ -27,9 +27,16 @@ test("AC22: seed fills the app with a demo user, a busy board and an empty proje
   await expect(cards(page, "Done")).toHaveCount(1);
   await expect(cards(page, "To do").filter({ hasText: "Overdue" })).toHaveCount(1);
   await expect(page.getByRole("link", { name: /^.{200}$/ })).toHaveCount(1);
+  const done = cards(page, "Done");
+  await expect(done.locator("p.checklist-progress")).toHaveText("Checklist 1/3");
+  await expect(done.getByRole("list", { name: "Task labels" }).getByRole("listitem")).toHaveText(["Bug", "Design"]);
+  await expect(page.getByRole("list", { name: "Labels", exact: true }).getByRole("listitem")).toHaveText(["Bug", "Design"]);
   const members = page.getByRole("list", { name: "Members" }).getByRole("listitem");
   await expect(members).toHaveCount(2);
 
   await page.goto(first.taskUrl);
   await expect(page.getByRole("list", { name: "Comments" }).getByRole("listitem")).toHaveCount(1);
+  await expect(page.getByRole("region", { name: "Checklist" }).getByRole("checkbox")).toHaveCount(3);
+  await expect(page.getByRole("checkbox", { name: "Write the copy", exact: true })).toBeChecked();
+  await expect(page.getByRole("checkbox", { name: "Bug", exact: true })).toBeChecked();
 });

@@ -11,7 +11,35 @@ export type Task = {
   dueDate: string | null;
   assigneeId: number | null;
   assigneeEmail: string | null;
+  /** The task's labels in name order (any case). */
+  labels: { id: number; name: string }[];
+  /** Checklist items ticked, and all items; both 0 for a task without a checklist. */
+  checklistDone: number;
+  checklistTotal: number;
 };
+
+type TaskRow = Omit<Task, "labels">;
+
+const TASK_SELECT = `SELECT tasks.id, tasks.title, tasks.description, tasks.status, tasks.due_date AS dueDate, tasks.assignee_id AS assigneeId, users.email AS assigneeEmail,
+       (SELECT COUNT(*) FROM checklist_items WHERE task_id = tasks.id) AS checklistTotal,
+       (SELECT COALESCE(SUM(done), 0) FROM checklist_items WHERE task_id = tasks.id) AS checklistDone
+       FROM tasks LEFT JOIN users ON users.id = tasks.assignee_id`;
+
+/** The rows with each task's labels attached, read in one query. */
+function withLabels(rows: TaskRow[]): Task[] {
+  const labels = getDb()
+    .prepare(
+      `SELECT task_labels.task_id AS taskId, labels.id, labels.name
+       FROM task_labels JOIN labels ON labels.id = task_labels.label_id
+       WHERE task_labels.task_id IN (SELECT value FROM json_each(?))
+       ORDER BY labels.name COLLATE NOCASE, labels.id`,
+    )
+    .all(JSON.stringify(rows.map((row) => row.id))) as { taskId: number; id: number; name: string }[];
+  return rows.map((row) => ({
+    ...row,
+    labels: labels.filter((label) => label.taskId === row.id).map(({ id, name }) => ({ id, name })),
+  }));
+}
 
 export type NewTask = { title: string; description: string; assigneeId: number | null; dueDate: string | null };
 
@@ -26,13 +54,8 @@ function isMember(projectId: number, userId: number): boolean {
 /** Tasks in the project, oldest first; empty if the user is not a member. */
 export function listTasks(userId: number, projectId: number): Task[] {
   if (!getProject(userId, projectId)) return [];
-  return getDb()
-    .prepare(
-      `SELECT tasks.id, tasks.title, tasks.description, tasks.status, tasks.due_date AS dueDate, tasks.assignee_id AS assigneeId, users.email AS assigneeEmail
-       FROM tasks LEFT JOIN users ON users.id = tasks.assignee_id
-       WHERE tasks.project_id = ? ORDER BY tasks.id`,
-    )
-    .all(projectId) as Task[];
+  const rows = getDb().prepare(`${TASK_SELECT} WHERE tasks.project_id = ? ORDER BY tasks.id`).all(projectId);
+  return withLabels(rows as TaskRow[]);
 }
 
 /** Adds a task in "To do" if the user is a member; the assignee, if any, must be a member too. */
@@ -61,14 +84,8 @@ export function moveTask(userId: number, projectId: number, taskId: number, stat
 /** The task if it is in the project and the user is a member; null otherwise. */
 export function getTask(userId: number, projectId: number, taskId: number): Task | null {
   if (!getProject(userId, projectId)) return null;
-  const row = getDb()
-    .prepare(
-      `SELECT tasks.id, tasks.title, tasks.description, tasks.status, tasks.due_date AS dueDate, tasks.assignee_id AS assigneeId, users.email AS assigneeEmail
-       FROM tasks LEFT JOIN users ON users.id = tasks.assignee_id
-       WHERE tasks.id = ? AND tasks.project_id = ?`,
-    )
-    .get(taskId, projectId) as Task | undefined;
-  return row ?? null;
+  const row = getDb().prepare(`${TASK_SELECT} WHERE tasks.id = ? AND tasks.project_id = ?`).get(taskId, projectId);
+  return row ? withLabels([row as TaskRow])[0] : null;
 }
 
 /** Replaces a task's fields if it is in the project and the user is a member; the assignee, if any, must be a member too. */
@@ -83,7 +100,7 @@ export function updateTask(userId: number, projectId: number, taskId: number, ta
   return result.changes > 0 ? "updated" : "not-found";
 }
 
-/** Deletes the task (and, by cascade, its comments) if it is in the project and the user is a member. */
+/** Deletes the task (and, by cascade, its comments, labels and checklist) if it is in the project and the user is a member. */
 export function deleteTask(userId: number, projectId: number, taskId: number): boolean {
   if (!getProject(userId, projectId)) return false;
   return getDb().prepare("DELETE FROM tasks WHERE id = ? AND project_id = ?").run(taskId, projectId).changes > 0;

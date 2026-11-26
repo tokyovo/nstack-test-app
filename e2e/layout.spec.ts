@@ -122,3 +122,55 @@ test("AC15: a title is capped at 200 chars on the server", async ({ browser }) =
   await expect(cards(a.page, "To do")).toHaveCount(1);
   await expect(cards(a.page, "To do")).toContainText("y".repeat(200));
 });
+
+test("AC41: at 390x844 a 40-char label on a card and a 200-char unbroken checklist item cause no horizontal scroll", async ({
+  browser,
+}) => {
+  const page = await (await browser.newContext({ viewport: PHONE })).newPage();
+  await signUp(page, newEmail());
+  await expect(page).toHaveURL("/projects");
+  const url = await createProject(page, "Long labels");
+  await page.goto(url);
+  const labelName = "W".repeat(40); // W is the widest glyph: unwrapped, 40 of them overflow a 390px card
+  await page.getByLabel("Label name").fill(labelName);
+  await page.getByRole("button", { name: "Create label" }).click();
+  await expect(page.getByRole("list", { name: "Labels" }).getByText(labelName)).toBeVisible();
+  await addTask(page, "A card");
+  await page.getByRole("link", { name: "A card" }).click();
+  await expect(page.getByRole("heading", { name: "A card" })).toBeVisible();
+  const taskUrl = page.url();
+
+  await page.getByRole("checkbox", { name: labelName }).check();
+  await page.getByRole("button", { name: "Save labels" }).click();
+  await expect(page.getByRole("status")).toHaveText("Labels saved");
+  const item = "C".repeat(200);
+  await page.getByLabel("New item").fill(item);
+  await page.getByRole("button", { name: "Add item" }).click();
+  await expect(page.getByRole("checkbox", { name: item })).toBeVisible();
+  await expectNoHorizontalScroll(page);
+
+  await page.goto(url);
+  await expect(cards(page, "To do").getByRole("list", { name: "Task labels" })).toHaveText(labelName);
+  await expect(cards(page, "To do").locator("p.checklist-progress")).toHaveText("Checklist 0/1");
+  await expectNoHorizontalScroll(page);
+  await page.goto(taskUrl);
+  await expectNoHorizontalScroll(page);
+});
+
+test("AC41: at 1280x800 a checklist item's Delete button sits within the form width, near its item", async ({ browser }) => {
+  const page = await (await browser.newContext({ viewport: DESKTOP })).newPage();
+  await signUp(page, newEmail());
+  await expect(page).toHaveURL("/projects");
+  const url = await createProject(page, "Wide checklist");
+  await page.goto(url);
+  await addTask(page, "A card");
+  await page.getByRole("link", { name: "A card" }).click();
+  await page.getByLabel("New item").fill("Proofread");
+  await page.getByRole("button", { name: "Add item" }).click();
+  const remove = page.getByRole("button", { name: 'Delete item "Proofread"' });
+  await expect(remove).toBeVisible();
+
+  const button = (await remove.boundingBox())!;
+  const field = (await page.getByLabel("New item").boundingBox())!;
+  expect(button.x + button.width).toBeLessThanOrEqual(field.x + field.width);
+});

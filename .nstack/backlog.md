@@ -2,8 +2,6 @@
 Rescored 2026-11-25 after slice 5 (UX pass on T18 `npm run screens` output, /tmp/t18-shots/). Slice 4 and 5 shipped; items below are open.
 Scored 2026-11-25 (value + risk + cost, cost 5 = cheapest). Sources: UX pass (headless Chromium, screenshots /tmp/ux-shots/), research.md (29 sources), earlier reviews.
 
-- 6 (v2 r1 c3) Labels/tags with filtering. Evidence: 4 sources, research.md
-- 6 (v2 r1 c3) Checklists/subtasks. Evidence: 4 sources, research.md
 - 6 (v2 r1 c3) Duplicate a task / templates. Evidence: 4 sources, research.md
 - 6 (v2 r1 c4) Silent feedback: whitespace project name does nothing; no "no results" on empty search; no visible drop area in empty columns. (UX)
 - 5 (v2 r1 c2) Calendar view. Evidence: 5 sources, research.md
@@ -21,3 +19,7 @@ Scored 2026-11-25 (value + risk + cost, cost 5 = cheapest). Sources: UX pass (he
 - 4 (v1 r1 c4) (slice 6 screens) Header "Task board" link has no hover/focus hint, so users may not find the way back to Projects; and Next's default 404 page body uses a different font from the app. Add a hover underline and an app/not-found.tsx.
 - 4 (v1 r1 c5) (slice 7 review nit) "Export CSV" and "Export JSON" are separated only by a space (`.export-links` has no CSS), so they read like one link; add a gap.
 - 4 (v1 r2 c4) (slice 7 review nit) CSV formula guard checks only the first character; a description with leading spaces before `=` (e.g. `  =HYPERLINK(...)`) is not prefixed. Some importers evaluate it. Guard on the first non-space character.
+- 6 (v3 r1 c2) Rename / delete labels, label colors (slice 8 left them out; the goal names create, assign, filter). Evidence: plan.md slice labels-checklist, Out of scope.
+- 4 (v1 r1 c2) `withLabels` in lib/tasks.ts matches labels to tasks with a filter per row (O(tasks x labels)); a Map if boards get large. Evidence: T25 builder.
+- 6 (v2 r2 c3) A checklist tick or delete the server refuses (item deleted in another tab) undoes silently and leaves the stale row; show an alert and refresh, like the board's failed move (AC29). Evidence: slice 8 reviewers 1 and 2 (two-session repro).
+- 4 (v1 r1 c3) Label duplicate check and name order are ASCII-only (`COLLATE NOCASE`): "Été" and "été" can both exist. Same limit as user emails. Evidence: slice 8 security reviewer (better-sqlite3 repro).

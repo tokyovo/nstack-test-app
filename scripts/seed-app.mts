@@ -23,6 +23,12 @@ const LONG_TITLE = (
 
 const COMMENTED_TITLE = "Pick the new domain name";
 const COMMENT = "Registered relaunch.example.com; the old domain redirects there from Monday.";
+const LABELS = ["Bug", "Design"];
+const CHECKLIST = [
+  { text: "Write the copy", done: true },
+  { text: "Pick screenshots", done: false },
+  { text: "Proofread", done: false },
+];
 
 const TASKS: SeedTask[] = [
   { title: "Write the launch announcement", description: "Blog post and newsletter.", dueInDays: -7, column: "To do" },
@@ -42,12 +48,15 @@ export async function seed(browser: Browser, baseURL: string): Promise<Seeded> {
   await ensureProject(page, EMPTY_PROJECT_NAME);
   await page.goto(boardPath);
   await ensureMember(page, MEMBER_EMAIL);
+  for (const name of LABELS) await ensureLabel(page, name);
   for (const task of TASKS) await ensureTask(page, task);
   for (const task of TASKS) await ensureColumn(page, task.title, task.column);
   const taskPath = await taskLink(page, COMMENTED_TITLE).getAttribute("href");
   if (!taskPath) throw new Error(`No link for task "${COMMENTED_TITLE}"`);
   await page.goto(taskPath);
   await ensureComment(page, COMMENT);
+  await ensureTaskLabels(page, LABELS);
+  for (const item of CHECKLIST) await ensureChecklistItem(page, item.text, item.done);
   await page.context().close();
 
   return { email: DEMO_EMAIL, password: PASSWORD, boardUrl: baseURL + boardPath, taskUrl: baseURL + taskPath };
@@ -93,6 +102,51 @@ async function ensureMember(page: Page, email: string) {
   await member.waitFor();
 }
 
+async function ensureLabel(page: Page, name: string) {
+  const label = page.getByRole("list", { name: "Labels", exact: true }).getByText(name, { exact: true });
+  if ((await label.count()) > 0) return;
+  await page.getByLabel("Label name").fill(name);
+  await page.getByRole("button", { name: "Create label" }).click();
+  await label.waitFor();
+}
+
+/** Ticks each of `names` on the task page and saves, unless the task already has them all. */
+async function ensureTaskLabels(page: Page, names: string[]) {
+  const section = page.getByRole("region", { name: "Labels", exact: true });
+  let changed = false;
+  for (const name of names) {
+    const box = section.getByRole("checkbox", { name, exact: true });
+    if (await box.isChecked()) continue;
+    await box.check();
+    changed = true;
+  }
+  if (!changed) return;
+  await section.getByRole("button", { name: "Save labels" }).click();
+  await section.getByRole("status").waitFor();
+}
+
+/** Adds the item unless the checklist has it, then ticks it when `done`, waiting for the tick to be stored. */
+async function ensureChecklistItem(page: Page, text: string, done: boolean) {
+  const section = page.getByRole("region", { name: "Checklist", exact: true });
+  const box = section.getByRole("checkbox", { name: text, exact: true });
+  if ((await box.count()) === 0) {
+    await section.getByLabel("New item").fill(text);
+    await section.getByRole("button", { name: "Add item" }).click();
+    await box.waitFor();
+  }
+  if (!done || (await box.isChecked())) return;
+  const stored = waitForServerAction(page);
+  await box.check();
+  await (await stored).finished();
+}
+
+/** Resolves with the response to the next server-action request (a POST with a next-action header). */
+function waitForServerAction(page: Page) {
+  return page.waitForResponse(
+    (response) => response.request().method() === "POST" && !!response.request().headers()["next-action"],
+  );
+}
+
 function taskLink(page: Page, title: string) {
   return page.getByRole("link", { name: title, exact: true });
 }
@@ -115,7 +169,7 @@ async function ensureTask(page: Page, task: SeedTask) {
 function card(page: Page, column: Column, title: string) {
   return page
     .getByRole("region", { name: column, exact: true })
-    .getByRole("listitem")
+    .locator("li.task-card")
     .filter({ has: taskLink(page, title) });
 }
 
@@ -126,9 +180,7 @@ async function ensureColumn(page: Page, title: string, target: Column) {
     const current = await currentColumn(page, title);
     if (current === target) return;
     if (COLUMNS.indexOf(current) > COLUMNS.indexOf(target)) throw new Error(`"${title}" is past ${target}`);
-    const stored = page.waitForResponse(
-      (response) => response.request().method() === "POST" && !!response.request().headers()["next-action"],
-    );
+    const stored = waitForServerAction(page);
     await card(page, current, title).focus();
     await page.keyboard.press("ArrowRight");
     await (await stored).finished();
