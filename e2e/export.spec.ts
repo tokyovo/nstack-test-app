@@ -241,7 +241,7 @@ test("AC51: the CSV formula guard looks past leading spaces", async ({ browser }
 
   const response = await page.request.get(`${url}/export?format=csv`);
   expect(response.status()).toBe(200);
-  const rows = parseCsv((await response.text()).replace(/^﻿/, ""));
+  const rows = parseCsv((await response.text()).replace(/^\uFEFF/, ""));
   expect(rows.slice(1).map((row) => [row[1], row[2]])).toEqual([
     ["Spaced formula", `'  =HYPERLINK("x")`],
     ["Spaced tab minus", "' \t-1"],
