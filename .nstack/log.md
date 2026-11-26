@@ -545,3 +545,12 @@
 - [x] 8. No new warnings (0, as before).
 - Not verified: none.
 - [x] Done when: all ticked.
+
+## 2026-11-26 review slice board-fold
+- Read: review/SKILL.md aac908c (same file as the slice 8 review entry, this run)
+- Reviewer (worktree, 488c855): pass, 1 nit: after "Add task" (form now below the board) the new card is off-screen and nothing near the form confirms it. Its runs: lint/typecheck/build pass; 4 specs 26 passed; 3 mutants (filters full-width, no gap, form back on top) red; screens at 1280/390.
+- Nit fixed as T30 (AC46 added to plan.md): builder commit 74072ab (`added` in TaskFormState, `<p role="status">Added "<title>"</p>`), 4 code lines + 1 test; red first, edit-form mutant red.
+- Controller at 74072ab: full chain via check:e2e-temp (port 3198) exit 0, 110 passed, 0 warnings, 0 temp files; own mutant (status line removed) -> AC46 failed; restored, tree clean.
+- Small-fix exception used: one finding, 4 changed code lines, verify passed, test seen red before the fix -> no new review round.
+- Worktree removed; no servers listening.
+- [x] Done when: no important findings; verify passed after the last fix (110 passed at 74072ab); nit fixed.
