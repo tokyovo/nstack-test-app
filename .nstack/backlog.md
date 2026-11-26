@@ -25,3 +25,4 @@ Scored 2026-11-25 (value + risk + cost, cost 5 = cheapest). Sources: UX pass (he
 - 4 (v1 r2 c1) No test asserts that a non-member's refused task delete does not redirect (tamper tests only check nothing was deleted). Evidence: T31 builder.
 - 4 (v1 r1 c2) No prettier config in the repo; default prettier (80 cols) reflows existing 120-col files, so builders revert reflows by hand. Check in a .prettierrc matching the code. Evidence: T32 builder.
 - 3 (v1 r1 c1) Alert style is scoped to `main [role="alert"]`; an alert outside <main> would be unstyled, and no test checks font-weight. Evidence: T34 builder.
+- 4 (v1 r1 c2) When the last checklist item fails (deleted elsewhere), "No items yet" (page.tsx) shows above the alert (inside Checklist); move the empty text into Checklist after the alert. Evidence: slice 10 reviewer 1.

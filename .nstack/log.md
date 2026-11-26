@@ -632,3 +632,13 @@
 - [x] Done when: ticked.
 - Follow-up (controller): a temporary spec (copy of AC47 + screenshot, deleted afterwards) shot /tmp/s10-shots/checklist-alert-{1280,390}.png: the alert was plain black text, not red. The assumption was wrong. Builder fix 09bae42 (colour test red first). The builder noted all form alerts were plain -> AC52/T34 added: one `main [role="alert"]` rule, commit bb590c8, login + task-form colour tests red first.
 - Controller at bb590c8: full chain (port 3205, exit code unpiped) exit 0, 118 passed, 0 warnings, 0 temp files; no e2e lines removed; re-shot checklist-alert-390.png: red bold. Not verified: none.
+
+## 2026-11-26 review slice task-feedback
+- Read: review/SKILL.md aac908c (same file, this run)
+- Reviewer 1 (297f9a4): pass, 1 nit ("No items yet" above the alert when the last item fails) -> backlog. Its runs: 70 passed on 9 specs; 3 mutants red; screens 1280/390; 0 console errors.
+- Reviewer 2, Focus: security and failure modes (after reviewer 1): fix-needed. Important: double-click on checklist Delete deletes the item but shows a false `Could not update` alert (3/3 repro; new in this slice). Nit: no test proved a non-member's refused delete does not redirect (mutant stayed green).
+- Fix: fresh builder (debug skill): row disables its Delete + checkbox while its own delete is pending (useTransition); new dblclick test red 6/6 before, green after; edit-task tamper test now asserts B's URL (red with the always-redirect mutant). Commits 074528d, c724786.
+- Controller at c724786: full chain (port 3207, unpiped) exit 0, 119 passed, 0 warnings, 0 temp files; dblclick test --repeat-each=5: 5 passed; e2e removals are a refactor of `tampered()` that now returns B's page (assertion added, none removed).
+- Small-fix exception used: one important finding, ~15 changed code lines in checklist-item.tsx, verify passed, test seen red before the fix -> no third review round.
+- Worktrees removed; no servers listening.
+- [x] Done when: no open important findings, verify passed after the last fix, nits fixed or in backlog.md.
