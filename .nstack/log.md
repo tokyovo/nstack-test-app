@@ -442,3 +442,13 @@
 - [x] 2. n/a.
 - [x] 3. n/a.
 - [ ] Done when: (slice) T27-T28 pending.
+
+## 2026-11-26 build T27
+- Read: build/SKILL.md 141fcec (same file as T25 entry, this run)
+- Did: builder: checklist_items table, lib/checklist.ts, add/toggle/delete actions (ids bound, `AND task_id = ?`), ChecklistForm + ChecklistItem (useOptimistic), card "Checklist d/t", e2e/checklist.spec.ts (7 tests, red first); 3 guard mutants red. Commit bd39eeb.
+- Decision (builder): empty checklist shows "No items yet" (matches "No labels yet"); smoke.spec table list adds checklist_items (spec change, the plan adds the table).
+- Controller proof at bd39eeb: full chain via check:e2e-temp (port 3193) exit 0, 103 passed, 0 temp files, no `data/`; smoke.spec diff is the one table name.
+- [x] 1. n/a: first attempt passed.
+- [x] 2. n/a.
+- [x] 3. n/a.
+- [ ] Done when: (slice) T28 pending.
