@@ -215,3 +215,37 @@ test("AC35: export JSON request checks: auth, membership, headers", async ({ bro
   const upper = await a.page.request.get(`${url}/export?format=JSON`, { maxRedirects: 0 });
   expect(upper.status()).toBe(400);
 });
+
+/** Stores a description as given, bypassing the trim on save. */
+function storeDescription(taskId: number, description: string) {
+  const db = new Database(process.env.E2E_DATABASE_PATH!);
+  db.pragma("busy_timeout = 5000");
+  db.prepare("UPDATE tasks SET description = ? WHERE id = ?").run(description, taskId);
+  db.close();
+}
+
+test("AC51: the CSV formula guard looks past leading spaces", async ({ browser }) => {
+  const { page } = await newUser(browser);
+  const url = await createProject(page, "Spaced export");
+  const id = projectId(url);
+  await page.goto(url);
+  await addTask(page, { title: "Spaced formula" });
+  await addTask(page, { title: "Spaced tab minus" });
+  await addTask(page, { title: "Spaced text" });
+  await addTask(page, { title: "Only spaces" });
+  const [formula, minus, text, blank] = storedTasks(id).map((task) => task.id);
+  storeDescription(formula, '  =HYPERLINK("x")');
+  storeDescription(minus, " \t-1");
+  storeDescription(text, "  plain words");
+  storeDescription(blank, "   ");
+
+  const response = await page.request.get(`${url}/export?format=csv`);
+  expect(response.status()).toBe(200);
+  const rows = parseCsv((await response.text()).replace(/^﻿/, ""));
+  expect(rows.slice(1).map((row) => [row[1], row[2]])).toEqual([
+    ["Spaced formula", `'  =HYPERLINK("x")`],
+    ["Spaced tab minus", "' \t-1"],
+    ["Spaced text", "  plain words"],
+    ["Only spaces", "   "],
+  ]);
+});
