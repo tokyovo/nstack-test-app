@@ -672,3 +672,47 @@
 - Audit: every step this run has a `step` entry with its checklist ticked (go, plan x3, build T25-T34, verify x3, review x3, ship x3, improve x2). Gaps found and fixed during the run: slice 10 verify first left "Not verified: checklist alert look"; checked with a screenshot, found a real defect, fixed (T34). The go entry's loop lines are ticked below.
 - Servers: none listening; no worktrees; no stray temp DBs; no browsers.
 - Slowed the run: backlog score arithmetic was wrong in 7 lines (the previous run stopped on it); a builder's exit code came after `| tail` (I re-ran every full chain unpiped); no prettier config (backlog).
+
+## 2026-11-27 go continue
+- Read: go/SKILL.md abef3d4
+- [x] 1. Never wait on a person. no person needed so far.
+- [x] 2. Nothing is done until it is proven. see verify/ship entries.
+- [x] 3. Smallest change that meets the goal. slice drive-tool replaces two scripts with one tool, no product code.
+- [x] 4. Fix root causes. n/a: no workaround taken.
+- [x] 5. State lives in files. state committed on nstack/drive-tool.
+- [x] 6. Guard the context window. builders and reviewers got file pointers.
+- [x] 7. Start every step with `step`. each step below has its Read line.
+- [x] 8. Turn lessons into structure. `drive check` added to CI so the drive section cannot silently rot.
+- [x] 1. n/a: existing project.
+- [x] 2. n/a: existing project.
+- [x] 3. n/a: existing project (Drive/Features handled under Orient 5).
+- [x] 4. n/a: existing project (missing drive tool handled under Orient 4).
+- [x] 1. git status clean on main, synced with origin; one worktree; no unmerged nstack/* branches; no open nstack PRs.
+- [x] 2. Last entry (2026-11-26 hand-off) fully ticked; nothing to resume.
+- [x] 3. n/a: main has no local-only commits.
+- [x] 4. lint pass, typecheck pass on main d52bc4c; `drive check`: no drive tool (npm error); check-features: "no Features table". -> first ticket: slice drive-tool.
+- [x] 5. verify.md lacks check table, drive tool and Features section, has per-ticket proof chains -> T36. goal.md has all four policy settings.
+- [x] 6. needs-human.md: no open items; plan.md: no parked tickets.
+- [x] 1. n/a: request is `continue`, not `maintain`.
+- [x] 2. n/a: not maintain.
+- [x] 3. n/a: not maintain.
+- [x] 4. n/a: not maintain.
+- Loop lines 1-4: ticked in the hand-off entry.
+
+## 2026-11-27 plan slice drive-tool
+- Read: plan/SKILL.md 4e0b788
+- [x] 1. Learn the ground truth. Read scripts/{screens,seed,seed-app,e2e-temp-check}.mts, package.json, playwright.config.ts webServer, ci.yml, verify.md, go/references/state.md.
+- [x] 2. Interrogate the goal yourself
+  - [x] 2.1. Questions: state location, how to pick port, stale instances, build-if-needed, what check does on failure, CI placement, verify.md layout.
+  - [x] 2.2. Answered from state.md format and existing scripts (screens behavior kept as-is).
+  - [x] 2.3. Decisions logged below.
+- [x] 3. Write the spec. Slice drive-tool, AC1-9 in plan.md.
+- [x] 4. Cut tickets. T35 (tool), T36 (verify.md).
+- [x] 5. Check the plan
+  - [x] 5.1. AC1-8 -> T35 proof; AC9 -> T36 proof.
+  - [x] 5.2. Fresh Explore agent listed 12 questions; all answered in plan.md "Answers".
+  - [x] 5.3. Slice in plan.md, branch nstack/drive-tool.
+- [x] Done when: met.
+- Decision: instance state in `<os tmp>/taskboard-drive/<port>.json` because it allows several copies and needs no gitignore change.
+- Decision: remove seed.mts/screens.mts rather than keep them beside drive (rule 3: remove before add).
+- Decision: "builds if needed" = `.next/BUILD_ID` missing; stale builds need `--build`. Simplest, easy to tighten later.
