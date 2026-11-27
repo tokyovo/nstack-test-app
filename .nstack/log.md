@@ -757,3 +757,9 @@
 | drive check bites | console.error mutant in shoot() | exit 1, cleaned up |
 | features map true | `check-features .nstack/verify.md` | exit 0; altered copy exit 1 |
 | screens | n/a: no UI change | - |
+
+## 2026-11-27 review slice drive-tool
+- Read: review/SKILL.md d8023cf
+- [x] 1. Dispatch. nstack:reviewer in a worktree at f7960fc: 1 important (pruning rm -rf's any dir a state file names, also under --dry-run; state dir 0775), 2 nits (malformed state file crashes; `toString` etc. print nothing).
+- [x] 2. Second reviewer. n/a: no auth, payments, migrations or public API; the important finding was a failure-mode one and its fix gets its own round.
+- [x] 3. Act on every finding. Fresh builder (debug skill) fixed all three at 0e54c27, with e2e/drive.spec.ts (6 tests). Controller: repros rerun (victim dir kept under --dry-run and without; bad JSON -> one line, exit 0; toString -> exit 2 with command list); drive.spec red with f7960fc's drive.mts (6 failed), restored; full gate at 0e54c27: lint 0, typecheck 0, build 0 (0 warnings), check:e2e-temp 0 (125 passed, 0 temp files), drive check 0, no `data/`, check-features 0 (new row for drive.spec). Backlog: pid reuse (below).

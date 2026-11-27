@@ -22,3 +22,4 @@ Scored 2026-11-25 (value + risk + cost, cost 5 = cheapest). Sources: UX pass (he
 - 3 (v1 r1 c1) Alert style is scoped to `main [role="alert"]`; an alert outside <main> would be unstyled, and no test checks font-weight. Evidence: T34 builder.
 - 4 (v1 r1 c2) When the last checklist item fails (deleted elsewhere), "No items yet" (page.tsx) shows above the alert (inside Checklist); move the empty text into Checklist after the alert. Evidence: slice 10 reviewer 1.
 - 3 (v1 r1 c1) Ctrl-C during `drive check` leaves its server running; `npm run drive -- stop` cleans it up. Evidence: T35 builder.
+- 4 (v1 r2 c1) `drive stop` trusts a recorded pid that is alive on a listening port; a pid reused by an unrelated process would be killed. Check /proc/<pid>/cmdline for next-server. Evidence: T35 review-fix builder.

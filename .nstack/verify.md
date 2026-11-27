@@ -4,11 +4,11 @@ Run from the repo root. Needs Node 24, `npm ci`, and Chromium for Playwright 1.6
 
 | Check | Speed | Command | Last result |
 |---|---|---|---|
-| lint | fast | `npm run lint` | pass, 0 warnings (2026-11-27, 14474dc) |
-| typecheck | fast | `npm run typecheck` | pass (2026-11-27, 14474dc) |
-| build | full | `npm run build` | pass, 0 warnings (2026-11-27, 14474dc) |
-| e2e | full | `npm run check:e2e-temp` | pass, 119 tests, 0 skipped, 0 temp files left (2026-11-27, 14474dc) |
-| drive | full | `npm run drive -- check` | pass, 5 steps, 10 screenshots (2026-11-27, 14474dc) |
+| lint | fast | `npm run lint` | pass, 0 warnings (2026-11-27, 0e54c27) |
+| typecheck | fast | `npm run typecheck` | pass (2026-11-27, 0e54c27) |
+| build | full | `npm run build` | pass, 0 warnings (2026-11-27, 0e54c27) |
+| e2e | full | `npm run check:e2e-temp` | pass, 125 tests, 0 skipped, 0 temp files left (2026-11-27, 0e54c27) |
+| drive | full | `npm run drive -- check` | pass, 5 steps, 10 screenshots (2026-11-27, 0e54c27) |
 | ci | full | `.github/workflows/ci.yml` on push and PR: npm ci, playwright install, lint, typecheck, build, test:e2e, drive check | green on main 26a9415 (run 45778821562, 119 passed; before the drive step existed) |
 
 - `check:e2e-temp [-- <playwright args>]` runs `playwright test` (needs `npm run build` first; it starts `next start -p ${E2E_PORT:-3100}` with `DATABASE_PATH` set to a fresh temp SQLite file, also readable by tests as `E2E_DATABASE_PATH`), then exits 1 if any `taskboard-e2e-<pid>-*` file is left in the OS temp dir; else the suite's exit code. `npm run test:e2e` is the suite alone.
@@ -24,7 +24,7 @@ How an agent runs and uses the app on its own, without touching anyone's data.
 - **Screens:** /login, /signup, /projects, /projects/<id> (board), /projects/<id>/tasks/<taskId> (task page).
 - **Evidence:** `npm run drive -- screens <dir>` seeds, then writes those 5 screens at 1280 and 390 px (10 full-page PNGs); exits 1 listing console or page errors (favicon.ico 404 ignored).
 - **Health:** `npm run drive -- check` starts, seeds, takes screens, checks 10 non-empty PNGs, stops and cleans up even after a failure; exit 0 means this section is true.
-- **Clean up:** `npm run drive -- stop [--port N | --all] [--dry-run]` kills the instance's process group by its recorded pid and deletes its temp dir and state file; stale instances are pruned. Ctrl-C during `check` leaves its server; run `stop`.
+- **Clean up:** `npm run drive -- stop [--port N | --all] [--dry-run]` kills the instance's process group by its recorded pid and deletes its temp dir and state file; stale instances are pruned (not under `--dry-run`). State files are validated on read: one naming a dir that is not `<os tmp>/taskboard-drive-*`, a bad pid or bad JSON is reported and only the state file is removed. The state dir is kept at mode 0700. Ctrl-C during `check` leaves its server; run `stop`.
 - **Isolate:** each instance has its own port and temp database; e2e uses `E2E_PORT` and its own temp DB.
 
 ## Features
@@ -66,3 +66,4 @@ How an agent runs and uses the app on its own, without touching anyone's data.
 | Board layout: columns above the fold, no horizontal scroll at 390px | /projects/<id> at 1280 and 390 | `e2e/layout.spec.ts` "AC42: at 1280x800 the columns start above the fold and the three filters share one row" |
 | Form labels above fields | all forms | `e2e/forms-layout.spec.ts` "AC24: project, task, invite and comment form labels sit above their fields" |
 | Demo data seed | `npm run drive -- seed` | `e2e/seed.spec.ts` "AC22, AC41: seed fills the app with a demo user, a busy board and an empty project; re-running adds nothing" |
+| Drive tool never deletes or kills what a bad state file names | `npm run drive -- stop` | `e2e/drive.spec.ts` "a state file naming a dir that is not a drive temp dir is reported and the dir is never deleted" |
