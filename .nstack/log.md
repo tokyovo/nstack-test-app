@@ -316,10 +316,10 @@ Not verified: none.
 - [x] 2. Sync. origin/main 7013a29 is an ancestor of the branch; nothing came in, verify stands.
 - [x] 3. Push. nstack/design-rules.
 - [x] 4. Open the PR. Body: user change, tickets, verification table, screens, merge danger (revert-safe, markup + CSS + tests), decisions.
-- [ ] 5. Wait for CI
-- [ ] 6. Merge
-- [ ] 7. Confirm and clean up.
-- [ ] Done when: the PR is merged, CI is green on the default branch, and the fast checks pass there, or the PR is parked with a reason.
+- [x] 5. Wait for CI. PR #26: runs 45972246117 and 45972277688 pass.
+- [x] 6. Merge. merge: auto, 0 important findings -> squash 7457fcc.
+- [x] 7. Confirm and clean up. main pulled; lint 0, typecheck 0; CI on 7457fcc success (45972984885); nstack/design-rules deleted local and remote; worktrees: main only.
+- [x] Done when: the PR is merged, CI is green on the default branch, and the fast checks pass there, or the PR is parked with a reason.
 
 ## 2026-11-27 improve
 - Read: improve/SKILL.md c8daf07
@@ -350,3 +350,13 @@ Not verified: none.
   - [x] 5.2. Fresh Explore reader: 10 questions, answered under "Plan-check answers".
   - [x] 5.3. Slice in plan.md, branch nstack/checklist-confirm.
 - [x] Done when: criteria mapped, questions answered, slice written.
+
+## 2026-11-27 build T52
+- Read: build/SKILL.md 4b2ec60
+- [x] 1. Branch. nstack/checklist-confirm from main 7457fcc.
+- [x] 2. Starting state. lint 0, typecheck 0 on main 7457fcc.
+- [x] 3. Dispatch. One builder, pointer brief, in the main checkout (alone).
+- [x] 4. Read the reply. ae4a27d: window.confirm('Delete item "<text>"?') before the delete; deleteItem(page, text, accept|dismiss) helper for every Delete click; the useRef guard was tried and dropped (the pending transition disables the button; AC47 counts exactly 1 dialog and 1 action). Spec change: "AC39: Delete removes the item without asking" -> "AC39: Delete asks first; dismissing keeps the item, accepting removes it".
+- [x] 5. Prove it yourself. At ae4a27d: lint 0, typecheck 0, build 0, check:e2e-temp checklist.spec 10 passed; with checklist-item.tsx from 1a0e96d: 7 failed, 3 passed; restored, tree clean.
+- [x] 6. Record. This entry; no Backlog lines.
+- [x] Done when: T52 committed on nstack/checklist-confirm, items ticked.

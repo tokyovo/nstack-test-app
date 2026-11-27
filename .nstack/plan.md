@@ -18,7 +18,7 @@ Plan-check answers (fresh reader, 2026-11-27):
 - Message is exact: `expect(message).toBe('Delete item "Drop"?')`.
 - The new test replaces "AC39: Delete removes the item without asking" under the new title; red before the change (no dialog, message "", the item is gone). Update the doc comment in checklist-item.tsx. Spec change logged in log.md; the verify.md Features row "Checklist items" keeps its proof name, so no row change.
 
-- [ ] T52 Checklist Delete asks first. Proof: `e2e/checklist.spec.ts` "AC39: Delete asks first; dismissing keeps the item, accepting removes it" (red before the change: the item disappears with no dialog); AC47 double-click test still green with the dialog accepted; the full checklist.spec green; lint, typecheck. Needs: none
+- [x] T52 Checklist Delete asks first. Proof: `e2e/checklist.spec.ts` "AC39: Delete asks first; dismissing keeps the item, accepting removes it" (red before the change: the item disappears with no dialog); AC47 double-click test still green with the dialog accepted; the full checklist.spec green; lint, typecheck. Needs: none
 
 ## Done
 - task-board v1: T1-T8, PR #1
