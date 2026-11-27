@@ -138,6 +138,22 @@ test("AC5: a copy of a 200-character title is cut to 200 characters with the pre
   expect(expected).toHaveLength(200);
 });
 
+test("AC5: a copy is cut by whole characters, so an emoji across the 200th place is dropped, not split", async ({
+  browser,
+}) => {
+  const a = await newUser(browser);
+  const url = await createProject(a.page, "Emoji copies");
+  const title = "T" + "a".repeat(190) + "\u{1F600}" + "b".repeat(7);
+  expect(title).toHaveLength(200);
+  await addTask(a.page, url, title);
+  await openTask(a.page, title);
+
+  await duplicate(a.page);
+  const expected = "Copy of T" + "a".repeat(190);
+  await expect(a.page.getByRole("heading", { name: expected, exact: true })).toBeVisible();
+  await expect(a.page.getByRole("heading", { level: 1 })).not.toContainText("�");
+});
+
 /** B presses Duplicate on B's own task while the bound [projectId, taskId] are rewritten; nothing is created anywhere. */
 async function forgedDuplicate(browser: Browser, ids: (a: { projectId: number; taskId: number }) => (number | null)[]) {
   const a = await newUser(browser);

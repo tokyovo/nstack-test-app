@@ -102,6 +102,16 @@ export function updateTask(userId: number, projectId: number, taskId: number, ta
   return result.changes > 0 ? "updated" : "not-found";
 }
 
+/** "Copy of <title>", cut by whole code points so it fits MAX_TITLE_LENGTH UTF-16 units without splitting an emoji. */
+function copyTitle(title: string): string {
+  let copy = "";
+  for (const char of `Copy of ${title}`) {
+    if (copy.length + char.length > MAX_TITLE_LENGTH) break;
+    copy += char;
+  }
+  return copy;
+}
+
 /**
  * Copies a task of the project into "To do" as "Copy of <title>" (cut to the title limit), with its description,
  * due date, labels and checklist (all unticked), but no comments; the assignee is kept only if still a member.
@@ -116,7 +126,7 @@ export function duplicateTask(userId: number, projectId: number, taskId: number)
     const copyId = Number(
       db
         .prepare("INSERT INTO tasks (project_id, title, description, assignee_id, due_date) VALUES (?, ?, ?, ?, ?)")
-        .run(projectId, `Copy of ${task.title}`.slice(0, MAX_TITLE_LENGTH), task.description, assigneeId, task.dueDate)
+        .run(projectId, copyTitle(task.title), task.description, assigneeId, task.dueDate)
         .lastInsertRowid,
     );
     db.prepare("INSERT INTO task_labels (task_id, label_id) SELECT ?, label_id FROM task_labels WHERE task_id = ?").run(

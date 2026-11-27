@@ -1,11 +1,11 @@
 import type Database from "better-sqlite3";
-import { DEFAULT_LABEL_COLOR, LABEL_COLORS } from "./label-colors";
+import { DEFAULT_LABEL_COLOR } from "./label-colors";
 
 // No "server-only" and relative imports only: e2e tests import this to migrate an old database file.
 
-const LABEL_COLOR_COLUMN = `TEXT NOT NULL DEFAULT '${DEFAULT_LABEL_COLOR}' CHECK (color IN (${LABEL_COLORS.map(
-  (color) => `'${color.key}'`,
-).join(", ")}))`;
+// No CHECK on the colour list: the app allow-lists colours (isLabelColor), and a CHECK baked into existing
+// files would reject a colour added later.
+const LABEL_COLOR_COLUMN = `TEXT NOT NULL DEFAULT '${DEFAULT_LABEL_COLOR}'`;
 
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS users (

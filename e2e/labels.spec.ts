@@ -519,6 +519,30 @@ test("AC2: a database file from before label colours opens; its labels become Gr
   }
 });
 
+test("AC2: the database accepts a label colour outside today's list, on an old file and a new one", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "taskboard-migrate-"));
+  try {
+    const oldFile = path.join(dir, "old.db");
+    const old = new Database(oldFile);
+    old.exec(OLD_LABELS_SCHEMA);
+    old.close();
+
+    for (const file of [oldFile, path.join(dir, "new.db")]) {
+      const db = new Database(file);
+      try {
+        applySchema(db);
+        db.prepare("INSERT OR IGNORE INTO projects (id, name) VALUES (1, 'Project')").run();
+        db.prepare("INSERT INTO labels (project_id, name, color) VALUES (1, 'Future', 'future-colour')").run();
+        expect(db.prepare("SELECT color FROM labels WHERE name = 'Future'").get()).toEqual({ color: "future-colour" });
+      } finally {
+        db.close();
+      }
+    }
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 /** The Labels list row whose edit form is for the label now named `name`. */
 function labelRow(page: Page, name: string) {
   return labelList(page).filter({ has: page.getByLabel(`Name for ${name}`, { exact: true }) });
