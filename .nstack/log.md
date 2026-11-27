@@ -270,3 +270,25 @@ Entries before 2026-11-27 are in git history: `git log -p .nstack/log.md`.
 - Audit: `audit-log .nstack/log.md 2026-11-27` exit 0 after renaming the orient heading (its third word `go` matched a skill name). Compared with what was done: form error states were screenshotted by the builders (T37, T38, T40), not by the controller in verify; verify item 2 used the a03be3e run (code identical at f4ce432).
 - Servers: none of ours listening (cloudflared and claude are not ours); /tmp/taskboard-drive empty; no e2e temp DBs; reviewer worktree removed.
 - Slowed the run: a full e2e suite (~5 min) per ticket plus one for verify on 2 CPUs; CI waits run in sequence. Not cheap to cut without losing per-ticket proof; left as is.
+
+## 2026-11-27 orient (controller, /nstack:go continue + goal additions)
+- In flight: none. `git status` clean, no worktrees, no unmerged nstack/* branches, no open nstack PRs, main == origin/main 762fb7f.
+- Parked retry: needs-human.md has no open items; plan.md has no Retry when.
+- Verification on main 762fb7f: lint 0, typecheck 0, `check-features` 0, `drive check` 0 (16 PNGs).
+- Formats: all sections present.
+- Goal changed: owner added label rename/delete/colour, duplicate a task, and a calendar view by due date; written into goal.md on nstack/labels-dup-calendar. Next: plan.
+
+## 2026-11-27 plan slice labels-dup-calendar
+- Read: plan/SKILL.md 9d86f42
+- [x] 1. Learn the ground truth. Read lib/db.ts (CREATE IF NOT EXISTS, no migrations), lib/labels.ts, lib/tasks.ts, actions.ts, board page, task page, design.md, verify.md Features; tests for labels in e2e/labels.spec.ts.
+- [x] 2. Interrogate the goal yourself
+  - [x] 2.1. Questions: colour storage, migration of existing files, rename collisions, delete confirm, what a duplicate copies, calendar range/week start/no-date tasks/narrow layout.
+  - [x] 2.2. From code: duplicate check COLLATE NOCASE, ConfirmButton for deletes, localToday for dates, tokens only in :root.
+  - [x] 2.3. Four Decision lines in the slice (colour keys, duplicate copy rules, Monday weeks, rename/delete on board).
+- [x] 3. Write the spec. 9 ACs, out of scope, two designs each for colour/calendar/migration.
+- [x] 4. Cut tickets. T41 colour+migration (riskiest, first), T42 rename/delete (Needs T41), T43 duplicate, T44 calendar (independent).
+- [x] 5. Check the plan
+  - [x] 5.1. AC1-2 T41; AC3-4 T42; AC5 T43; AC6-7 T44; AC8 T41+T44; AC9 all.
+  - [x] 5.2. Fresh general-purpose reader: 15 questions, all answered in the slice's Plan check answers.
+  - [x] 5.3. Slice in plan.md, branch nstack/labels-dup-calendar.
+- [x] Done when: every criterion has a proof, the fresh reader's questions are answered in the plan, and the slice is in `plan.md`.
