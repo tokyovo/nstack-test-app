@@ -130,3 +130,4 @@ Entries before 2026-11-27 are in git history: `git log -p .nstack/log.md`.
 - log.md trimmed to this run (was 794 lines).
 - Lesson: two review rounds found the drive tool leaving servers or deleting files on failure paths; e2e/drive.spec.ts (8 tests) now covers those paths and `drive check` runs in CI, so the next regression fails CI instead of needing a reviewer.
 - Slowed the run: nstack's verify.md format changed (table, Drive, Features), which cost a whole slice; `drive screens` needs `drive start` first, which the error message says.
+- After merge of PR #18 (efcd1aa): CI run 45931652688 never started (GitHub billing: failed payment or spending limit). Rerun once: same. Parked in needs-human.md. efcd1aa's tree equals PR #18 head 507f78c (git diff --quiet exit 0), which passed CI; last code commit cd4603a green on main (45930318735). This entry is on nstack/state-park-2026-11-27, PR left open because its CI cannot run either.
