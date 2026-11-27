@@ -132,7 +132,7 @@ Entries before 2026-11-27 are in git history: `git log -p .nstack/log.md`.
 - Slowed the run: nstack's verify.md format changed (table, Drive, Features), which cost a whole slice; `drive screens` needs `drive start` first, which the error message says.
 - After merge of PR #18 (efcd1aa): CI run 45931652688 never started (GitHub billing: failed payment or spending limit). Rerun once: same. Parked in needs-human.md. efcd1aa's tree equals PR #18 head 507f78c (git diff --quiet exit 0), which passed CI; last code commit cd4603a green on main (45930318735). This entry is on nstack/state-park-2026-11-27, PR left open because its CI cannot run either.
 
-## 2026-11-27 go continue (controller): orient
+## 2026-11-27 orient (controller, /nstack:go continue)
 - In flight: PR #19 (nstack/state-park-2026-11-27, state only) open; no worktrees, no other nstack branches, main == origin/main.
 - Parked retry: `gh run view 45931652688 --json conclusion -q .conclusion` -> success (billing fixed). Resolved in needs-human.md; PR #19 CI green (45931744049).
 - Verification on main efcd1aa: lint 0, typecheck 0, build ok, `drive check` exit 0 (5 steps, 10 PNGs), `check-features` exit 0.
@@ -244,8 +244,29 @@ Entries before 2026-11-27 are in git history: `git log -p .nstack/log.md`.
 - [x] 1. Commit. 10 code commits (T37-T40) + state commits on nstack/design.
 - [x] 2. Sync. origin/main 344be19 is an ancestor of the branch: nothing came in, verify stands.
 - [x] 3. Push. nstack/design.
-- [ ] 4. Open the PR
-- [ ] 5. Wait for CI
-- [ ] 6. Merge
-- [ ] 7. Confirm and clean up.
-- [ ] Done when: the PR is merged, CI is green on the default branch, and the fast checks pass there, or the PR is parked with a reason.
+- [x] 4. Open the PR. https://github.com/tokyovo/nstack-test-app/pull/20 (body: tickets, verification table, before/after screenshot paths, merge danger low, decisions).
+- [x] 5. Wait for CI. `gh pr checks 20 --watch` exit 0: runs 45944833294, 45944858932 pass (143 passed, drive check 16 PNGs).
+- [x] 6. Merge. merge: auto, 0 important findings: `gh pr merge 20 --squash --delete-branch` -> e9490a1.
+- [x] 7. Confirm and clean up. main e9490a1: lint 0, typecheck 0, CI 45945258200 success; remote heads: main only; no nstack/* branches or worktrees left.
+- [x] Done when: PR #20 merged, CI green on main e9490a1, fast checks pass there. (Items 4-7 ticked on the follow-up state branch: they happened after the slice branch was pushed.)
+
+## 2026-11-27 improve
+- Read: improve/SKILL.md c8daf07
+- [x] 1. Gather evidence
+  - [x] 1.1. Broken things. None: main e9490a1 lint 0, typecheck 0, CI green (45945258200: 143 passed, drive check 16 PNGs).
+  - [x] 1.2. Known problems. 0 open issues; needs-human has no open items; backlog read.
+  - [x] 1.3. Gaps against the goal. None: check-features 0 on the slice; every Done-when item has a passing CI check.
+  - [x] 1.4. Outside demand. research.md 2026-11-25 (2 days old); its candidates are in backlog (duplicate task 6, calendar 5, multiple assignees 5).
+  - [x] 1.5. Risk. `npm audit` 0 vulnerabilities; no new input paths in slice design.
+  - [x] 1.6. User experience. Pass done in verify slice-design an hour ago (/tmp/verify-design, 16 shots, 8/8 critique); its findings are backlog lines (Log out wraps at 390 with a long email 4, checklist Delete without confirm 4, newlines collapse 4).
+  - [x] 1.7. Code health. n/a: nothing slows the work above.
+- [x] 2. Score. Removed 4 lines shipped in PR #20 (plain look, header hint/404, search height, comment times); `score` re-sorted the rest.
+- [x] 3. Decide. Nothing meets bar 7. Top three: 6 duplicate a task/templates, 6 rename/delete labels + colours, 5 calendar view.
+- [x] Done when: all sources checked, candidates scored, top three logged.
+
+## 2026-11-27 hand-off (controller)
+- Go loop lines: [x] 1. Pick work: no open slice; Orient 4 (no design.md) + improve -> slice design. [x] 2. T37-T40 by fresh builders, each proven by the controller (full suite + drive check per ticket). [x] 3. verify (16 bites seen red), review (0 important, 2 nits to backlog), ship PR #20 -> e9490a1, CI green on main. [x] 4. plan.md Done line on the slice branch before ship.
+- Stop rule: goal met, CI green on main e9490a1 (45945258200), improve found nothing at bar 7 (top 6, 6, 5).
+- Audit: `audit-log .nstack/log.md 2026-11-27` exit 0 after renaming the orient heading (its third word `go` matched a skill name). Compared with what was done: form error states were screenshotted by the builders (T37, T38, T40), not by the controller in verify; verify item 2 used the a03be3e run (code identical at f4ce432).
+- Servers: none of ours listening (cloudflared and claude are not ours); /tmp/taskboard-drive empty; no e2e temp DBs; reviewer worktree removed.
+- Slowed the run: a full e2e suite (~5 min) per ticket plus one for verify on 2 CPUs; CI waits run in sequence. Not cheap to cut without losing per-ticket proof; left as is.

@@ -2,14 +2,10 @@
 Rescored 2026-11-26 after slice 8 (UX pass on /tmp/s8-shots/). Earlier: rescored 2026-11-25 after slice 5 (UX pass on T18 `npm run screens` output, /tmp/t18-shots/). Slice 4 and 5 shipped; items below are open.
 Scored 2026-11-25 (value + risk + cost, cost 5 = cheapest). Sources: UX pass (headless Chromium, screenshots /tmp/ux-shots/), research.md (29 sources), earlier reviews.
 
-- 8 (v4 r2 c2) The app looks plain and unfinished: browser-default controls, bulleted label/member lists, red side stripe on overdue cards, no design.md (go Orient 4 requires one). Evidence: UX pass 2026-11-27, /tmp/design-before/. Planned as slice design.
 - 6 (v2 r1 c3) Duplicate a task / templates. Evidence: 4 sources, research.md
-- 6 (v1 r1 c4) (slice 6 screens) Header "Task board" link has no hover/focus hint, so users may not find the way back to Projects; and Next's default 404 page body uses a different font from the app. Add a hover underline and an app/not-found.tsx.
 - 6 (v3 r1 c2) Rename / delete labels, label colors (slice 8 left them out; the goal names create, assign, filter). Evidence: plan.md slice labels-checklist, Out of scope.
-- 6 (v1 r1 c4) Board search box is a few px taller than the two filter selects (browser default heights), board-1280.png. Evidence: T29 builder.
 - 5 (v2 r1 c2) Calendar view. Evidence: 5 sources, research.md
 - 5 (v2 r1 c2) Multiple assignees. Evidence: 3 sources, research.md
-- 5 (v1 r1 c3) Comment timestamps shown as raw UTC with no timezone. (UX)
 - 5 (v2 r2 c1) (T22) e2e/seed.spec.ts AC22 takes 19-29s against the 30s default test timeout (1 worker, 2 CPUs); under load from a parallel run it timed out twice in T22 `check:e2e-temp` full runs. Give it `test.setTimeout(60_000)` (it seeds twice through the UI) or speed up seed.
 - 5 (v1 r1 c3) Label duplicate check and name order are ASCII-only (`COLLATE NOCASE`): "Été" and "été" can both exist. Same limit as user emails. Evidence: slice 8 security reviewer (better-sqlite3 repro).
 - 4 (v1 r1 c2) Link related tasks; recurring tasks; time tracking; timeline/Gantt (3-4 sources each, research.md).

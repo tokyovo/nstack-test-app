@@ -9,7 +9,7 @@ Run from the repo root. Needs Node 24, `npm ci`, and Chromium for Playwright 1.6
 | build | full | `npm run build` | pass, 0 warnings (2026-11-27, a03be3e) |
 | e2e | full | `npm run check:e2e-temp` | pass, 143 tests, 0 skipped, 0 temp files left (2026-11-27, a03be3e) |
 | drive | full | `npm run drive -- check` | pass, 5 steps, 16 screenshots (2026-11-27, a03be3e) |
-| ci | full | `.github/workflows/ci.yml` on push and PR: npm ci, playwright install, lint, typecheck, build, test:e2e, drive check | green on main 26a9415 (run 45778821562, 119 passed; before the drive step existed) |
+| ci | full | `.github/workflows/ci.yml` on push and PR: npm ci, playwright install, lint, typecheck, build, test:e2e, drive check | green on main e9490a1 (run 45945258200, 143 passed, drive check 16 PNGs) |
 
 - `check:e2e-temp [-- <playwright args>]` runs `playwright test` (needs `npm run build` first; it starts `next start -p ${E2E_PORT:-3100}` with `DATABASE_PATH` set to a fresh temp SQLite file, also readable by tests as `E2E_DATABASE_PATH`), then exits 1 if any `taskboard-e2e-<pid>-*` file is left in the OS temp dir; else the suite's exit code. `npm run test:e2e` is the suite alone.
 - `E2E_SECURE_COOKIES=1` drops the e2e server's `INSECURE_COOKIES=1` (production cookie flags).
