@@ -317,8 +317,8 @@ Entries before 2026-11-27 are in git history: `git log -p .nstack/log.md`.
 - Read: build/SKILL.md 45c2dd4
 - [x] 1. Branch. nstack/labels-dup-calendar from main 762fb7f; builder in its own worktree.
 - [x] 2. Starting state. lint 0, typecheck 0 at 47388eb (tsconfig now excludes .claude worktrees).
-- [ ] 3. Dispatch
-- [ ] 4. Read the reply
-- [ ] 5. Prove it yourself.
-- [ ] 6. Record.
-- [ ] Done when: the ticket is committed on the slice's branch with items 1-6 ticked in its log entry, or is parked in `plan.md`.
+- [x] 3. Dispatch. Fresh nstack:builder, worktree, pointer brief, Parallel: 3.
+- [x] 4. Read the reply. Done at 57020e6: lib/calendar.ts (pure, UTC date math), calendar page, board Calendar link, seed due dates on days 1 and 28, drive calendar screen; 5/6 calendar tests red first; drive check 18 PNGs in its worktree.
+- [x] 5. Prove it yourself. Merged into slice branch (c7d1d07, on top of T43): lint 0, typecheck 0, build 0, `check:e2e-temp -- calendar duplicate a11y seed` 0 (19 passed).
+- [x] 6. Record. Features row "Calendar view"; Drive screens list gains calendar (18 PNGs). Backlog: seed.spec near 30s under load (already a backlog line).
+- [x] Done when: the ticket is committed on the slice's branch with items 1-6 ticked in its log entry, or is parked in `plan.md`.
