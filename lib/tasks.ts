@@ -1,5 +1,6 @@
 import "server-only";
 import { getDb } from "@/lib/db";
+import { MAX_TITLE_LENGTH } from "@/lib/limits";
 import { getProject } from "@/lib/projects";
 import type { Status } from "@/lib/statuses";
 
@@ -98,6 +99,34 @@ export function updateTask(userId: number, projectId: number, taskId: number, ta
     )
     .run(task.title, task.description, task.assigneeId, task.dueDate, taskId, projectId);
   return result.changes > 0 ? "updated" : "not-found";
+}
+
+/**
+ * Copies a task of the project into "To do" as "Copy of <title>" (cut to the title limit), with its description,
+ * due date, labels and checklist (all unticked), but no comments; the assignee is kept only if still a member.
+ * Returns the copy's id, or null unless the task is in the project and the user is a member.
+ */
+export function duplicateTask(userId: number, projectId: number, taskId: number): number | null {
+  const task = getTask(userId, projectId, taskId);
+  if (!task) return null;
+  const db = getDb();
+  const assigneeId = task.assigneeId !== null && isMember(projectId, task.assigneeId) ? task.assigneeId : null;
+  return db.transaction(() => {
+    const copyId = Number(
+      db
+        .prepare("INSERT INTO tasks (project_id, title, description, assignee_id, due_date) VALUES (?, ?, ?, ?, ?)")
+        .run(projectId, `Copy of ${task.title}`.slice(0, MAX_TITLE_LENGTH), task.description, assigneeId, task.dueDate)
+        .lastInsertRowid,
+    );
+    db.prepare("INSERT INTO task_labels (task_id, label_id) SELECT ?, label_id FROM task_labels WHERE task_id = ?").run(
+      copyId,
+      taskId,
+    );
+    db.prepare(
+      "INSERT INTO checklist_items (task_id, text) SELECT ?, text FROM checklist_items WHERE task_id = ? ORDER BY id",
+    ).run(copyId, taskId);
+    return copyId;
+  })();
 }
 
 /** Deletes the task (and, by cascade, its comments, labels and checklist) if it is in the project and the user is a member. */

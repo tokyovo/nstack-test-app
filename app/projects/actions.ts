@@ -10,7 +10,7 @@ import { addComment } from "@/lib/comments";
 import { createLabel, setTaskLabels } from "@/lib/labels";
 import { MAX_CHECKLIST_ITEM_LENGTH, MAX_LABEL_LENGTH, MAX_TITLE_LENGTH } from "@/lib/limits";
 import { isStatus } from "@/lib/statuses";
-import { createTask, deleteTask, moveTask, updateTask, type NewTask } from "@/lib/tasks";
+import { createTask, deleteTask, duplicateTask, moveTask, updateTask, type NewTask } from "@/lib/tasks";
 
 function readName(formData: FormData): string {
   return String(formData.get("name") ?? "").trim();
@@ -134,6 +134,18 @@ export async function deleteTaskAction(projectId: number, taskId: number): Promi
   if (deleteTask(user.id, projectId, taskId)) revalidatePath(`/projects/${projectId}`);
   else if (!getProject(user.id, projectId)) return;
   redirect(`/projects/${projectId}`);
+}
+
+/** Copies a task and opens the copy; a task gone from a project the user is in leads back to the board. */
+export async function duplicateTaskAction(projectId: number, taskId: number): Promise<void> {
+  const user = await requireUser();
+  const copyId = duplicateTask(user.id, projectId, taskId);
+  if (copyId === null) {
+    if (getProject(user.id, projectId)) redirect(`/projects/${projectId}`);
+    return;
+  }
+  revalidatePath(`/projects/${projectId}`);
+  redirect(`/projects/${projectId}/tasks/${copyId}`);
 }
 
 /** Moves a task to another column; called from the board with untrusted arguments. True when the move was stored. */

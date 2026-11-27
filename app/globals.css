@@ -746,8 +746,12 @@ label > :is(input, select, textarea) {
   margin-top: var(--space-4);
 }
 
-/* Deleting the task sits apart from Save changes, under its own rule. */
-.task-delete {
+/* Duplicate and Delete task sit apart from Save changes, under their own rule; Delete at the far end. */
+.task-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-2);
   margin-top: var(--space-6);
   padding-top: var(--space-4);
   border-top: 1px dashed var(--border);
