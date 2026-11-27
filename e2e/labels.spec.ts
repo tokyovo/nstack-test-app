@@ -1,4 +1,9 @@
-import { expect, test, type Browser, type Page } from "@playwright/test";
+import { expect, test, type Browser, type Locator, type Page } from "@playwright/test";
+import Database from "better-sqlite3";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { applySchema } from "../lib/schema";
 import { cards, createProject, newUser, tamperBoundIds, type ColumnName } from "./helpers";
 
 function labelList(page: Page) {
@@ -10,19 +15,33 @@ function labelForm(page: Page) {
 }
 
 /** Submits the board's label form with `name` as typed; `required` and `maxlength` are removed so the server decides. */
-async function submitLabel(page: Page, name: string) {
+async function submitLabel(page: Page, name: string, colour?: string) {
   const input = labelForm(page).getByLabel("Label name");
   await input.evaluate((field) => {
     field.removeAttribute("required");
     field.removeAttribute("maxlength");
   });
   await input.fill(name);
+  if (colour) await labelForm(page).getByLabel("Colour").selectOption({ label: colour });
   await labelForm(page).getByRole("button", { name: "Create label" }).click();
 }
 
-async function createLabel(page: Page, name: string) {
-  await submitLabel(page, name);
+async function createLabel(page: Page, name: string, colour?: string) {
+  await submitLabel(page, name, colour);
   await expect(labelList(page).filter({ hasText: name.trim() })).toHaveCount(1);
+}
+
+/** The coloured chip that shows a label's name inside `scope`. */
+function chip(scope: Page | Locator, name: string) {
+  return scope.locator(".label-chip").filter({ hasText: new RegExp(`^${name}$`) });
+}
+
+/** The chip's computed background and text colours. */
+function chipColours(target: Locator) {
+  return target.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return { background: style.backgroundColor, color: style.color };
+  });
 }
 
 async function addTask(page: Page, projectUrl: string, title: string) {
@@ -136,7 +155,9 @@ test("AC37: a task's labels are ticked on its page, saved, and shown on its card
 
   await a.page.goto(url);
   await expect(cardLabels(a.page, "To do", "Fix header")).toHaveText(["bug", "Design"]);
-  await expect(cardLabels(a.page, "To do", "Fix header").first()).toHaveClass("label");
+  await expect(cardLabels(a.page, "To do", "Fix header").first().locator(".label-chip")).toHaveClass(
+    "label-chip label-gray",
+  );
   await expect(cards(a.page, "To do").filter({ hasText: "Plain task" }).getByRole("list")).toHaveCount(0);
 
   await openTask(a.page, "Fix header");
@@ -356,4 +377,113 @@ test("AC38: an unknown or another project's label id shows all labels", async ({
   await expect.poll(() => query(a.page, "q")).toBe("Plain");
   expect(query(a.page, "label")).toBeNull();
   await expect(cardTitles(a.page)).toHaveText(["Plain"]);
+});
+
+const BLUE = { background: "rgb(223, 235, 251)", color: "rgb(31, 79, 143)" }; // #DFEBFB, #1F4F8F
+const GRAY = { background: "rgb(232, 234, 237)", color: "rgb(58, 65, 73)" }; // #E8EAED, #3A4149
+
+test("AC1: a label's colour shows on its chip in the Labels list, on cards and on the task page; Gray is the default", async ({
+  browser,
+}) => {
+  const a = await newUser(browser);
+  const url = await createProject(a.page, "Colourful");
+  await a.page.goto(url);
+  const colour = labelForm(a.page).getByLabel("Colour");
+  await expect(colour.locator("option")).toHaveText(["Gray", "Green", "Blue", "Purple", "Orange", "Red"]);
+  await expect(colour).toHaveValue("gray");
+
+  await createLabel(a.page, "Urgent", "Blue");
+  await expect(colour).toHaveValue("gray");
+  await createLabel(a.page, "Someday");
+  await a.page.reload();
+  const list = a.page.getByRole("list", { name: "Labels", exact: true });
+  await expect(chip(list, "Urgent")).toHaveClass("label-chip label-blue");
+  expect(await chipColours(chip(list, "Urgent"))).toEqual(BLUE);
+  await expect(chip(list, "Someday")).toHaveClass("label-chip label-gray");
+  expect(await chipColours(chip(list, "Someday"))).toEqual(GRAY);
+
+  await addTask(a.page, url, "Ship it");
+  await openTask(a.page, "Ship it");
+  const section = a.page.getByRole("region", { name: "Labels" });
+  expect(await chipColours(chip(section, "Urgent"))).toEqual(BLUE);
+  expect(await chipColours(chip(section, "Someday"))).toEqual(GRAY);
+  await a.page.getByRole("checkbox", { name: "Urgent" }).check();
+  await a.page.getByRole("checkbox", { name: "Someday" }).check();
+  await saveLabels(a.page);
+
+  await a.page.goto(url);
+  const card = cards(a.page, "To do").filter({ hasText: "Ship it" });
+  await expect(cardLabels(a.page, "To do", "Ship it")).toHaveText(["Someday", "Urgent"]);
+  expect(await chipColours(chip(card, "Urgent"))).toEqual(BLUE);
+  expect(await chipColours(chip(card, "Someday"))).toEqual(GRAY);
+});
+
+test("AC1: a colour that is not in the list is rejected and nothing is stored", async ({ browser }) => {
+  const a = await newUser(browser);
+  const url = await createProject(a.page, "Forged colour");
+  await a.page.goto(url);
+  await labelForm(a.page)
+    .getByLabel("Colour")
+    .evaluate((select: HTMLSelectElement) => {
+      select.options[select.selectedIndex].value = "pink";
+    });
+  await submitLabel(a.page, "Hot");
+  await expect(labelForm(a.page).getByRole("alert")).toHaveText("Pick a colour from the list");
+  await expect(labelForm(a.page).getByLabel("Label name")).toHaveValue("Hot");
+
+  await a.page.reload();
+  await expect(labelList(a.page)).toHaveCount(0);
+});
+
+/** The tables a label touches, as they were before labels had a colour. */
+const OLD_LABELS_SCHEMA = `
+CREATE TABLE projects (id INTEGER PRIMARY KEY, name TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT (datetime('now')));
+CREATE TABLE tasks (
+  id INTEGER PRIMARY KEY,
+  project_id INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  description TEXT NOT NULL DEFAULT '',
+  assignee_id INTEGER,
+  due_date TEXT,
+  status TEXT NOT NULL DEFAULT 'todo' CHECK (status IN ('todo', 'in_progress', 'done')),
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE TABLE labels (
+  id INTEGER PRIMARY KEY,
+  project_id INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  UNIQUE (project_id, name COLLATE NOCASE)
+);
+CREATE TABLE task_labels (
+  task_id INTEGER NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
+  label_id INTEGER NOT NULL REFERENCES labels(id) ON DELETE CASCADE,
+  PRIMARY KEY (task_id, label_id)
+);
+INSERT INTO projects (id, name) VALUES (1, 'Old project');
+INSERT INTO tasks (id, project_id, title) VALUES (7, 1, 'Old task');
+INSERT INTO labels (id, project_id, name) VALUES (3, 1, 'Legacy');
+INSERT INTO task_labels (task_id, label_id) VALUES (7, 3);
+`;
+
+test("AC2: a database file from before label colours opens; its labels become Gray and keep names and task links", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "taskboard-migrate-"));
+  try {
+    const file = path.join(dir, "old.db");
+    const old = new Database(file);
+    old.exec(OLD_LABELS_SCHEMA);
+    old.close();
+
+    for (let open = 0; open < 2; open++) {
+      const db = new Database(file);
+      try {
+        applySchema(db);
+        expect(db.prepare("SELECT id, name, color FROM labels").all()).toEqual([{ id: 3, name: "Legacy", color: "gray" }]);
+        expect(db.prepare("SELECT task_id, label_id FROM task_labels").all()).toEqual([{ task_id: 7, label_id: 3 }]);
+      } finally {
+        db.close();
+      }
+    }
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
 });

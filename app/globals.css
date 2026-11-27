@@ -16,6 +16,20 @@
   --border: #d5d9dd;
   --edge: #8a939c;
 
+  /* Label chips: a soft background and dark text per colour key, each pair at least 6:1. */
+  --label-gray-bg: #e8eaed;
+  --label-gray-text: #3a4149;
+  --label-green-bg: #ddf1e4;
+  --label-green-text: #1f5f3a;
+  --label-blue-bg: #dfebfb;
+  --label-blue-text: #1f4f8f;
+  --label-purple-bg: #ece4f8;
+  --label-purple-text: #5a3594;
+  --label-orange-bg: #fce9d9;
+  --label-orange-text: #8a4111;
+  --label-red-bg: #fbe3e3;
+  --label-red-text: #9b1c1c;
+
   --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --text-sm: 0.875rem;
   --text-md: 1rem;
@@ -483,14 +497,48 @@ label > :is(input, select, textarea) {
   margin-top: var(--space-2);
 }
 
-.task-labels .label {
+.task-labels li {
   min-width: 0;
+}
+
+/* A label's name on a chip in its colour: on cards, in the board's Labels list and on the task page. */
+.label-chip {
+  display: inline-block;
+  max-width: 100%;
   padding: 0 var(--space-2);
-  border: 1px solid var(--border);
   border-radius: 999px;
-  background: var(--background);
   font-size: var(--text-sm);
   overflow-wrap: anywhere;
+}
+
+.label-gray {
+  background: var(--label-gray-bg);
+  color: var(--label-gray-text);
+}
+
+.label-green {
+  background: var(--label-green-bg);
+  color: var(--label-green-text);
+}
+
+.label-blue {
+  background: var(--label-blue-bg);
+  color: var(--label-blue-text);
+}
+
+.label-purple {
+  background: var(--label-purple-bg);
+  color: var(--label-purple-text);
+}
+
+.label-orange {
+  background: var(--label-orange-bg);
+  color: var(--label-orange-text);
+}
+
+.label-red {
+  background: var(--label-red-bg);
+  color: var(--label-red-text);
 }
 
 /* Checklist progress: the count, then a 4 px bar under the card text. */

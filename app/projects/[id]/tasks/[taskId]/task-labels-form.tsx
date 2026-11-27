@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import type { SaveLabelsState } from "@/app/projects/actions";
 import type { Label } from "@/lib/labels";
+import { LabelChip } from "../../label-chip";
 
 type Props = {
   action: (prev: SaveLabelsState, formData: FormData) => Promise<SaveLabelsState>;
@@ -22,7 +23,7 @@ export function TaskLabelsForm({ action, labels, checked }: Props) {
       {labels.map((label) => (
         <label key={label.id} className="checkbox-row">
           <input type="checkbox" name="labelId" value={label.id} defaultChecked={checked.includes(label.id)} />{" "}
-          {label.name}
+          <LabelChip label={label} />
         </label>
       ))}
       <button type="submit" className="primary" disabled={pending}>
