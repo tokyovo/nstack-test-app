@@ -716,3 +716,24 @@
 - Decision: instance state in `<os tmp>/taskboard-drive/<port>.json` because it allows several copies and needs no gitignore change.
 - Decision: remove seed.mts/screens.mts rather than keep them beside drive (rule 3: remove before add).
 - Decision: "builds if needed" = `.next/BUILD_ID` missing; stale builds need `--build`. Simplest, easy to tighten later.
+
+## 2026-11-27 build T35
+- Read: build/SKILL.md 42e2412
+- [x] 1. Branch. nstack/drive-tool from d52bc4c.
+- [x] 2. Starting state. lint exit 0, typecheck exit 0 (main d52bc4c).
+- [x] 3. Dispatch. fresh nstack:builder with the pointer brief.
+- [x] 4. Read the reply. done at e65299e; scripts/drive.mts (496 lines), package.json drive script, seed/screens removed, CI step added.
+- [x] 5. Prove it yourself. At e65299e, exit codes taken unpiped: `drive --help` 0; unknown command 2; `seed` with nothing running 1 ("run `npm run drive -- start`"); `drive check --json` 0, 5 steps ok; `start --json` 0 (one JSON line), `stop --dry-run --json` 0 with port still listening, `stop --port N --json` 0 then port closed; mutant (console.error on board page in shoot) -> `check` exit 1, screens failed, stop ok, 0 temp dirs/state files/ports left; reverted, `git diff --stat` empty; AC7 grep exit 1 (no matches); lint 0; typecheck 0; `npx playwright test e2e/seed.spec.ts` 1 passed; no `data/`.
+- [x] 6. Record. this entry; backlog line added (Ctrl-C during check).
+- [x] Done when: committed e65299e, items ticked.
+- Note: a `next-server` on 127.0.0.1:3400 (pid 114319, started 2026-11-26 20:04, beside a cloudflared tunnel pid 114277) is not nstack's (last hand-off found none listening); left untouched.
+
+## 2026-11-27 build T36
+- Read: build/SKILL.md 42e2412 (same file, this run)
+- [x] 1. Branch. nstack/drive-tool.
+- [x] 2. Starting state. lint 0, typecheck 0 at e65299e (T35 entry).
+- [x] 3. Dispatch. n/a: T36 edits only `.nstack/verify.md`, which builders may not edit; the controller wrote it from `grep` of every e2e test title.
+- [x] 4. Read the reply. n/a: no builder.
+- [x] 5. Prove it yourself. `check-features .nstack/verify.md` exit 0 (36 rows); scratch copy `<tmp>/x/.nstack/verify.md` with e2e symlinked and one test name altered: exit 1 "missing test: Overdue marker". Seed row contents checked against scripts/seed-app.mts (labels, checklist).
+- [x] 6. Record. this entry; per-ticket Proof chain sections removed (evidence is in log.md and git history).
+- [x] Done when: committed with the state commit below.
