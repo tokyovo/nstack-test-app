@@ -7,6 +7,7 @@ Scored 2026-11-25 (value + risk + cost, cost 5 = cheapest). Sources: UX pass (he
 - 5 (v2 r1 c2) Task templates (duplicate shipped in PR #22; a saved template list is the rest of that research candidate). Evidence: research.md (4 sources for duplicate/templates).
 - 5 (v2 r1 c2) Multiple assignees. Evidence: 3 sources, research.md
 - 5 (v1 r1 c3) Label duplicate check and name order are ASCII-only (`COLLATE NOCASE`): "Été" and "été" can both exist. Same limit as user emails. Evidence: slice 8 security reviewer (better-sqlite3 repro).
+- 5 (v1 r2 c2) `check:e2e-temp` and `drive` run whatever `.next` holds; after a bite-run restore without `npm run build` a full suite tested old code (verify checklist-confirm). Refuse a build older than the newest file in app/ or lib/. Evidence: verify slice checklist-confirm.
 - 4 (v1 r2 c1) The security reviewer ran `next start` by hand (port 3251) and left it running after its worktree was removed; the controller found it at hand-off. If it happens again, make reviewers start servers only through `drive start`/`stop`. Evidence: hand-off 2026-11-27c.
 - 4 (v1 r2 c1) Project rename/delete check membership with their own `MEMBER_CHECK` SQL in lib/projects.ts, not `getProject`: two membership rules to keep in step. Use one. Evidence: T48 bite run.
 - 4 (v1 r2 c1) CSP is `frame-ancestors 'none'` only; a script-src policy needs per-request nonces (every page dynamic). Evidence: slice secure-access plan.

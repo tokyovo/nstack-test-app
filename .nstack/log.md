@@ -360,3 +360,17 @@ Not verified: none.
 - [x] 5. Prove it yourself. At ae4a27d: lint 0, typecheck 0, build 0, check:e2e-temp checklist.spec 10 passed; with checklist-item.tsx from 1a0e96d: 7 failed, 3 passed; restored, tree clean.
 - [x] 6. Record. This entry; no Backlog lines.
 - [x] Done when: T52 committed on nstack/checklist-confirm, items ticked.
+
+## 2026-11-27 verify slice checklist-confirm
+- Read: verify/SKILL.md 1af2e2c
+- [x] 1. Clean tree. HEAD 35a804e (code ae4a27d).
+- [x] 2. Project checks. lint 0, typecheck 0, build 0 (0 warnings), check:e2e-temp 177 passed / 0 failed / 0 skipped, 0 temp files, no data/; drive check 0 (18 PNGs). First full run: 9 failed, because I restored checklist-item.tsx after the bite run without rebuilding (.next held the no-confirm build; the 7 checklist failures equal the bite run), plus 2 a11y timeouts at load 6.5; after `npm run build` all 177 passed.
+- [x] 3. Every acceptance criterion in scope has a passing check. AC1-3, AC5 checklist.spec "AC39: Delete asks first; ..."; AC4 "AC47: double-clicking Delete ..." (exactly 1 dialog, 1 action). check-features 0 (Checklist items row proof name unchanged).
+- [x] 4. Every new check bites. checklist-item.tsx from 1a0e96d: 7 failed; restored + rebuilt: 10 passed.
+- [x] 5. The real thing runs. Playwright against next start, in CI.
+- [x] 6. Every changed screen looks right. Task page markup and CSS unchanged (diff: onClick only); the confirm is the browser's native dialog, as for task/project/label deletes. Every delete in the app now asks first.
+- [x] 7. Nothing got weaker. Removed test "AC39: Delete removes the item without asking" is the spec change (replaced by the asks-first test), logged in build T52; no skip/any/ignore added.
+- [x] 8. No new warnings or errors. 0/0; 177 tests as before.
+- [x] 9. Access is enforced. Deny proof "AC39: a non-member's checklist requests change nothing" passes (accepts the dialog so the request is sent); no route/action change.
+- [x] Done when: all ticked. Not verified: none.
+- Lesson: a stale `.next` after a bite restore made a full run test old code (no rebuild). Once so far; backlog: make check:e2e-temp refuse a build older than the newest app/ or lib/ file.
