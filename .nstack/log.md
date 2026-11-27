@@ -249,3 +249,23 @@ Entries before 2026-11-27 are in git history: `git log -p .nstack/log.md`.
 - Audit: `audit-log .nstack/log.md 2026-11-27` exit 0. Compared with what was done: the plan step line was printed as "secure-headers" and the slice named secure-access (noted in that entry); verify item 6 n/a (no UI change).
 - Servers: stopped a next-server on :3251 (pid 311528) left by the security reviewer, cwd its removed worktree. The next-server on 127.0.0.1:3400 (pid 114319, from 2026-11-26) is not from this run; left running. /tmp/taskboard-drive empty; no e2e temp DBs; worktrees: main only.
 - Slowed the run: the nstack guard hook blocks any command containing the no-verify flag text, even inside a grep pattern for the "nothing got weaker" scan; worked around with a character class. The leftover reviewer server is a backlog line (once so far).
+
+## 2026-11-27 orient (controller, run "continue: new design rules")
+- Nothing in flight: tree clean, one worktree, no unmerged nstack branches, no open nstack PRs; main == origin/main 7013a29.
+- check-env ok; lint 0; typecheck 0; check-features 0; build 0; drive check pass (18 PNGs); check-security against a drive copy: all 4 ok (36 deny proofs).
+- needs-human: no open items. Goal met; the user asked to bring every screen up to the design skill's new rules -> plan.
+
+## 2026-11-27 plan design-rules
+- Read: plan/SKILL.md fa73337
+- [x] 1. Learn the ground truth. globals.css headings h2 xl / h3 lg / column h3 md / calendar day h3 sm; header h1 "Task board" on every page; selects browser default; date input default; checkbox accent-color set. Probe: `system-ui` resolves to WenQuanYi Zen Hei here, bold width == regular width (211.3 vs 211.3px), Liberation Sans 215.8 vs 231.3 -> no heading renders bold on this machine.
+- [x] 2. Interrogate the goal yourself
+  - [x] 2.1. Questions: which element is the page title; what happens to the app name; calendar day labels; which controls share what; select chevron without colour literals; 404 logged out.
+  - [x] 2.2. Answered from code and the design skill (in the plan's Decisions and answers).
+  - [x] 2.3. Decision: drop leading system-ui from the font stack (reversible, one line). Decision: calendar day numbers stop being headings. Decision: columns become h2.
+- [x] 3. Write the spec. 10 ACs in plan.md slice design-rules.
+- [x] 4. Cut tickets. T49 headings, T50 controls; independent, parallel (both touch globals.css in different sections).
+- [x] 5. Check the plan
+  - [x] 5.1. AC1-5 -> T49 headings.spec; AC6 -> T49 calendar.spec; AC7-9 -> T50 controls.spec; AC10 -> verify critique + a11y.spec.
+  - [x] 5.2. Fresh Explore reader: 15 questions, all answered under "Plan-check answers".
+  - [x] 5.3. Slice in plan.md, branch nstack/design-rules.
+- [x] Done when: every criterion has a proof, questions answered, slice in plan.md.
