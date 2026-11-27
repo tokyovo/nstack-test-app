@@ -125,7 +125,7 @@ test("AC6: an invalid month shows the current month", async ({ browser }) => {
   }
 });
 
-test("AC6: the no-due-date count is hidden at 0 and says "1 task" for one", async ({ browser }) => {
+test("AC6: the no-due-date count is hidden at 0 and says 1 task for one", async ({ browser }) => {
   const { page } = await newUser(browser);
   const url = await createProject(page, "Counts");
   await page.goto(`${url}/calendar`);
