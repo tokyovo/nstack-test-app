@@ -86,6 +86,17 @@ test.describe("AC2, AC3 screens pass the axe scan and phone layout checks", () =
     await expectAccessible(page, `${url}?q=zzzz`);
     await expect(page.getByRole("status").filter({ hasText: "No tasks match" })).toBeVisible();
   });
+
+  test("the task page with labels, checklist items and a comment", async ({ browser }) => {
+    const { page } = await newUser(browser);
+    const url = await busyBoard(page);
+    await page.goto(url);
+    await page.getByRole("link", { name: "Late task", exact: true }).click();
+    await page.getByLabel("Comment", { exact: true }).fill("Started on the draft");
+    await page.getByRole("button", { name: "Add comment" }).click();
+    await expect(page.getByRole("list", { name: "Comments" }).getByRole("listitem")).toHaveCount(1);
+    await expectAccessible(page, new URL(page.url()).pathname);
+  });
 });
 
 /**

@@ -218,6 +218,16 @@ button:active,
   color: var(--danger-hover);
 }
 
+/* A quiet button acts on one row of a list: no frame until hovered, so a list of them stays calm. */
+:is(button, .button).quiet {
+  border-color: transparent;
+  background: transparent;
+}
+
+:is(button, .button).quiet:hover {
+  border-color: transparent;
+}
+
 button:disabled,
 button:disabled:hover {
   border-color: var(--border);
@@ -612,14 +622,22 @@ label > :is(input, select, textarea) {
    no wider than the fields so each Delete stays next to its item. */
 .checklist {
   max-width: 32rem;
+  margin: 0 0 var(--space-4);
   padding: 0;
   list-style: none;
 }
 
 .checklist-item {
   display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.checklist-item > .checkbox-row {
+  align-items: center;
+  margin: 0;
 }
 
 .checklist-item > .checkbox-row {
@@ -632,3 +650,93 @@ label > :is(input, select, textarea) {
   overflow-wrap: anywhere;
 }
 
+/* The task page: back link, title, a details grid, then Edit task, Labels, Checklist and Comments as
+   sections divided by a rule. Kept to a readable width. */
+.task-page {
+  max-width: 48rem;
+}
+
+.back-link {
+  margin: var(--space-6) 0 0;
+  font-size: var(--text-sm);
+}
+
+.task-page h2 {
+  margin-top: var(--space-2);
+  font-size: var(--text-2xl);
+}
+
+.task-details {
+  display: grid;
+  gap: var(--space-1) var(--space-6);
+  margin: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.task-details dt {
+  color: var(--muted);
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+.task-details dd {
+  min-width: 0;
+  margin: 0 0 var(--space-2);
+}
+
+@media (min-width: 40rem) {
+  .task-details {
+    grid-template-columns: max-content minmax(0, 1fr);
+    align-items: baseline;
+  }
+
+  .task-details dd {
+    margin: 0;
+  }
+}
+
+.task-section {
+  margin-top: var(--space-8);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--border);
+}
+
+.task-section h3 {
+  margin-top: var(--space-4);
+}
+
+/* Deleting the task sits apart from Save changes, under its own rule. */
+.task-delete {
+  margin-top: var(--space-6);
+  padding-top: var(--space-4);
+  border-top: 1px dashed var(--border);
+}
+
+.comment-list {
+  margin: 0 0 var(--space-4);
+  padding: 0;
+  list-style: none;
+}
+
+.comment-list li {
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.comment-list p {
+  margin: var(--space-1) 0 0;
+}
+
+.comment-list .comment-meta {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+
+.comment-meta strong {
+  color: var(--text);
+  font-weight: 600;
+}

@@ -37,12 +37,12 @@ export default async function TaskPage({ params }: PageProps<"/projects/[id]/tas
   const labels = listLabels(user.id, project.id);
   const checklist = listChecklist(user.id, project.id, task.id);
   return (
-    <main>
-      <p>
+    <main className="task-page">
+      <p className="back-link">
         <Link href={`/projects/${project.id}`}>{project.name}</Link>
       </p>
       <h2>{task.title}</h2>
-      <dl>
+      <dl className="task-details">
         <dt>Status</dt>
         <dd>{COLUMN_NAMES[task.status]}</dd>
         <dt>Assignee</dt>
@@ -52,7 +52,7 @@ export default async function TaskPage({ params }: PageProps<"/projects/[id]/tas
         <dt>Description</dt>
         <dd>{task.description || "No description"}</dd>
       </dl>
-      <section>
+      <section className="task-section">
         <h3>Edit task</h3>
         <TaskForm
           action={updateTaskAction.bind(null, project.id, task.id)}
@@ -60,16 +60,16 @@ export default async function TaskPage({ params }: PageProps<"/projects/[id]/tas
           task={task}
           submitLabel="Save changes"
         />
-        <form action={deleteTaskAction.bind(null, project.id, task.id)}>
-          <ConfirmButton message={`Delete task "${task.title}"? This also deletes its comments.`}>
+        <form className="task-delete" action={deleteTaskAction.bind(null, project.id, task.id)}>
+          <ConfirmButton className="danger" message={`Delete task "${task.title}"? This also deletes its comments.`}>
             Delete task
           </ConfirmButton>
         </form>
       </section>
-      <section aria-labelledby="task-labels-heading">
+      <section className="task-section" aria-labelledby="task-labels-heading">
         <h3 id="task-labels-heading">Labels</h3>
         {labels.length === 0 ? (
-          <p>No labels yet</p>
+          <p className="section-empty">No labels yet; create them on the board</p>
         ) : (
           <TaskLabelsForm
             action={saveTaskLabelsAction.bind(null, project.id, task.id)}
@@ -78,9 +78,9 @@ export default async function TaskPage({ params }: PageProps<"/projects/[id]/tas
           />
         )}
       </section>
-      <section aria-labelledby="checklist-heading">
+      <section className="task-section" aria-labelledby="checklist-heading">
         <h3 id="checklist-heading">Checklist</h3>
-        {checklist.length === 0 && <p>No items yet</p>}
+        {checklist.length === 0 && <p className="section-empty">No items yet</p>}
         <Checklist
           rows={checklist.map((item) => ({
             item,
@@ -90,12 +90,15 @@ export default async function TaskPage({ params }: PageProps<"/projects/[id]/tas
         />
         <ChecklistForm action={addChecklistItemAction.bind(null, project.id, task.id)} />
       </section>
-      <section>
+      <section className="task-section">
         <h3>Comments</h3>
-        <ul aria-label="Comments">
+        {comments.length === 0 && <p className="section-empty">No comments yet</p>}
+        <ul aria-label="Comments" className="comment-list">
           {comments.map((comment) => (
             <li key={comment.id}>
-              <strong>{comment.authorEmail}</strong> <time dateTime={comment.createdAt.toISOString()}>{formatCommentTime(comment.createdAt)}</time>
+              <p className="comment-meta">
+                <strong>{comment.authorEmail}</strong> <time dateTime={comment.createdAt.toISOString()}>{formatCommentTime(comment.createdAt)}</time>
+              </p>
               <p>{comment.body}</p>
             </li>
           ))}

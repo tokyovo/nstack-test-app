@@ -38,6 +38,7 @@ export function ChecklistItem({ item, toggle, remove }: Props) {
       </label>
       <button
         type="button"
+        className="danger quiet"
         aria-label={`Delete item "${item.text}"`}
         disabled={removing}
         onClick={() => startRemove(remove)}
