@@ -19,6 +19,7 @@ type Props = { action: (prev: LabelFormState, formData: FormData) => Promise<Lab
 /** New-label form on a board; refilled with the typed name and picked colour after an error, reset after a create. */
 export function LabelForm({ action }: Props) {
   const [state, formAction, pending] = useActionState(action, {});
+  const color = state.values?.color ?? DEFAULT_LABEL_COLOR;
   return (
     <form action={formAction}>
       {state.error && <p role="alert">{state.error}</p>}
@@ -28,7 +29,8 @@ export function LabelForm({ action }: Props) {
       </label>
       <label>
         Colour{" "}
-        <select name="color" defaultValue={state.values?.color ?? DEFAULT_LABEL_COLOR}>
+        {/* Keyed by its value: the form reset after each submit restores a select's mount-time default only. */}
+        <select key={color} name="color" defaultValue={color}>
           <LabelColourOptions />
         </select>
       </label>

@@ -121,6 +121,32 @@ test("AC36: label errors are shown and the typed name is kept", async ({ browser
   await expect(labelChips(a.page)).toHaveText(["Bug", "x".repeat(40)]);
 });
 
+test("AC1: after a create error the New label form keeps the picked colour; after a create it is Gray again", async ({
+  browser,
+}) => {
+  const a = await newUser(browser);
+  const url = await createProject(a.page, "Colour kept");
+  await a.page.goto(url);
+  const alert = labelForm(a.page).getByRole("alert");
+  const colour = labelForm(a.page).getByLabel("Colour");
+
+  await submitLabel(a.page, "   ", "Blue");
+  await expect(alert).toHaveText("Label name is required");
+  await expect(colour).toHaveValue("blue");
+
+  await createLabel(a.page, "Bug");
+  await submitLabel(a.page, "bug", "Red");
+  await expect(alert).toHaveText("That label already exists");
+  await expect(colour).toHaveValue("red");
+
+  await submitLabel(a.page, "Chore", "Green");
+  await expect(labelChips(a.page)).toHaveText(["Bug", "Chore"]);
+  await expect(chip(a.page.getByRole("list", { name: "Labels", exact: true }), "Chore")).toHaveClass(
+    "label-chip label-green",
+  );
+  await expect(colour).toHaveValue("gray");
+});
+
 test("AC36: labels belong to one project and a name can exist in two projects", async ({ browser }) => {
   const a = await newUser(browser);
   const first = await createProject(a.page, "First");
