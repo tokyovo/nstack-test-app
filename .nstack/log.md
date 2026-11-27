@@ -382,16 +382,16 @@ Entries before 2026-11-27 are in git history: `git log -p .nstack/log.md`.
 - Read: review/SKILL.md f713898
 - [x] 1. Dispatch. One nstack:reviewer, worktree, pointer brief at 988bfe9. Verdict pass: 0 important, 1 nit (Copy of title cut can split a surrogate pair). Reran lint/typecheck/build, 34 targeted tests, a mutation (dup keeps ticks -> red), drive check 18, screens.
 - [x] 2. Second reviewer (data migration): Focus security and failure modes, own worktree, in parallel. Verdict pass: 0 important, 2 nits (colour CHECK baked into existing files makes a future colour a 500; same surrogate cut). Membership/project scoping, allow-listed class names, strict month regex confirmed; forged tests pass.
-- [ ] 3. Act on every finding.
-- [ ] 4. Review the fixes
-- [ ] Done when: the latest round has no important findings, `verify` passed after the last fix, and nits are fixed or in `backlog.md`.
+- [x] 3. Act on every finding. All 3 nits (2 distinct) cheap: fixed in T46 (copy title by code points; colour CHECK dropped).
+- [x] 4. Review the fixes. Used the small-fix exception: T46 changes 20 lines of lib code for two nits, both new tests seen red with the fix reverted and green after, full verify passed at b5a09ef (168 passed, drive check 18).
+- [x] Done when: the latest round has no important findings, `verify` passed after the last fix, and nits are fixed or in `backlog.md`.
 
 ## 2026-11-27 build T46
 - Read: build/SKILL.md 45c2dd4
 - [x] 1. Branch. nstack/labels-dup-calendar; builder in its own worktree.
 - [x] 2. Starting state. lint 0, typecheck 0 at 41b2a93 code (verify).
-- [ ] 3. Dispatch
-- [ ] 4. Read the reply
-- [ ] 5. Prove it yourself.
-- [ ] 6. Record.
-- [ ] Done when: the ticket is committed on the slice's branch with items 1-6 ticked in its log entry, or is parked in `plan.md`.
+- [x] 3. Dispatch. Fresh nstack:builder, worktree, pointer brief (alone).
+- [x] 4. Read the reply. Done at b5a09ef: copyTitle() by code points; LABEL_COLOR_COLUMN without CHECK; 2 new tests (emoji copy, future colour after applySchema) red first.
+- [x] 5. Prove it yourself. Fast-forwarded to b5a09ef. With lib/tasks.ts + lib/schema.ts at 4c9f14c: the 2 new tests failed; restored: full gate lint 0, typecheck 0, clean build 0 (0 warnings), `check:e2e-temp` 0 (168 passed), `drive check` 0 (18 PNGs), check-features 0, no data/.
+- [x] 6. Record. Backlog: none new (dev DB files from this unshipped branch keep the CHECK; main never had it).
+- [x] Done when: the ticket is committed on the slice's branch with items 1-6 ticked in its log entry, or is parked in `plan.md`.
