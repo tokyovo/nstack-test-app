@@ -279,3 +279,25 @@ Entries before 2026-11-27 are in git history: `git log -p .nstack/log.md`.
 - [x] 5. Prove it yourself. At e4559f7: lint 0, typecheck 0, build 0, controls.spec 1 passed; with globals.css from 98bf7ff it fails ("select ... appearance auto"). At merge 01576b6: lint 0, typecheck 0, build 0; headings+controls+calendar specs 10 passed; with `system-ui` put back first in --font, headings.spec fails (2 of 3 tests).
 - [x] 6. Record. This entry. Backlog: the board has two primaries ("New task" link and "Add task"); to be judged in the verify critique (line 1 / line 9), not deferred.
 - [x] Done when: T49 and T50 committed on nstack/design-rules (merge 01576b6), items ticked.
+
+## 2026-11-27 verify slice design-rules
+- Read: verify/SKILL.md 1af2e2c
+- [x] 1. Clean tree. HEAD edede51 (code); only .nstack/ uncommitted, which does not invalidate verify.
+- [x] 2. Project checks. lint 0 (0 warnings), typecheck 0, build 0 (0 warnings), check:e2e-temp 177 passed / 0 failed / 0 flaky / 0 skipped, 0 temp files, no data/ dir; drive check 0 (18 PNGs). All at edede51.
+- [x] 3. Every acceptance criterion in scope has a passing check. AC1-5 headings.spec (3 tests); AC2 also nav.spec; AC6 calendar.spec; AC7-9 controls.spec; AC11 controls.spec "at most one visible primary"; AC10 critique below + a11y.spec. Features rows added (3); check-features 0.
+- [x] 4. Every new check bites. controls.spec red on 98bf7ff CSS ("appearance auto"), green after; headings.spec red with system-ui first in --font (2 of 3 fail), green restored; primary test red on board/board-empty/board-nomatch before T51 (builder run, "New task, Add task"). git status clean after each restore.
+- [x] 5. The real thing runs. The new specs drive real Chromium against `next start` in CI; drive screens on a seeded copy.
+- [x] 6. Every changed screen looks right. Critique found the board's two primaries (lines 1/9) -> T51; removed the task page's dashed rule above Duplicate/Delete (did not earn its place) -> edede51; re-shot.
+- [x] 7. Nothing got weaker. No deleted tests; no skip/any/ts-ignore/eslint-disable added. Changed assertions are heading levels and locators only (calendar level 2->1, move h3->h2, nav/smoke/seed header title and day numbers): spec change AC1-AC3, AC6, logged in build T49 T50.
+- [x] 8. No new warnings or errors. Counts as Last result (0/0), tests 172 -> 177; verify.md Last result updated to edede51.
+- [x] 9. Access is enforced. n/a: diff touches only page markup and CSS (app/layout.tsx, page.tsx files, board.tsx, task-labels-form.tsx, globals.css); no route, action, query, table or auth code.
+- [x] Done when: all items ticked; Not verified: none.
+
+| Claim | Command | Result |
+|---|---|---|
+| full gate at edede51 | lint, typecheck, build, check:e2e-temp, drive check | 0/0/0, 177 passed, 18 PNGs |
+| headings bite | system-ui first in --font, headings.spec | 2 failed; restored, 3 passed |
+| controls bite | globals.css from 98bf7ff, controls.spec | 1 failed; restored, passed |
+| screens | /tmp/dr-final2/{login,signup,projects,board,board-empty,board-nomatch,task,calendar,notfound}-{1280,390}.png | lines 1-9 pass on each: one bold h1 largest; bold h2 sections; one green primary (board: Add task; task: Save changes); spacing on scale; no overflow at 390; empty states (board-empty, nomatch) intended; matches design.md; focus per a11y.spec AC4 (outline rule unchanged); action copy; selects chevroned, date input and checkboxes styled like the family |
+
+Not verified: none.
