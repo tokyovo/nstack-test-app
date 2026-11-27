@@ -266,6 +266,28 @@ select {
   padding: 0 var(--space-3);
 }
 
+/* Selects drop the browser's own arrow for a chevron in the muted text colour: two gradient triangles that meet
+   in a point, with room on the right so the text never runs under it. */
+select {
+  appearance: none;
+  padding-right: var(--space-8);
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+    linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position:
+    right 1.125rem center,
+    right 0.8125rem center;
+  background-size: 0.3125rem 0.3125rem;
+  background-repeat: no-repeat;
+}
+
+/* The date input's picker icon sits inside the field like the select's chevron. */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
 textarea {
   min-height: 5rem;
   padding: var(--space-2) var(--space-3);
@@ -284,7 +306,7 @@ textarea {
 }
 
 :is(input, select, textarea):disabled {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--muted);
   cursor: not-allowed;
 }
