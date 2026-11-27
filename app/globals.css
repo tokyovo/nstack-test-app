@@ -1,5 +1,47 @@
-/* Base styles: readable defaults, a three-column board that stacks on narrow screens,
-   and long unbroken text wraps instead of widening the page. */
+/* Base styles from .nstack/design.md: tokens, controls with every state, a three-column board that stacks on
+   narrow screens, and long unbroken text wraps instead of widening the page.
+   Colours live only in :root (scripts/check-css-tokens.mjs, run by `npm run lint`, enforces it). */
+
+:root {
+  --background: #f3f4f1;
+  --surface: #ffffff;
+  --text: #1e2329;
+  --muted: #57606a;
+  --accent: #1d6b57;
+  --accent-hover: #16503f;
+  --accent-soft: #e3efea;
+  --danger: #b91c1c;
+  --danger-hover: #8f1515;
+  --danger-soft: #fbeaea;
+  --border: #d5d9dd;
+  --edge: #8a939c;
+
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --text-sm: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.75rem;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+
+  --radius: 6px;
+  --control-height: 2.5rem;
+  --transition: 150ms ease;
+}
+
+/* Phones: every control is a 44 px touch target. */
+@media (max-width: 640px) {
+  :root {
+    --control-height: 2.75rem;
+  }
+}
 
 *,
 *::before,
@@ -7,40 +49,236 @@
   box-sizing: border-box;
 }
 
+html {
+  background: var(--background);
+}
+
 body {
   margin: 0 auto;
   max-width: 72rem;
-  padding: 1rem;
-  font-family: system-ui, sans-serif;
+  padding: 0 var(--space-4) var(--space-8);
+  background: var(--background);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: var(--text-md);
+  font-variant-numeric: tabular-nums;
   line-height: 1.5;
   overflow-wrap: anywhere;
+}
+
+::selection {
+  background: var(--accent-soft);
+}
+
+h2,
+h3 {
+  line-height: 1.25;
+  text-wrap: balance;
+}
+
+h2 {
+  margin: var(--space-6) 0 var(--space-4);
+  font-size: var(--text-xl);
+}
+
+h3 {
+  margin: var(--space-6) 0 var(--space-3);
+  font-size: var(--text-lg);
+}
+
+a {
+  color: var(--accent);
+  text-underline-offset: 0.15em;
+}
+
+a:hover {
+  color: var(--accent-hover);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 header {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.5rem 1rem;
-  border-bottom: 1px solid #ddd;
-  margin-bottom: 1rem;
+  gap: var(--space-2) var(--space-4);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--space-4);
 }
 
 header h1 {
-  margin: 0.5rem auto 0.5rem 0;
-  font-size: 1.25rem;
+  margin: 0 auto 0 0;
+  font-size: var(--text-lg);
 }
 
+/* The title is a link to Projects: plain until hovered or focused. */
 header h1 a {
   color: inherit;
   text-decoration: none;
 }
 
+header h1 a:hover,
+header h1 a:focus-visible {
+  color: inherit;
+  text-decoration: underline;
+}
+
+header [data-testid="current-user"] {
+  min-width: 0;
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+
+header form {
+  margin: 0;
+}
+
+/* A narrow centred column: log in, sign up and the 404 page. */
+main.narrow {
+  max-width: 24rem;
+  margin: var(--space-8) auto 0;
+}
+
+main.narrow label > :is(input, select, textarea) {
+  width: 100%;
+}
+
+/* Controls. Buttons are secondary unless .primary (the submit that creates or saves) or .danger (deletes);
+   .button makes a link look like a button. Inputs and selects share one height. */
 input,
 select,
 textarea,
 button {
   font: inherit;
   max-width: 100%;
+}
+
+button,
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--control-height);
+  padding: 0 var(--space-4);
+  border: 1px solid var(--edge);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 500;
+  line-height: 1.25;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color var(--transition),
+    border-color var(--transition),
+    color var(--transition);
+}
+
+button:hover,
+.button:hover {
+  border-color: var(--text);
+  background: var(--background);
+  color: var(--text);
+}
+
+button:active,
+.button:active {
+  background: var(--border);
+}
+
+:is(button, .button).primary {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--surface);
+}
+
+:is(button, .button).primary:hover {
+  border-color: var(--accent-hover);
+  background: var(--accent-hover);
+  color: var(--surface);
+}
+
+:is(button, .button).danger {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+:is(button, .button).danger:hover {
+  background: var(--danger-soft);
+  color: var(--danger-hover);
+}
+
+button:disabled,
+button:disabled:hover {
+  border-color: var(--border);
+  background: var(--background);
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+input:not([type="checkbox"]),
+select,
+textarea {
+  border: 1px solid var(--edge);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  transition: border-color var(--transition);
+}
+
+input:not([type="checkbox"]),
+select {
+  height: var(--control-height);
+  padding: 0 var(--space-3);
+}
+
+textarea {
+  min-height: 5rem;
+  padding: var(--space-2) var(--space-3);
+}
+
+:is(input, select, textarea):hover {
+  border-color: var(--text);
+}
+
+:is(input, select, textarea):focus {
+  border-color: var(--accent);
+}
+
+:is(input, select, textarea):user-invalid {
+  border-color: var(--danger);
+}
+
+:is(input, select, textarea):disabled {
+  background: var(--background);
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+input[type="checkbox"] {
+  width: 1.125rem;
+  height: 1.125rem;
+  accent-color: var(--accent);
+}
+
+/* Errors: danger text on a light danger tint, next to what caused them. */
+main [role="alert"] {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius);
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
 }
 
 /* Each label sits above its field, and fields share the form's left edge. A fixed field width
@@ -52,7 +290,7 @@ main form {
 label {
   display: block;
   max-width: 100%;
-  margin: 0 0 0.75rem;
+  margin: 0 0 var(--space-3);
 }
 
 label > :is(input, select, textarea) {
@@ -82,12 +320,7 @@ label > :is(input, select, textarea) {
 
 .column-empty {
   margin: 0;
-  color: #6b7280;
-}
-
-main [role="alert"] {
-  color: #b91c1c;
-  font-weight: 600;
+  color: var(--muted);
 }
 
 .board-column {
@@ -95,7 +328,8 @@ main [role="alert"] {
   min-height: 6rem;
   padding: 0.5rem;
   border-radius: 6px;
-  background: #f3f4f6;
+  border: 1px solid var(--border);
+  background: var(--surface);
 }
 
 .board-column h3 {
@@ -112,16 +346,16 @@ main [role="alert"] {
 .task-card {
   margin-bottom: 0.5rem;
   padding: 0.5rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border);
   border-radius: 6px;
-  background: #fff;
+  background: var(--surface);
   cursor: grab;
 }
 
 .task-card p {
   margin: 0.25rem 0 0;
   font-size: 0.875rem;
-  color: #4b5563;
+  color: var(--muted);
 }
 
 @media (max-width: 640px) {
@@ -138,12 +372,12 @@ main [role="alert"] {
 }
 
 .task-card.overdue {
-  border-color: #b91c1c;
+  border-color: var(--danger);
   border-left-width: 4px;
 }
 
 .task-card .overdue-label {
-  color: #b91c1c;
+  color: var(--danger);
   font-weight: 600;
 }
 
@@ -174,9 +408,9 @@ main [role="alert"] {
 
 .task-labels .label {
   padding: 0 0.4rem;
-  border: 1px solid #c7d2fe;
+  border: 1px solid var(--border);
   border-radius: 999px;
-  background: #eef2ff;
+  background: var(--background);
   font-size: 0.75rem;
   overflow-wrap: anywhere;
 }
@@ -186,6 +420,14 @@ main [role="alert"] {
   display: flex;
   align-items: baseline;
   gap: 0.5rem;
+}
+
+/* Phones: a checkbox's label is its 44 px touch target. */
+@media (max-width: 640px) {
+  .checkbox-row {
+    align-items: center;
+    min-height: var(--control-height);
+  }
 }
 
 .checkbox-row > input {

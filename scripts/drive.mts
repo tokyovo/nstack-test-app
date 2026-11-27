@@ -273,7 +273,11 @@ const VIEWPORTS = [
   { width: 1280, height: 800 },
   { width: 390, height: 844 },
 ];
-const SCREEN_NAMES = ["login", "signup", "projects", "board", "task"];
+const SCREEN_NAMES = ["login", "signup", "projects", "board", "task", "notfound"];
+/** A project id no seed creates, for the 404 screen; its document's 404 is not a console error. */
+const NOT_FOUND_PATH = "/projects/999999";
+/** Paths whose 404 the browser logs to the console on purpose. */
+const EXPECTED_404_PATHS = ["/favicon.ico", NOT_FOUND_PATH];
 
 /** Seeds, then saves full-page screenshots of the main screens at desktop and phone widths. */
 async function screens(baseURL: string, dir: string): Promise<{ dir: string; files: string[]; errors: string[] }> {
@@ -283,7 +287,7 @@ async function screens(baseURL: string, dir: string): Promise<{ dir: string; fil
   function recordErrors(page: Page) {
     page.on("console", (message) => {
       if (message.type() !== "error") return;
-      if (new URL(message.location().url || baseURL).pathname === "/favicon.ico") return;
+      if (EXPECTED_404_PATHS.includes(new URL(message.location().url || baseURL).pathname)) return;
       errors.push(`${page.url()}: ${message.text()}`);
     });
     page.on("pageerror", (error) => errors.push(`${page.url()}: ${error.message}`));
@@ -313,6 +317,7 @@ async function screens(baseURL: string, dir: string): Promise<{ dir: string; fil
       await shoot(page, "/projects", "projects", viewport.width);
       await shoot(page, seeded.boardUrl, "board", viewport.width);
       await shoot(page, seeded.taskUrl, "task", viewport.width);
+      await shoot(page, NOT_FOUND_PATH, "notfound", viewport.width);
       await page.context().close();
     }
   } finally {
@@ -413,7 +418,7 @@ const COMMANDS: Record<string, { usage: string; summary: string; options: Record
   },
   screens: {
     usage: "screens <dir> [--url U | --port N] [--json]",
-    summary: "Seed, then save 10 full-page PNGs; exit 1 listing console/page errors.",
+    summary: "Seed, then save 12 full-page PNGs; exit 1 listing console/page errors.",
     options: {
       url: { type: "string", description: "base URL of the app (default: the single running instance)" },
       port: { type: "string", description: "use http://localhost:N" },

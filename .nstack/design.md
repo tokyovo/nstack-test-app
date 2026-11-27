@@ -1,0 +1,14 @@
+# Design
+Subject: a task board a small team keeps open all day to see who is doing what; calm, dense, quick to scan.
+Kind: work tool
+## Tokens
+- background #F3F4F1, surface #FFFFFF, text #1E2329, muted #57606A, accent #1D6B57 (primary buttons, links, focus, selection), danger #B91C1C (overdue, delete, errors); border #D5D9DD
+- derived: accent-hover #16503F, danger-hover #8F1515 (hover), accent-soft #E3EFEA (selection), danger-soft #FBEAEA (error tint), edge #8A939C (control edges, 3:1 on surface)
+- type: system-ui stack for everything; scale 0.875 / 1 / 1.125 / 1.375 / 1.75 rem (ratio ~1.2); body 1rem; numbers tabular
+- space: 4 px base (4, 8, 12, 16, 24, 32, 48); radius 6 px; border 1px #D5D9DD; shadow only on a dragged card
+- controls: one height for buttons, inputs and selects (2.5rem, 2.75rem = 44 px at <= 640 px); focus is a 2 px accent outline 2 px off the edge
+- signature: column headings carry a live card count; Done cards dim; checklist progress is a 4 px bar under the card text
+## Generic check
+- Rejected: identical floating cards with a soft shadow (default); cards are flat with a border instead
+- Rejected: a coloured side stripe for overdue cards; overdue is a danger badge instead
+- Rejected: a web font; the system-ui stack needs no network fetch at build
