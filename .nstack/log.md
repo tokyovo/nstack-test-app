@@ -389,7 +389,28 @@ Not verified: none.
 - [x] 2. Sync. origin/main 7457fcc is an ancestor; nothing came in.
 - [x] 3. Push. nstack/checklist-confirm.
 - [x] 4. Open the PR. Body: change, ticket, verification, merge danger (revert-safe, one client component and its spec), decisions.
-- [ ] 5. Wait for CI
-- [ ] 6. Merge
-- [ ] 7. Confirm and clean up.
-- [ ] Done when: the PR is merged, CI is green on the default branch, and the fast checks pass there, or the PR is parked with a reason.
+- [x] 5. Wait for CI. PR #27: runs 45976596235, 45976617264 pass.
+- [x] 6. Merge. merge: auto, 0 findings -> squash add5df3.
+- [x] 7. Confirm and clean up. main pulled; lint 0, typecheck 0; CI on add5df3 success (45977192188); branch deleted local and remote; worktrees: main only.
+- [x] Done when: the PR is merged, CI is green on the default branch, and the fast checks pass there, or the PR is parked with a reason.
+
+## 2026-11-27 improve
+- Read: improve/SKILL.md c8daf07
+- [x] 1. Gather evidence
+  - [x] 1.1. Broken things. None: CI green on main add5df3 (45977192188); full gate 177 passed at 665b91a.
+  - [x] 1.2. Known problems. 0 open issues; needs-human none open; backlog read.
+  - [x] 1.3. Gaps against the goal. None (check-features 0).
+  - [x] 1.4. Outside demand. research.md 2026-11-25, fresh; candidates in backlog (top 5).
+  - [x] 1.5. Risk. npm audit 0 high/critical (orient check-security); no new deps.
+  - [x] 1.6. User experience. All 18 screens critiqued this run (verify design-rules); every delete now asks first. New candidate: no check enforces confirmation on destructive actions.
+  - [x] 1.7. Code health. Nothing beyond backlog.
+- [x] 2. Score. Shipped item removed; new 6 (v1 r2 c3) destructive-action check; 5 (v1 r2 c2) stale .next guard; scripts/score exit 0.
+- [x] 3. Decide. Top 3: 6, 6, 5; none meets bar 7. Stop.
+- [x] Done when: sources checked, scored, top three logged.
+
+## 2026-11-27 hand-off (controller, run "continue: new design rules")
+- Go loop: Orient clean -> plan design-rules (T49-T51) -> build (2 parallel builders + T51 from the critique) -> verify (177 passed, 9/9 critique) -> review (0 important) -> ship PR #26 (7457fcc, CI green) -> improve (checklist confirm, 8) -> plan/build/verify/review/ship checklist-confirm PR #27 (add5df3, CI green) -> improve: top 6, 6, 5, nothing at bar 7.
+- Stop rule: goal met; CI green on main add5df3; improve (with research, fresh 2026-11-25) found nothing at bar 7.
+- Audit: audit-log flagged the checklist-confirm ship entry (items 5-7 unticked until merge); ticked with evidence above. Compared with what was done: verify design-rules item 6 passed the task page while its checklist Delete had no confirmation (the design critique list has no line for it); found and fixed in the next slice, and a check is in the backlog (6). The first full run of verify checklist-confirm tested a stale .next (no rebuild after the bite restore); re-run after build, backlog line (5).
+- Servers: none of this run's left; drive state dir empty; no e2e temp DBs; worktrees: main only. The next-server on 127.0.0.1:3400 (pid 319417, cwd ~/.local/share/nstack-test-app/demo-src, started 08:30) is not from this run; left running.
+- Slowed the run: the stale-build trap above; builders cannot edit .nstack/design.md, so design.md lines in a ticket need the controller (written into this run's tickets as controller work after merge).
