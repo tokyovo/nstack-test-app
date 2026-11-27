@@ -4,7 +4,18 @@
 // database (data/) is never touched. Instance state lives in <tmpdir>/taskboard-drive/<port>.json.
 import { chromium, type Page } from "@playwright/test";
 import { spawn, spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, openSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
+import {
+  chmodSync,
+  existsSync,
+  lstatSync,
+  mkdirSync,
+  openSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
 import { mkdtemp } from "node:fs/promises";
 import net from "node:net";
 import os from "node:os";
@@ -59,14 +70,60 @@ function removeInstanceFiles(instance: Instance) {
   rmSync(stateFile(instance.port), { force: true });
 }
 
-/** The running instances, after pruning stale ones (pid dead or port not listening). */
-async function runningInstances(): Promise<Instance[]> {
+/** A temp dir `start` could have made: a direct child of the OS temp dir named taskboard-drive-*. */
+function isDriveTempDir(dir: unknown): dir is string {
+  return (
+    typeof dir === "string" &&
+    path.resolve(dir) === dir &&
+    path.dirname(dir) === os.tmpdir() &&
+    path.basename(dir).startsWith("taskboard-drive-")
+  );
+}
+
+/** The instance a state file describes, or why it cannot be trusted. */
+function parseStateFile(file: string): Instance | string {
+  let data: Partial<Record<keyof Instance, unknown>>;
+  try {
+    data = JSON.parse(readFileSync(file, "utf8"));
+  } catch {
+    return "not JSON";
+  }
+  const { url, port, pid, db, dir } = data ?? {};
+  if (typeof url !== "string" || typeof db !== "string") return "url or db is not a string";
+  if (typeof port !== "number" || `${port}.json` !== path.basename(file)) return "port does not match the file name";
+  if (typeof pid !== "number" || !Number.isInteger(pid) || pid < 2) return `pid ${JSON.stringify(pid)} is not a process id`;
+  if (!isDriveTempDir(dir)) return `dir ${JSON.stringify(dir)} is not a taskboard-drive-* dir in ${os.tmpdir()}`;
+  return { url, port, pid, db, dir };
+}
+
+/** Creates the state dir private to this user, or tightens one an earlier version left group-writable. */
+function secureStateDir(options: { create: boolean; dryRun?: boolean }) {
+  if (!existsSync(STATE_DIR)) {
+    if (options.create) mkdirSync(STATE_DIR, { recursive: true, mode: 0o700 });
+    return;
+  }
+  const stat = lstatSync(STATE_DIR);
+  if (!stat.isDirectory() || stat.uid !== process.getuid?.())
+    throw new DriveError(`${STATE_DIR} is not a directory owned by you: remove it and retry.`);
+  if ((stat.mode & 0o077) !== 0 && !options.dryRun) chmodSync(STATE_DIR, 0o700);
+}
+
+/** The running instances. Stale ones (pid dead or port not listening) and invalid state files are
+ * reported and, unless dryRun, their files removed; an invalid file's dir is never touched. */
+async function runningInstances(options: { dryRun?: boolean } = {}): Promise<Instance[]> {
+  secureStateDir({ create: false, dryRun: options.dryRun });
   if (!existsSync(STATE_DIR)) return [];
   const running: Instance[] = [];
   for (const name of readdirSync(STATE_DIR).filter((file) => file.endsWith(".json"))) {
-    const instance = JSON.parse(readFileSync(path.join(STATE_DIR, name), "utf8")) as Instance;
-    if (isAlive(instance.pid) && (await isListening(instance.port))) {
+    const file = path.join(STATE_DIR, name);
+    const instance = parseStateFile(file);
+    if (typeof instance === "string") {
+      if (!options.dryRun) rmSync(file, { force: true });
+      console.error(`Ignored invalid state file ${file}: ${instance}${options.dryRun ? "" : "; removed the state file"}`);
+    } else if (isAlive(instance.pid) && (await isListening(instance.port))) {
       running.push(instance);
+    } else if (options.dryRun) {
+      console.error(`Would prune stale instance on port ${instance.port} (pid ${instance.pid}): remove ${instance.dir}`);
     } else {
       removeInstanceFiles(instance);
       console.error(`Pruned stale instance on port ${instance.port} (pid ${instance.pid}); removed ${instance.dir}`);
@@ -157,7 +214,7 @@ async function start(options: { port?: number; build?: boolean }): Promise<Insta
         : `next start exited with ${child.exitCode}`;
     throw new DriveError(`${why}. Last lines of server.log:\n${tail}`);
   }
-  mkdirSync(STATE_DIR, { recursive: true });
+  secureStateDir({ create: true });
   writeFileSync(stateFile(port), JSON.stringify(instance));
   return instance;
 }
@@ -192,8 +249,8 @@ async function stopInstance(instance: Instance) {
 }
 
 /** The instances `stop` should act on: --all, the one on --port, or the single running one. */
-async function stopTargets(options: { port?: number; all?: boolean }): Promise<Instance[]> {
-  const running = await runningInstances();
+async function stopTargets(options: { port?: number; all?: boolean; dryRun: boolean }): Promise<Instance[]> {
+  const running = await runningInstances({ dryRun: options.dryRun });
   if (options.all) return running;
   if (options.port !== undefined) return running.filter((instance) => instance.port === options.port);
   if (running.length > 1)
@@ -405,7 +462,7 @@ async function main(argv: string[]): Promise<number> {
     console.log(mainUsage());
     return 0;
   }
-  if (!name || !(name in COMMANDS)) {
+  if (!name || !Object.hasOwn(COMMANDS, name)) {
     console.error(`${name ? `Unknown command "${name}"` : "No command given"}.\n\n${mainUsage()}`);
     return 2;
   }
@@ -468,7 +525,7 @@ async function main(argv: string[]): Promise<number> {
     }
     case "stop": {
       const dryRun = values["dry-run"] === true;
-      const targets = await stopTargets({ port, all: values.all === true });
+      const targets = await stopTargets({ port, all: values.all === true, dryRun });
       if (!dryRun) for (const instance of targets) await stopInstance(instance);
       const stopped = targets.map(({ port, pid, dir }) => ({ port, pid, dir }));
       const verb = dryRun ? "Would stop" : "Stopped";
