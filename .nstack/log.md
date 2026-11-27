@@ -297,11 +297,11 @@ Entries before 2026-11-27 are in git history: `git log -p .nstack/log.md`.
 - Read: build/SKILL.md 45c2dd4
 - [x] 1. Branch. nstack/labels-dup-calendar from main 762fb7f; builder in its own worktree.
 - [x] 2. Starting state. lint 0, typecheck 0 at 47388eb (tsconfig now excludes .claude worktrees).
-- [ ] 3. Dispatch
-- [ ] 4. Read the reply
-- [ ] 5. Prove it yourself.
-- [ ] 6. Record.
-- [ ] Done when: the ticket is committed on the slice's branch with items 1-6 ticked in its log entry, or is parked in `plan.md`.
+- [x] 3. Dispatch. Fresh nstack:builder, worktree, pointer brief, Parallel: 3.
+- [x] 4. Read the reply. Done at 8bf1e3c: lib/schema.ts (applySchema + idempotent colour migration, CHECK on keys), lib/label-colors.ts, LabelChip, Colour select, seed Bug=Red Design=Purple; AC1/AC2 red first; mutation (weak red text) failed axe. Spec changes: AC37 class assertion, forms-layout centring, seed chip classes.
+- [x] 5. Prove it yourself. Merged (0770d37; lib/tasks.ts import conflict, kept both): lint 0, typecheck 0, build 0, `check:e2e-temp -- labels a11y seed forms-layout duplicate calendar` 0 (39 passed).
+- [x] 6. Record. design.md Tokens gets the six chip pairs; Features rows for label colour and old-DB migration.
+- [x] Done when: the ticket is committed on the slice's branch with items 1-6 ticked in its log entry, or is parked in `plan.md`.
 
 ## 2026-11-27 build T43
 - Read: build/SKILL.md 45c2dd4
