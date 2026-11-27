@@ -32,7 +32,7 @@ test("AC22, AC41: seed fills the app with a demo user, a busy board and an empty
   const done = cards(page, "Done");
   await expect(done.locator("p.checklist-progress")).toHaveText("Checklist 1/3");
   await expect(done.getByRole("list", { name: "Task labels" }).getByRole("listitem")).toHaveText(["Bug", "Design"]);
-  await expect(page.getByRole("list", { name: "Labels", exact: true }).getByRole("listitem")).toHaveText(["Bug", "Design"]);
+  await expect(page.getByRole("list", { name: "Labels", exact: true }).locator(".label-chip")).toHaveText(["Bug", "Design"]);
   await expect(page.getByRole("list", { name: "Labels", exact: true }).locator(".label-chip")).toHaveClass([
     "label-chip label-red",
     "label-chip label-purple",

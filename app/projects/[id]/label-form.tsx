@@ -5,6 +5,15 @@ import type { LabelFormState } from "@/app/projects/actions";
 import { DEFAULT_LABEL_COLOR, LABEL_COLORS } from "@/lib/label-colors";
 import { MAX_LABEL_LENGTH } from "@/lib/limits";
 
+/** The colour select's options, shared by the new-label form and each label's edit form. */
+export function LabelColourOptions() {
+  return LABEL_COLORS.map((color) => (
+    <option key={color.key} value={color.key}>
+      {color.name}
+    </option>
+  ));
+}
+
 type Props = { action: (prev: LabelFormState, formData: FormData) => Promise<LabelFormState> };
 
 /** New-label form on a board; refilled with the typed name and picked colour after an error, reset after a create. */
@@ -20,11 +29,7 @@ export function LabelForm({ action }: Props) {
       <label>
         Colour{" "}
         <select name="color" defaultValue={state.values?.color ?? DEFAULT_LABEL_COLOR}>
-          {LABEL_COLORS.map((color) => (
-            <option key={color.key} value={color.key}>
-              {color.name}
-            </option>
-          ))}
+          <LabelColourOptions />
         </select>
       </label>
       <button type="submit" disabled={pending}>

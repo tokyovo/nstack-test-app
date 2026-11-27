@@ -612,6 +612,50 @@ label > :is(input, select, textarea) {
   border-bottom: 1px solid var(--border);
 }
 
+/* A Labels row: the chip with a quiet Delete label at the far end, then the edit form (name, colour, Save). */
+.plain-list li.label-row {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-2) 0;
+}
+
+.label-row form {
+  margin: 0;
+}
+
+.label-row-head,
+.label-edit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+/* One line: a long name wraps inside its chip and Delete label keeps the far end. */
+.label-row-head {
+  flex-wrap: nowrap;
+  justify-content: space-between;
+}
+
+.label-row-head .label-chip {
+  min-width: 0;
+}
+
+.label-row-head button {
+  white-space: nowrap;
+}
+
+.label-edit input {
+  flex: 1 1 8rem;
+  min-width: 0;
+}
+
+.label-edit [role="alert"] {
+  flex-basis: 100%;
+  margin: 0;
+}
+
 /* The projects page: one row per project (name, rename field, Rename, a quiet Delete) on a white list,
    then the New project form. Rows wrap on narrow screens, the name taking its own line. */
 .projects-page {

@@ -7,8 +7,8 @@ import { requireUser } from "@/lib/auth";
 import { createProject, deleteProject, getProject, inviteMember, renameProject } from "@/lib/projects";
 import { addChecklistItem, deleteChecklistItem, setChecklistItemDone } from "@/lib/checklist";
 import { addComment } from "@/lib/comments";
-import { isLabelColor } from "@/lib/label-colors";
-import { createLabel, setTaskLabels } from "@/lib/labels";
+import { isLabelColor, type LabelColor } from "@/lib/label-colors";
+import { createLabel, deleteLabel, setTaskLabels, updateLabel } from "@/lib/labels";
 import { MAX_CHECKLIST_ITEM_LENGTH, MAX_LABEL_LENGTH, MAX_TITLE_LENGTH } from "@/lib/limits";
 import { isStatus } from "@/lib/statuses";
 import { createTask, deleteTask, duplicateTask, moveTask, updateTask, type NewTask } from "@/lib/tasks";
@@ -179,25 +179,56 @@ const LABEL_ERRORS = {
   duplicate: "That label already exists",
 } as const;
 
+/** Reads and validates the label form fields shared by create and edit; an error message if invalid. */
+function readLabel(formData: FormData): { name: string; color: LabelColor } | { error: string } {
+  const name = String(formData.get("name") ?? "").trim();
+  if (!name) return { error: "Label name is required" };
+  if (name.length > MAX_LABEL_LENGTH) return { error: `Label name must be at most ${MAX_LABEL_LENGTH} characters` };
+  const color = String(formData.get("color") ?? "");
+  if (!isLabelColor(color)) return { error: "Pick a colour from the list" };
+  return { name, color };
+}
+
+/** The label form fields as typed, sent back with an error so the form can be refilled. */
+function typedLabel(formData: FormData): LabelFormState["values"] {
+  return { name: String(formData.get("name") ?? ""), color: String(formData.get("color") ?? "") };
+}
+
 export async function createLabelAction(
   projectId: number,
   _prev: LabelFormState,
   formData: FormData,
 ): Promise<LabelFormState> {
   const user = await requireUser();
-  const typed = String(formData.get("name") ?? "");
-  const color = String(formData.get("color") ?? "");
-  const values = { name: typed, color };
-  const name = typed.trim();
-  if (!name) return { error: "Label name is required", values };
-  if (name.length > MAX_LABEL_LENGTH) {
-    return { error: `Label name must be at most ${MAX_LABEL_LENGTH} characters`, values };
-  }
-  if (!isLabelColor(color)) return { error: "Pick a colour from the list", values };
-  const result = createLabel(user.id, projectId, name, color);
-  if (result !== "created") return { error: LABEL_ERRORS[result], values };
+  const label = readLabel(formData);
+  if ("error" in label) return { error: label.error, values: typedLabel(formData) };
+  const result = createLabel(user.id, projectId, label.name, label.color);
+  if (result !== "created") return { error: LABEL_ERRORS[result], values: typedLabel(formData) };
   revalidatePath(`/projects/${projectId}`);
   return {};
+}
+
+/** Renames and recolours a label from its row in the board's Labels list. */
+export async function updateLabelAction(
+  projectId: number,
+  labelId: number,
+  _prev: LabelFormState,
+  formData: FormData,
+): Promise<LabelFormState> {
+  const user = await requireUser();
+  const label = readLabel(formData);
+  if ("error" in label) return { error: label.error, values: typedLabel(formData) };
+  const result = updateLabel(user.id, projectId, labelId, label.name, label.color);
+  if (result === "not-found") return { error: "Label not found", values: typedLabel(formData) };
+  if (result === "duplicate") return { error: LABEL_ERRORS.duplicate, values: typedLabel(formData) };
+  revalidatePath(`/projects/${projectId}`);
+  return {};
+}
+
+/** Deletes a label from its row in the board's Labels list; its tasks stay. Anything else changes nothing. */
+export async function deleteLabelAction(projectId: number, labelId: number): Promise<void> {
+  const user = await requireUser();
+  if (deleteLabel(user.id, projectId, labelId)) revalidatePath(`/projects/${projectId}`);
 }
 
 export type SaveLabelsState = FormState & { saved?: boolean };

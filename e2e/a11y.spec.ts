@@ -143,7 +143,8 @@ async function busyBoard(page: Page): Promise<string> {
     await page.getByLabel("Label name").fill(name);
     await labelForm.getByLabel("Colour").selectOption({ label: name });
     await page.getByRole("button", { name: "Create label" }).click();
-    await expect(page.getByRole("list", { name: "Labels" }).getByText(name, { exact: true })).toBeVisible();
+    const chip = page.getByRole("list", { name: "Labels", exact: true }).locator(".label-chip", { hasText: new RegExp(`^${name}$`) });
+    await expect(chip).toBeVisible();
   }
   for (const [title, due] of [
     ["Late task", "2020-01-01"],

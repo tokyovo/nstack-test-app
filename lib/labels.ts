@@ -9,6 +9,13 @@ export type Label = { id: number; name: string; color: LabelColor };
 
 export type CreateLabelResult = "created" | "not-found" | "duplicate";
 
+export type UpdateLabelResult = "updated" | "not-found" | "duplicate";
+
+/** The labels table allows one name per project in any case. */
+function isDuplicateName(error: unknown): boolean {
+  return error instanceof Database.SqliteError && error.code === "SQLITE_CONSTRAINT_UNIQUE";
+}
+
 /** The project's labels in name order (any case); empty if the user is not a member. */
 export function listLabels(userId: number, projectId: number): Label[] {
   if (!getProject(userId, projectId)) return [];
@@ -23,10 +30,39 @@ export function createLabel(userId: number, projectId: number, name: string, col
   try {
     getDb().prepare("INSERT INTO labels (project_id, name, color) VALUES (?, ?, ?)").run(projectId, name, color);
   } catch (error) {
-    if (error instanceof Database.SqliteError && error.code === "SQLITE_CONSTRAINT_UNIQUE") return "duplicate";
+    if (isDuplicateName(error)) return "duplicate";
     throw error;
   }
   return "created";
+}
+
+/**
+ * Renames and recolours a label of the project if the user is a member; another label's name in any case
+ * is a duplicate, the label's own name in another case is not.
+ */
+export function updateLabel(
+  userId: number,
+  projectId: number,
+  labelId: number,
+  name: string,
+  color: LabelColor,
+): UpdateLabelResult {
+  if (!getProject(userId, projectId)) return "not-found";
+  try {
+    const { changes } = getDb()
+      .prepare("UPDATE labels SET name = ?, color = ? WHERE id = ? AND project_id = ?")
+      .run(name, color, labelId, projectId);
+    return changes === 0 ? "not-found" : "updated";
+  } catch (error) {
+    if (isDuplicateName(error)) return "duplicate";
+    throw error;
+  }
+}
+
+/** Deletes a label of the project (and so its task links) if the user is a member; true when one was deleted. */
+export function deleteLabel(userId: number, projectId: number, labelId: number): boolean {
+  if (!getProject(userId, projectId)) return false;
+  return getDb().prepare("DELETE FROM labels WHERE id = ? AND project_id = ?").run(labelId, projectId).changes > 0;
 }
 
 /**
