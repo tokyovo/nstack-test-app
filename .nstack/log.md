@@ -137,3 +137,33 @@ Entries before 2026-11-27 are in git history: `git log -p .nstack/log.md`.
 - Parked retry: `gh run view 45931652688 --json conclusion -q .conclusion` -> success (billing fixed). Resolved in needs-human.md; PR #19 CI green (45931744049).
 - Verification on main efcd1aa: lint 0, typecheck 0, build ok, `drive check` exit 0 (5 steps, 10 PNGs), `check-features` exit 0.
 - Formats: no `.nstack/design.md` for a UI app -> per go Orient 4-5 the next slice follows design (direction, then restyle main screens).
+
+## 2026-11-27 improve
+- Read: improve/SKILL.md c8daf07
+- [x] 1. Gather evidence
+  - [x] 1.1. Broken things. None: lint/typecheck/build/drive check pass on main efcd1aa; CI green on main (45931652688) and PR #19.
+  - [x] 1.2. Known problems. `gh issue list` empty; needs-human billing item now passes (resolved, PR #19 merged 344be19); backlog.md read (22 open).
+  - [x] 1.3. Gaps against the goal. None: every Features row has a proof (`check-features` exit 0), CI green on main.
+  - [x] 1.4. Outside demand. research.md dated 2026-11-25 (2 days, under 7); its candidates are already in backlog.md (duplicate task 6, calendar 5, multiple assignees 5).
+  - [x] 1.5. Risk. `npm audit` 0 vulnerabilities; no new input paths since slice 11.
+  - [x] 1.6. User experience. `drive screens /tmp/design-before`: board and task pages are browser defaults (default buttons/selects, bulleted label/member lists, red side stripe on overdue card, raw UTC comment time); no `.nstack/design.md` exists, which go Orient 4 requires for a UI app.
+  - [x] 1.7. Code health. n/a: nothing in the backlog's code-health lines slows the next slice.
+- [x] 2. Score. "Looks plain" rescored v4 r2 c2 = 8 (was v2: goal.md defines users of a team tool; go Orient 4 makes design.md + restyle mandatory for a UI app), grouped with header-link hint/404 (6), search height (6), comment timestamps (5) which touch the same screens.
+- [x] 3. Decide. 8 >= bar 7 -> slice `design` planned (see plan entry).
+- [x] Done when: all sources checked, candidates scored, slice planned.
+- Decision: design slice before any feature work because go Orient 4 requires design.md for a UI app and the UX pass shows default-styled screens.
+
+## 2026-11-27 plan
+- Read: plan/SKILL.md 4e0b788
+- [x] 1. Learn the ground truth. Plain CSS in app/globals.css (223 lines, system-ui), 19 classNames, no inline styles; screens from verify.md Drive; board.tsx column regions named by `<h3 id>` (aria-labelledby); 404s via notFound() with Next's default page.
+- [x] 2. Interrogate the goal yourself
+  - [x] 2.1. Questions: font source, comment time zone, where the column count goes, danger colour vs asserted alert colour, 404 page content, which links need 44 px, how to prove focus, ticket order.
+  - [x] 2.2. Answered from code: alert colour rgb(185,28,28) asserted in 3 specs; region names used by e2e/helpers.ts:47; datetime('now') is UTC.
+  - [x] 2.3. Decisions logged in the slice (5 Decision lines in plan.md).
+- [x] 3. Write the spec. Slice design, 10 acceptance criteria, out of scope listed; CSS modules considered and rejected (one line why).
+- [x] 4. Cut tickets. T37 base+harness (riskiest: axe + token lint), T38 board, T39 task page, T40 projects; sequential (all edit globals.css).
+- [x] 5. Check the plan
+  - [x] 5.1. Criteria-to-proofs line in the slice; every AC has a ticket proof.
+  - [x] 5.2. Fresh Explore subagent read /tmp/slice12-plan.md + code: 15 questions (count vs region name, danger colour vs tests, count of visible vs all, keyboard move refresh, timestamp parsing/format/regex, UTC suffix, drive screens lacks 404/empty/no-match, 404 logged in/out, not-found main, focus test page, 44 px exemptions, progress bar a11y, overdue markup, grid vs AC43/AC44, lint script rules); each answered in AC3-AC8, AC10, T37, T38 or a Decision.
+  - [x] 5.3. Slice written to plan.md with branch nstack/design.
+- [x] Done when: every criterion has a proof, the reader's questions are answered, the slice is in plan.md.
