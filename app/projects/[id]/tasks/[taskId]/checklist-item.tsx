@@ -11,13 +11,14 @@ type Props = {
 };
 
 /**
- * One checklist row: the box saves as soon as it is ticked or unticked; Delete removes the row without asking.
- * Once Delete is pressed the row takes no more clicks, so a double click sends one delete, not a second
- * one the server must refuse.
+ * One checklist row: the box saves as soon as it is ticked or unticked; Delete asks the browser to confirm,
+ * then removes the row. Once the delete starts the row takes no more clicks, so a double click asks once and
+ * sends one delete, not a second one the server must refuse.
  */
 export function ChecklistItem({ item, toggle, remove }: Props) {
   const [done, setDone] = useOptimistic(item.done);
   const [removing, startRemove] = useTransition();
+  const label = `Delete item "${item.text}"`;
   return (
     <li className="checklist-item">
       <label className="checkbox-row">
@@ -39,9 +40,11 @@ export function ChecklistItem({ item, toggle, remove }: Props) {
       <button
         type="button"
         className="danger quiet"
-        aria-label={`Delete item "${item.text}"`}
+        aria-label={label}
         disabled={removing}
-        onClick={() => startRemove(remove)}
+        onClick={() => {
+          if (window.confirm(`${label}?`)) startRemove(remove);
+        }}
       >
         Delete
       </button>
