@@ -380,8 +380,18 @@ Entries before 2026-11-27 are in git history: `git log -p .nstack/log.md`.
 
 ## 2026-11-27 review slice labels-dup-calendar
 - Read: review/SKILL.md f713898
-- [ ] 1. Dispatch
-- [ ] 2. Second reviewer
+- [x] 1. Dispatch. One nstack:reviewer, worktree, pointer brief at 988bfe9. Verdict pass: 0 important, 1 nit (Copy of title cut can split a surrogate pair). Reran lint/typecheck/build, 34 targeted tests, a mutation (dup keeps ticks -> red), drive check 18, screens.
+- [x] 2. Second reviewer (data migration): Focus security and failure modes, own worktree, in parallel. Verdict pass: 0 important, 2 nits (colour CHECK baked into existing files makes a future colour a 500; same surrogate cut). Membership/project scoping, allow-listed class names, strict month regex confirmed; forged tests pass.
 - [ ] 3. Act on every finding.
 - [ ] 4. Review the fixes
 - [ ] Done when: the latest round has no important findings, `verify` passed after the last fix, and nits are fixed or in `backlog.md`.
+
+## 2026-11-27 build T46
+- Read: build/SKILL.md 45c2dd4
+- [x] 1. Branch. nstack/labels-dup-calendar; builder in its own worktree.
+- [x] 2. Starting state. lint 0, typecheck 0 at 41b2a93 code (verify).
+- [ ] 3. Dispatch
+- [ ] 4. Read the reply
+- [ ] 5. Prove it yourself.
+- [ ] 6. Record.
+- [ ] Done when: the ticket is committed on the slice's branch with items 1-6 ticked in its log entry, or is parked in `plan.md`.
