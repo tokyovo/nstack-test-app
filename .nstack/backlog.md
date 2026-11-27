@@ -21,3 +21,8 @@ Scored 2026-11-25 (value + risk + cost, cost 5 = cheapest). Sources: UX pass (he
 - 4 (v1 r1 c2) No prettier config in the repo; default prettier (80 cols) reflows existing 120-col files, so builders revert reflows by hand. Check in a .prettierrc matching the code. Evidence: T32 builder.
 - 3 (v1 r1 c1) Alert style is scoped to `main [role="alert"]`; an alert outside <main> would be unstyled, and no test checks font-weight. Evidence: T34 builder.
 - 4 (v1 r1 c2) When the last checklist item fails (deleted elsewhere), "No items yet" (page.tsx) shows above the alert (inside Checklist); move the empty text into Checklist after the alert. Evidence: slice 10 reviewer 1.
+- 3 (v1 r1 c1) Ctrl-C during `drive check` leaves its server running; `npm run drive -- stop` cleans it up. Evidence: T35 builder.
+- 4 (v1 r2 c1) `drive stop` trusts a recorded pid that is alive on a listening port; a pid reused by an unrelated process would be killed. Check /proc/<pid>/cmdline for next-server. Evidence: T35 review-fix builder.
+- 3 (v1 r1 c1) drive: a non-DriveError (e.g. EACCES) ends with a Node stack trace, not one line; `existsSync(STATE_DIR)` after `secureStateDir` is redundant. Evidence: T35 round-2 builder.
+- 3 (v1 r1 c1) `drive check` seeds twice (screens seeds again); idempotent but ~5-15s slower. Evidence: drive-tool review round 3.
+- 3 (v1 r1 c1) `drive stop --all`: if one instance fails to stop, the loop ends there without reporting the ones already stopped or trying the rest. Evidence: drive-tool review round 3.
