@@ -26,6 +26,20 @@ test("AC49: a project with no tasks shows 'No tasks' in each column and no 'No t
   await expect(a.page.locator(".board-empty")).toHaveCount(0);
 });
 
+test("a project with no tasks points to the New task form above the columns; the first task removes the pointer", async ({
+  browser,
+}) => {
+  const a = await newUser(browser);
+  await a.page.goto(await createProject(a.page, "Fresh board"));
+  const start = a.page.locator(".board").getByText("No tasks yet. Add the first one under New task.");
+  await expect(start).toBeVisible();
+  await expect(start.getByRole("link", { name: "New task" })).toHaveAttribute("href", "#new-task");
+  expect((await start.boundingBox())!.y).toBeLessThan((await column(a.page, "To do").boundingBox())!.y);
+
+  await addTask(a.page, "First task");
+  await expect(start).toHaveCount(0);
+});
+
 test("AC49: only columns without a visible task say 'No tasks'", async ({ browser }) => {
   const a = await newUser(browser);
   await a.page.goto(await createProject(a.page, "One task"));

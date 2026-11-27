@@ -40,3 +40,41 @@ test.describe("AC28 header title links to Projects", () => {
     });
   }
 });
+
+test.describe("AC8 unknown URLs show the app's 404 page", () => {
+  async function expectNotFound(page: Page, path: string) {
+    const response = await page.goto(path);
+    expect(response?.status()).toBe(404);
+    const main = page.getByRole("main");
+    await expect(main.getByRole("heading", { name: "Page not found" })).toBeVisible();
+    await expect(main.getByRole("link", { name: "Back to projects" })).toHaveAttribute("href", "/projects");
+  }
+
+  test("logged out, /nope is a 404 whose link leads on to /login", async ({ page }) => {
+    await expectNotFound(page, "/nope");
+    await page.getByRole("link", { name: "Back to projects" }).click();
+    await expect(page).toHaveURL("/login");
+  });
+
+  test("logged in, /nope and a missing project are 404s whose link leads to /projects", async ({ browser }) => {
+    const { page } = await newUser(browser);
+    await expectNotFound(page, "/nope");
+    await expectNotFound(page, "/projects/999999");
+    await page.getByRole("link", { name: "Back to projects" }).click();
+    await expect(page).toHaveURL("/projects");
+  });
+
+  test("logged in, the header title is underlined on hover and outlined on keyboard focus", async ({ browser }) => {
+    const { page } = await newUser(browser);
+    await page.mouse.move(0, 0);
+    await expect(titleLink(page)).toHaveCSS("text-decoration-line", "none");
+    await titleLink(page).hover();
+    await expect(titleLink(page)).toHaveCSS("text-decoration-line", "underline");
+
+    await page.mouse.move(0, 0);
+    await page.goto("/projects");
+    await page.keyboard.press("Tab");
+    await expect(titleLink(page)).toBeFocused();
+    await expect(titleLink(page)).not.toHaveCSS("outline-style", "none");
+  });
+});

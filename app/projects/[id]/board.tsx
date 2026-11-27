@@ -74,7 +74,9 @@ const KEY_STEPS: Record<string, -1 | 1> = { ArrowLeft: -1, ArrowRight: 1 };
  * The search box shows only tasks whose title or description contains the query (any case);
  * the assignee filter narrows that further to all, the viewer's, unassigned, or one member's tasks,
  * and the label filter to the tasks with one label. All three live in the URL, so a reload or a shared link shows the same board.
- * An empty column says "No tasks"; when the project has tasks but none match, the board says so above the columns.
+ * Each column heading has the count of its visible cards beside it; Done cards are dimmed.
+ * An empty column says "No tasks"; above the columns, a project without tasks points to the New task form, and one
+ * whose tasks all fail the search or filters says nothing matches.
  */
 export function Board({
   projectId,
@@ -199,6 +201,11 @@ export function Board({
           {moveError}
         </p>
       )}
+      {shown.length === 0 && (
+        <p className="board-start">
+          No tasks yet. Add the first one under <a href="#new-task">New task</a>.
+        </p>
+      )}
       {shown.length > 0 && visible.length === 0 && (
         <p role="status" className="board-empty">
           No tasks match the search or filters
@@ -216,15 +223,19 @@ export function Board({
             onDragOver={(event) => event.preventDefault()}
             onDrop={(event) => onDrop(event, status)}
           >
-            <h3 id={headingId}>{name}</h3>
+            <div className="column-header">
+              <h3 id={headingId}>{name}</h3>
+              <span className="column-count">{columnTasks.length}</span>
+            </div>
             <ul>
               {columnTasks.map((task) => {
                 const overdue = isOverdue(task, today);
+                const classes = ["task-card", overdue && "overdue", task.status === "done" && "done"];
                 return (
                   <li
                     key={task.id}
                     data-task-id={task.id}
-                    className={overdue ? "task-card overdue" : "task-card"}
+                    className={classes.filter(Boolean).join(" ")}
                     tabIndex={0}
                     draggable
                     onDragStart={(event) => event.dataTransfer.setData("text/plain", String(task.id))}
@@ -233,12 +244,6 @@ export function Board({
                     <strong>
                       <Link href={`/projects/${projectId}/tasks/${task.id}`}>{task.title}</Link>
                     </strong>
-                    <p>{task.assigneeEmail ?? "Unassigned"}</p>
-                    <p>{task.dueDate ? `Due ${task.dueDate}` : "No due date"}</p>
-                    {overdue && <p className="overdue-label">Overdue</p>}
-                    {task.checklistTotal > 0 && (
-                      <p className="checklist-progress">{`Checklist ${task.checklistDone}/${task.checklistTotal}`}</p>
-                    )}
                     {task.labels.length > 0 && (
                       <ul aria-label="Task labels" className="task-labels">
                         {task.labels.map((label) => (
@@ -247,6 +252,17 @@ export function Board({
                           </li>
                         ))}
                       </ul>
+                    )}
+                    <p>{task.assigneeEmail ?? "Unassigned"}</p>
+                    <p className="due">{task.dueDate ? `Due ${task.dueDate}` : "No due date"}</p>
+                    {overdue && <p className="overdue-label">Overdue</p>}
+                    {task.checklistTotal > 0 && (
+                      <>
+                        <p className="checklist-progress">{`Checklist ${task.checklistDone}/${task.checklistTotal}`}</p>
+                        <div className="checklist-bar" aria-hidden="true">
+                          <span style={{ width: `${(100 * task.checklistDone) / task.checklistTotal}%` }} />
+                        </div>
+                      </>
                     )}
                   </li>
                 );

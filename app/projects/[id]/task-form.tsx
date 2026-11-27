@@ -52,7 +52,7 @@ export function TaskForm({ action, members, task, submitLabel = "Add task" }: Pr
       <label>
         Due date <input name="dueDate" type="date" defaultValue={values.dueDate} />
       </label>
-      <button type="submit" disabled={pending}>
+      <button type="submit" className="primary" disabled={pending}>
         {submitLabel}
       </button>
     </form>

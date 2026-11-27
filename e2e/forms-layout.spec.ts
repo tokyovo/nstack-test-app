@@ -122,3 +122,24 @@ test("AC26: on /projects a project's link, rename field, Rename and Delete sit o
   }));
   for (const center of centers) expect(Math.abs(center - centers[0])).toBeLessThanOrEqual(4);
 });
+
+test("on the task page at 1280, each label checkbox is vertically centred on its text", async ({ browser }) => {
+  const { page } = await newUser(browser);
+  await page.setViewportSize(DESKTOP);
+  const url = await createProject(page, "Aligned boxes");
+  await page.goto(url);
+  await page.getByLabel("Label name").fill("Bug");
+  await page.getByRole("button", { name: "Create label" }).click();
+  await expect(page.getByRole("list", { name: "Labels" }).getByText("Bug")).toBeVisible();
+  const taskUrl = await addTask(page, url, "Has a label");
+  await page.goto(taskUrl);
+
+  const { box, text } = await page.getByRole("checkbox", { name: "Bug" }).evaluate((input) => {
+    const range = document.createRange();
+    const node = [...input.parentElement!.childNodes].findLast((n) => n.nodeType === Node.TEXT_NODE && n.textContent!.trim())!;
+    range.selectNodeContents(node);
+    const middle = (rect: DOMRect) => rect.top + rect.height / 2;
+    return { box: middle(input.getBoundingClientRect()), text: middle(range.getBoundingClientRect()) };
+  });
+  expect(Math.abs(box - text), `checkbox centre ${box}, text centre ${text}`).toBeLessThanOrEqual(1);
+});

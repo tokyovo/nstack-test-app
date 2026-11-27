@@ -1,5 +1,47 @@
-/* Base styles: readable defaults, a three-column board that stacks on narrow screens,
-   and long unbroken text wraps instead of widening the page. */
+/* Base styles from .nstack/design.md: tokens, controls with every state, a three-column board that stacks on
+   narrow screens, and long unbroken text wraps instead of widening the page.
+   Colours live only in :root (scripts/check-css-tokens.mjs, run by `npm run lint`, enforces it). */
+
+:root {
+  --background: #f3f4f1;
+  --surface: #ffffff;
+  --text: #1e2329;
+  --muted: #57606a;
+  --accent: #1d6b57;
+  --accent-hover: #16503f;
+  --accent-soft: #e3efea;
+  --danger: #b91c1c;
+  --danger-hover: #8f1515;
+  --danger-soft: #fbeaea;
+  --border: #d5d9dd;
+  --edge: #8a939c;
+
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --text-sm: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.75rem;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+
+  --radius: 6px;
+  --control-height: 2.5rem;
+  --transition: 150ms ease;
+}
+
+/* Phones: every control is a 44 px touch target. */
+@media (max-width: 640px) {
+  :root {
+    --control-height: 2.75rem;
+  }
+}
 
 *,
 *::before,
@@ -7,40 +49,251 @@
   box-sizing: border-box;
 }
 
+html {
+  background: var(--background);
+}
+
 body {
   margin: 0 auto;
   max-width: 72rem;
-  padding: 1rem;
-  font-family: system-ui, sans-serif;
+  padding: 0 var(--space-4) var(--space-8);
+  background: var(--background);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: var(--text-md);
+  font-variant-numeric: tabular-nums;
   line-height: 1.5;
   overflow-wrap: anywhere;
+}
+
+::selection {
+  background: var(--accent-soft);
+}
+
+h2,
+h3 {
+  line-height: 1.25;
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+h2 {
+  margin: var(--space-6) 0 var(--space-4);
+  font-size: var(--text-xl);
+}
+
+h3 {
+  margin: var(--space-6) 0 var(--space-3);
+  font-size: var(--text-lg);
+}
+
+a {
+  color: var(--accent);
+  text-underline-offset: 0.15em;
+}
+
+a:hover {
+  color: var(--accent-hover);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 header {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.5rem 1rem;
-  border-bottom: 1px solid #ddd;
-  margin-bottom: 1rem;
+  gap: var(--space-2) var(--space-4);
+  min-height: calc(var(--control-height) + 2 * var(--space-2));
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--space-4);
 }
 
 header h1 {
-  margin: 0.5rem auto 0.5rem 0;
-  font-size: 1.25rem;
+  margin: 0 auto 0 0;
+  font-size: var(--text-lg);
 }
 
+/* The title is a link to Projects: plain until hovered or focused. */
 header h1 a {
   color: inherit;
   text-decoration: none;
 }
 
+header h1 a:hover,
+header h1 a:focus-visible {
+  color: inherit;
+  text-decoration: underline;
+}
+
+header [data-testid="current-user"] {
+  min-width: 0;
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+
+header form {
+  margin: 0;
+}
+
+/* A narrow centred column: log in, sign up and the 404 page. */
+main.narrow {
+  max-width: 24rem;
+  margin: var(--space-8) auto 0;
+}
+
+main.narrow label > :is(input, select, textarea) {
+  width: 100%;
+}
+
+/* Controls. Buttons are secondary unless .primary (the submit that creates or saves) or .danger (deletes);
+   .button makes a link look like a button. Inputs and selects share one height. */
 input,
 select,
 textarea,
 button {
   font: inherit;
   max-width: 100%;
+}
+
+button,
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--control-height);
+  padding: 0 var(--space-4);
+  border: 1px solid var(--edge);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 500;
+  line-height: 1.25;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color var(--transition),
+    border-color var(--transition),
+    color var(--transition);
+}
+
+button:hover,
+.button:hover {
+  border-color: var(--text);
+  background: var(--background);
+  color: var(--text);
+}
+
+button:active,
+.button:active {
+  background: var(--border);
+}
+
+:is(button, .button).primary {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--surface);
+}
+
+:is(button, .button).primary:hover {
+  border-color: var(--accent-hover);
+  background: var(--accent-hover);
+  color: var(--surface);
+}
+
+:is(button, .button).danger {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+:is(button, .button).danger:hover {
+  background: var(--danger-soft);
+  color: var(--danger-hover);
+}
+
+/* A quiet button acts on one row of a list: no frame until hovered, so a list of them stays calm. */
+:is(button, .button).quiet {
+  border-color: transparent;
+  background: transparent;
+}
+
+:is(button, .button).quiet:hover {
+  border-color: transparent;
+}
+
+button:disabled,
+button:disabled:hover {
+  border-color: var(--border);
+  background: var(--background);
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+input:not([type="checkbox"]),
+select,
+textarea {
+  border: 1px solid var(--edge);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  transition: border-color var(--transition);
+}
+
+input:not([type="checkbox"]),
+select {
+  height: var(--control-height);
+  padding: 0 var(--space-3);
+}
+
+textarea {
+  min-height: 5rem;
+  padding: var(--space-2) var(--space-3);
+}
+
+:is(input, select, textarea):hover {
+  border-color: var(--text);
+}
+
+:is(input, select, textarea):focus {
+  border-color: var(--accent);
+}
+
+:is(input, select, textarea):user-invalid {
+  border-color: var(--danger);
+}
+
+:is(input, select, textarea):disabled {
+  background: var(--background);
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+input[type="checkbox"] {
+  width: 1.125rem;
+  height: 1.125rem;
+  accent-color: var(--accent);
+}
+
+/* Errors: danger text on a light danger tint, next to what caused them. */
+main [role="alert"] {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius);
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
 }
 
 /* Each label sits above its field, and fields share the form's left edge. A fixed field width
@@ -52,7 +305,7 @@ main form {
 label {
   display: block;
   max-width: 100%;
-  margin: 0 0 0.75rem;
+  margin: 0 0 var(--space-3);
 }
 
 label > :is(input, select, textarea) {
@@ -61,10 +314,34 @@ label > :is(input, select, textarea) {
   margin-top: 0.25rem;
 }
 
+/* The board page: a title row (name, exports, New task), the filters row, three columns, then the
+   New task, Labels and Members sections. */
+.board-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3) var(--space-4);
+  margin: var(--space-6) 0 var(--space-4);
+}
+
+.board-title h2 {
+  min-width: 0;
+  margin: 0;
+}
+
+/* The board's links (exports, "New task") on one row with room between them. */
+.export-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+}
+
 .board {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1rem;
+  gap: var(--space-4);
   align-items: start;
 }
 
@@ -72,35 +349,69 @@ label > :is(input, select, textarea) {
    32rem field cap, so each field fills it); the grid gap spaces them. */
 .board > label {
   margin: 0;
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+.board > label > :is(input, select) {
+  font-size: var(--text-md);
+  font-weight: 400;
 }
 
 .board-error,
-.board-empty {
+.board-empty,
+.board-start {
   grid-column: 1 / -1;
   margin: 0;
 }
 
-.column-empty {
-  margin: 0;
-  color: #6b7280;
+/* No projects or tasks yet, or search and filters hide every task: a quiet notice, not an error. */
+.board-empty,
+.board-start,
+.projects-empty {
+  padding: var(--space-3) var(--space-4);
+  border: 1px dashed var(--edge);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--muted);
 }
 
-main [role="alert"] {
-  color: #b91c1c;
-  font-weight: 600;
-}
-
+/* Columns are flat areas on the page background; the cards are the only white surfaces. */
 .board-column {
   min-width: 0;
   min-height: 6rem;
-  padding: 0.5rem;
-  border-radius: 6px;
-  background: #f3f4f6;
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
 }
 
-.board-column h3 {
-  margin: 0 0 0.5rem;
-  font-size: 1rem;
+.column-header {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.column-header h3 {
+  margin: 0;
+  font-size: var(--text-md);
+}
+
+.column-count {
+  min-width: 1.5rem;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: var(--text-sm);
+  text-align: center;
+}
+
+.column-empty {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--text-sm);
 }
 
 .board-column ul {
@@ -110,18 +421,104 @@ main [role="alert"] {
 }
 
 .task-card {
-  margin-bottom: 0.5rem;
-  padding: 0.5rem;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  background: #fff;
+  margin-bottom: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
   cursor: grab;
+  transition: border-color var(--transition);
+}
+
+.task-card:hover {
+  border-color: var(--edge);
+}
+
+.task-card:active {
+  cursor: grabbing;
+}
+
+.task-card strong {
+  display: block;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+/* The title reads as text until hovered or focused. */
+.task-card strong a {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.task-card strong a:hover,
+.task-card strong a:focus-visible {
+  color: var(--accent-hover);
+  text-decoration: underline;
 }
 
 .task-card p {
-  margin: 0.25rem 0 0;
-  font-size: 0.875rem;
-  color: #4b5563;
+  margin: var(--space-1) 0 0;
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+
+.task-card.overdue .due {
+  color: var(--danger);
+}
+
+.task-card .overdue-label {
+  display: inline-block;
+  padding: 0 var(--space-2);
+  border-radius: 999px;
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-weight: 600;
+}
+
+/* A card's labels: small rounded chips that wrap onto more lines. */
+.board-column .task-labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin-top: var(--space-2);
+}
+
+.task-labels .label {
+  min-width: 0;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--background);
+  font-size: var(--text-sm);
+  overflow-wrap: anywhere;
+}
+
+/* Checklist progress: the count, then a 4 px bar under the card text. */
+.checklist-bar {
+  height: 4px;
+  margin-top: var(--space-1);
+  border-radius: 2px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.checklist-bar span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+
+/* Done cards step back: the page background instead of white, muted title. */
+.task-card.done {
+  background: var(--background);
+}
+
+.task-card.done strong a {
+  color: var(--muted);
+}
+
+.task-card.done .checklist-bar span {
+  background: var(--muted);
 }
 
 @media (max-width: 640px) {
@@ -130,62 +527,131 @@ main [role="alert"] {
   }
 }
 
-/* The board's links (exports, "New task") on one row with room between them. */
-.export-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
+/* Below the board: New task, Labels and Members side by side on wide screens, stacked below 64rem. */
+.board-sections {
+  display: grid;
+  gap: var(--space-6);
+  margin-top: var(--space-8);
 }
 
-.task-card.overdue {
-  border-color: #b91c1c;
-  border-left-width: 4px;
+@media (min-width: 64rem) {
+  .board-sections {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
-.task-card .overdue-label {
-  color: #b91c1c;
-  font-weight: 600;
+.board-sections > section {
+  min-width: 0;
 }
 
-/* A project's link, rename field and buttons share one row, wrapping on narrow screens. */
+.board-sections h3 {
+  margin-top: 0;
+}
+
+.section-empty {
+  color: var(--muted);
+}
+
+/* Label and member lists: plain rows, no bullets. */
+.plain-list {
+  margin: 0 0 var(--space-4);
+  padding: 0;
+  list-style: none;
+}
+
+.plain-list li {
+  padding: var(--space-1) 0;
+  border-bottom: 1px solid var(--border);
+}
+
+/* The projects page: one row per project (name, rename field, Rename, a quiet Delete) on a white list,
+   then the New project form. Rows wrap on narrow screens, the name taking its own line. */
+.projects-page {
+  max-width: 48rem;
+}
+
+.project-list {
+  margin: 0 0 var(--space-6);
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  list-style: none;
+}
+
 .project-row,
 .project-row form {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-2);
 }
 
 .project-row {
-  margin-bottom: 0.5rem;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--border);
+}
+
+.project-row:last-child {
+  border-bottom: 0;
 }
 
 .project-row form {
   margin: 0;
 }
 
-/* A card's labels: small rounded chips that wrap onto more lines. */
-.board-column .task-labels {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem;
-  margin-top: 0.25rem;
+.project-row button {
+  flex: none;
+  white-space: nowrap;
 }
 
-.task-labels .label {
-  padding: 0 0.4rem;
-  border: 1px solid #c7d2fe;
-  border-radius: 999px;
-  background: #eef2ff;
-  font-size: 0.75rem;
-  overflow-wrap: anywhere;
+.project-name {
+  flex: 1 1 12rem;
+  min-width: 0;
+  font-weight: 600;
+}
+
+.project-row input[name="name"] {
+  width: 14rem;
+}
+
+/* Phones: the name on its own line, then the rename field, Rename and Delete sharing the next. */
+@media (max-width: 640px) {
+  .project-name {
+    flex-basis: 100%;
+  }
+
+  .project-row form:first-of-type {
+    flex: 1 1 0;
+    flex-wrap: nowrap;
+    min-width: 0;
+  }
+
+  .project-row input[name="name"] {
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 0;
+  }
+}
+
+.new-project {
+  margin-top: var(--space-6);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border);
 }
 
 /* A checkbox and its text on one line (the text wraps), unlike the stacked field labels. */
 .checkbox-row {
   display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Phones: a checkbox's label is its 44 px touch target. */
+@media (max-width: 640px) {
+  .checkbox-row {
+    min-height: var(--control-height);
+  }
 }
 
 .checkbox-row > input {
@@ -198,19 +664,23 @@ main [role="alert"] {
    no wider than the fields so each Delete stays next to its item. */
 .checklist {
   max-width: 32rem;
+  margin: 0 0 var(--space-4);
   padding: 0;
   list-style: none;
 }
 
 .checklist-item {
   display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) 0;
+  border-bottom: 1px solid var(--border);
 }
 
 .checklist-item > .checkbox-row {
   flex: 1;
   min-width: 0;
+  margin: 0;
 }
 
 .checklist-item span {
@@ -218,6 +688,93 @@ main [role="alert"] {
   overflow-wrap: anywhere;
 }
 
-.checklist-progress {
-  font-size: 0.875rem;
+/* The task page: back link, title, a details grid, then Edit task, Labels, Checklist and Comments as
+   sections divided by a rule. Kept to a readable width. */
+.task-page {
+  max-width: 48rem;
+}
+
+.back-link {
+  margin: var(--space-6) 0 0;
+  font-size: var(--text-sm);
+}
+
+.task-page h2 {
+  margin-top: var(--space-2);
+  font-size: var(--text-2xl);
+}
+
+.task-details {
+  display: grid;
+  gap: var(--space-1) var(--space-6);
+  margin: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.task-details dt {
+  color: var(--muted);
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+.task-details dd {
+  min-width: 0;
+  margin: 0 0 var(--space-2);
+}
+
+@media (min-width: 40rem) {
+  .task-details {
+    grid-template-columns: max-content minmax(0, 1fr);
+    align-items: baseline;
+  }
+
+  .task-details dd {
+    margin: 0;
+  }
+}
+
+.task-section {
+  margin-top: var(--space-8);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--border);
+}
+
+.task-section h3 {
+  margin-top: var(--space-4);
+}
+
+/* Deleting the task sits apart from Save changes, under its own rule. */
+.task-delete {
+  margin-top: var(--space-6);
+  padding-top: var(--space-4);
+  border-top: 1px dashed var(--border);
+}
+
+.comment-list {
+  margin: 0 0 var(--space-4);
+  padding: 0;
+  list-style: none;
+}
+
+.comment-list li {
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.comment-list p {
+  margin: var(--space-1) 0 0;
+}
+
+.comment-list .comment-meta {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+
+.comment-meta strong {
+  color: var(--text);
+  font-weight: 600;
 }

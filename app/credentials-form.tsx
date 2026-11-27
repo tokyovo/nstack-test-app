@@ -21,7 +21,7 @@ export function CredentialsForm({ action, submitLabel, passwordAutoComplete }: P
       <label>
         Password <input name="password" type="password" required autoComplete={passwordAutoComplete} />
       </label>
-      <button type="submit" disabled={pending}>
+      <button type="submit" className="primary" disabled={pending}>
         {submitLabel}
       </button>
     </form>

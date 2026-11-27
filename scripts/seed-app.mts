@@ -37,7 +37,7 @@ const TASKS: SeedTask[] = [
   { title: COMMENTED_TITLE, assignee: DEMO_EMAIL, column: "Done" },
 ];
 
-export type Seeded = { email: string; password: string; boardUrl: string; taskUrl: string };
+export type Seeded = { email: string; password: string; boardUrl: string; emptyBoardUrl: string; taskUrl: string };
 
 export async function seed(browser: Browser, baseURL: string): Promise<Seeded> {
   const member = await signedInPage(browser, baseURL, MEMBER_EMAIL);
@@ -45,7 +45,7 @@ export async function seed(browser: Browser, baseURL: string): Promise<Seeded> {
 
   const page = await signedInPage(browser, baseURL, DEMO_EMAIL);
   const boardPath = await ensureProject(page, PROJECT_NAME);
-  await ensureProject(page, EMPTY_PROJECT_NAME);
+  const emptyBoardPath = await ensureProject(page, EMPTY_PROJECT_NAME);
   await page.goto(boardPath);
   await ensureMember(page, MEMBER_EMAIL);
   for (const name of LABELS) await ensureLabel(page, name);
@@ -59,7 +59,13 @@ export async function seed(browser: Browser, baseURL: string): Promise<Seeded> {
   for (const item of CHECKLIST) await ensureChecklistItem(page, item.text, item.done);
   await page.context().close();
 
-  return { email: DEMO_EMAIL, password: PASSWORD, boardUrl: baseURL + boardPath, taskUrl: baseURL + taskPath };
+  return {
+    email: DEMO_EMAIL,
+    password: PASSWORD,
+    boardUrl: baseURL + boardPath,
+    emptyBoardUrl: baseURL + emptyBoardPath,
+    taskUrl: baseURL + taskPath,
+  };
 }
 
 /** A page in a new browser context, logged in as `email` (signed up first if the account does not exist). */

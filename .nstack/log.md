@@ -137,3 +137,115 @@ Entries before 2026-11-27 are in git history: `git log -p .nstack/log.md`.
 - Parked retry: `gh run view 45931652688 --json conclusion -q .conclusion` -> success (billing fixed). Resolved in needs-human.md; PR #19 CI green (45931744049).
 - Verification on main efcd1aa: lint 0, typecheck 0, build ok, `drive check` exit 0 (5 steps, 10 PNGs), `check-features` exit 0.
 - Formats: no `.nstack/design.md` for a UI app -> per go Orient 4-5 the next slice follows design (direction, then restyle main screens).
+
+## 2026-11-27 improve
+- Read: improve/SKILL.md c8daf07
+- [x] 1. Gather evidence
+  - [x] 1.1. Broken things. None: lint/typecheck/build/drive check pass on main efcd1aa; CI green on main (45931652688) and PR #19.
+  - [x] 1.2. Known problems. `gh issue list` empty; needs-human billing item now passes (resolved, PR #19 merged 344be19); backlog.md read (22 open).
+  - [x] 1.3. Gaps against the goal. None: every Features row has a proof (`check-features` exit 0), CI green on main.
+  - [x] 1.4. Outside demand. research.md dated 2026-11-25 (2 days, under 7); its candidates are already in backlog.md (duplicate task 6, calendar 5, multiple assignees 5).
+  - [x] 1.5. Risk. `npm audit` 0 vulnerabilities; no new input paths since slice 11.
+  - [x] 1.6. User experience. `drive screens /tmp/design-before`: board and task pages are browser defaults (default buttons/selects, bulleted label/member lists, red side stripe on overdue card, raw UTC comment time); no `.nstack/design.md` exists, which go Orient 4 requires for a UI app.
+  - [x] 1.7. Code health. n/a: nothing in the backlog's code-health lines slows the next slice.
+- [x] 2. Score. "Looks plain" rescored v4 r2 c2 = 8 (was v2: goal.md defines users of a team tool; go Orient 4 makes design.md + restyle mandatory for a UI app), grouped with header-link hint/404 (6), search height (6), comment timestamps (5) which touch the same screens.
+- [x] 3. Decide. 8 >= bar 7 -> slice `design` planned (see plan entry).
+- [x] Done when: all sources checked, candidates scored, slice planned.
+- Decision: design slice before any feature work because go Orient 4 requires design.md for a UI app and the UX pass shows default-styled screens.
+
+## 2026-11-27 plan
+- Read: plan/SKILL.md 4e0b788
+- [x] 1. Learn the ground truth. Plain CSS in app/globals.css (223 lines, system-ui), 19 classNames, no inline styles; screens from verify.md Drive; board.tsx column regions named by `<h3 id>` (aria-labelledby); 404s via notFound() with Next's default page.
+- [x] 2. Interrogate the goal yourself
+  - [x] 2.1. Questions: font source, comment time zone, where the column count goes, danger colour vs asserted alert colour, 404 page content, which links need 44 px, how to prove focus, ticket order.
+  - [x] 2.2. Answered from code: alert colour rgb(185,28,28) asserted in 3 specs; region names used by e2e/helpers.ts:47; datetime('now') is UTC.
+  - [x] 2.3. Decisions logged in the slice (5 Decision lines in plan.md).
+- [x] 3. Write the spec. Slice design, 10 acceptance criteria, out of scope listed; CSS modules considered and rejected (one line why).
+- [x] 4. Cut tickets. T37 base+harness (riskiest: axe + token lint), T38 board, T39 task page, T40 projects; sequential (all edit globals.css).
+- [x] 5. Check the plan
+  - [x] 5.1. Criteria-to-proofs line in the slice; every AC has a ticket proof.
+  - [x] 5.2. Fresh Explore subagent read /tmp/slice12-plan.md + code: 15 questions (count vs region name, danger colour vs tests, count of visible vs all, keyboard move refresh, timestamp parsing/format/regex, UTC suffix, drive screens lacks 404/empty/no-match, 404 logged in/out, not-found main, focus test page, 44 px exemptions, progress bar a11y, overdue markup, grid vs AC43/AC44, lint script rules); each answered in AC3-AC8, AC10, T37, T38 or a Decision.
+  - [x] 5.3. Slice written to plan.md with branch nstack/design.
+- [x] Done when: every criterion has a proof, the reader's questions are answered, the slice is in plan.md.
+
+## 2026-11-27 build T37
+- Read: build/SKILL.md 13386ea
+- [x] 1. Branch. nstack/design from main 344be19.
+- [x] 2. Starting state. lint 0, typecheck 0 on main efcd1aa/344be19 (same code; branch adds only .nstack/).
+- [x] 3. Dispatch. Fresh nstack:builder with the pointer brief.
+- [x] 4. Read the reply. Done: f60d337 + 6792ffe (critique fixes: header height logged in/out, 404 orphan word).
+- [x] 5. Prove it yourself. At 6792ffe: lint 0 (incl. check-css-tokens), typecheck 0, build 0 (0 warnings), `check:e2e-temp` 0 (134 passed, 0 temp files, no data/), `drive check` 0 (12 PNGs), `check-features` 0. Looked at /tmp/t37-shots/login-1280.png: tokens applied, primary button accent.
+- [x] 6. Record. verify.md rows/Drive updated (6 screens, 12 PNGs; 3 Features rows); backlog lines added.
+- [x] Done when: T37 committed on nstack/design (6792ffe), items 1-6 ticked.
+- Decision (builder): derived tokens accent-hover, danger-hover, accent-soft, danger-soft and control edge #8A939C because border #D5D9DD gives control edges ~1.4:1 (needs 3:1). Controls 2.5rem, 2.75rem at <=640px.
+- Note: AC4 focus test passed before the CSS (Chromium's default ring); it guards against later removal.
+
+## 2026-11-27 build T38
+- Read: build/SKILL.md 13386ea
+- [x] 1. Branch. nstack/design.
+- [x] 2. Starting state. lint 0, typecheck 0 at 6792ffe (T37 proof).
+- [x] 3. Dispatch. Fresh nstack:builder with the pointer brief (+ design.md).
+- [x] 4. Read the reply. Done: 00652bd (AC6 count, red->green), 203afd3 (restyle, drive screens board-empty/board-nomatch), 724980f (critique fixes: filter text 16px, stacked headings spaced, empty-project pointer + test; removed the danger border on overdue cards).
+- [x] 5. Prove it yourself. At 724980f: lint 0, typecheck 0, build 0, `check:e2e-temp` 0 (138 passed), `drive check` 0 (16 PNGs), `check-features` 0. Looked at /tmp/t38-shots/board-1280.png: title row with secondary exports + primary New task, counted columns, overdue badge, checklist bar, dimmed Done card, three sections below.
+- [x] 6. Record. verify.md Drive (8 screens, 16 PNGs), result rows, Features rows for AC5/AC6; backlog line added.
+- [x] Done when: T38 committed on nstack/design (724980f), items 1-6 ticked.
+- Decision (builder): count is a bare-number span (no aria-label; axe flags aria-label on a span). Done cards use background colour + muted title, not opacity. Add task submit is primary; Create label/Invite secondary. a11y setup moves its card by keyboard (drag of an off-screen card timed out; move.spec drag tests pass).
+
+## 2026-11-27 build T39
+- Read: build/SKILL.md 13386ea
+- [x] 1. Branch. nstack/design.
+- [x] 2. Starting state. lint 0, typecheck 0 at 724980f (T38 proof).
+- [x] 3. Dispatch. Fresh nstack:builder with the pointer brief (+ design.md).
+- [x] 4. Read the reply. Done: 3214a22 (AC7, red on raw "2026-11-27 04:37:25" then green), a907aa4 (task page restyle; critique 8/8 at both widths, /tmp/t39-after). Builder did not hand-shoot form error states or tab through by hand (global [role=alert] and :focus-visible cover them); left for verify's critique.
+- [x] 5. Prove it yourself. At a907aa4: lint 0, typecheck 0, build 0, `check:e2e-temp` 0 (140 passed), `drive check` 0 (16 PNGs), `check-features` 0. Looked at /tmp/t39-after/task-1280.png: details panel, ruled sections, primary saves, danger Delete task apart, comment "27 Nov 2026, 04:40 UTC"; label checkboxes sit slightly above their text.
+- [x] 6. Record. verify.md results + AC7 Features row; backlog: newlines collapse (4); plan T40 extended with the duplicate chip CSS (builder finding) and checkbox alignment.
+- [x] Done when: T39 committed on nstack/design (a907aa4), items 1-6 ticked.
+- Decision (builder): comment times parsed at the DB boundary (lib/comments.ts). Only Save changes/Save labels primary. ConfirmButton takes an optional className; new `.quiet` button modifier.
+
+## 2026-11-27 build T40
+- Read: build/SKILL.md 13386ea
+- [x] 1. Branch. nstack/design.
+- [x] 2. Starting state. lint 0, typecheck 0 at a907aa4 (T39 proof).
+- [x] 3. Dispatch. Fresh nstack:builder with the pointer brief (+ design.md).
+- [x] 4. Read the reply. Done: a03be3e (projects restyle, empty state, duplicate chip CSS removed, checkboxes centred; 3 new tests red first). Removed the redundant "New project" h3 in critique.
+- [x] 5. Prove it yourself. At a03be3e: lint 0, typecheck 0, build 0 (0 warnings), `check:e2e-temp` 0 (143 passed, 0 temp files, no data/), `drive check` 0 (16 PNGs), `check-features` 0. Looked at /tmp/t40-shots/projects-390.png: rows with rename + quiet Delete, primary Create project, no overflow.
+- [x] 6. Record. verify.md results + empty-projects Features row; backlog: header Log out wraps at 390 with long email (4).
+- [x] Done when: T40 committed on nstack/design (a03be3e), items 1-6 ticked.
+
+## 2026-11-27 verify slice-design
+- Read: verify/SKILL.md db15016
+- [x] 1. Clean tree. `git status --porcelain` empty; HEAD f4ce432; `git diff --quiet a03be3e HEAD -- . ':!.nstack'` exit 0 (only .nstack/ since the code proof).
+- [x] 2. Project checks. At a03be3e (same code): lint 0 (incl. check-css-tokens), typecheck 0, build 0 (0 warnings), `check:e2e-temp` 0 (143 passed, 0 skipped, 0 temp files, no data/), `drive check` 0 (16 PNGs). CI: runs on the PR.
+- [x] 3. Every acceptance criterion in scope has a passing check. AC1 lint (bite: a `#abc` outside :root -> exit 1, T37); AC2-AC3 a11y.spec 6 cases; AC4 a11y.spec focus test; AC5 layout.spec; AC6 move.spec; AC7 comments.spec; AC8 nav.spec 3 tests; AC9 full suite 143 passed; AC10 critique below. Features rows added for 404, a11y, focus, AC5, AC6, AC7, empty projects; `check-features` 0.
+- [x] 4. Every new check bites. Broke all at once (column-count +1, " GMT" suffix, 404 heading text, both empty-state texts, `:focus-visible` outline none, `main select` 3.5rem, checkbox-row flex-start, `main` colour #bbb), rebuilt, ran the 8 touched specs: 16 failed (every new test, each on its own break), 44 passed. `git checkout -- .`, rebuilt: 60 passed; `git status` clean.
+- [x] 5. The real thing runs. `drive start` + `drive screens /tmp/verify-design` exit 0 (seeds through the UI, 16 screens, no console errors); saved Playwright tests drive every AC in CI.
+- [x] 6. Every changed screen looks right. 16 shots in /tmp/verify-design (login, signup, projects, board, board-empty, board-nomatch, task, notfound at 1280 and 390): 8/8 critique lines pass; error states hand-shot by builders (T37 login/signup, T38 label, T40 rename). Delete task/project confirm; checklist-item Delete does not (earlier spec choice, unchanged here; backlog).
+- [x] 7. Nothing got weaker. `git diff main...HEAD -- e2e` removes one line (an import list extended); no skip/fixme/only/any/ts-ignore/eslint-disable/--no-verify added.
+- [x] 8. No new warnings or errors. Build 0 warnings (as before); tests 127 -> 143; drive screens 10 -> 16 (new screens); verify.md Last result updated (a03be3e).
+- [x] Done when: all items ticked; Not verified: CI on the PR (runs at ship).
+
+| Claim | Command | Result |
+|---|---|---|
+| all checks | lint, typecheck, build, check:e2e-temp, drive check at a03be3e | 0/0/0/0 (143 passed)/0 (16 PNGs) |
+| new tests bite | 9 breaks, 8 specs | 16 failed; restored: 60 passed |
+| screens | /tmp/verify-design/{login,signup,projects,board,board-empty,board-nomatch,task,notfound}-{1280,390}.png | 1 main content+primary obvious; 2 spacing on scale, edges aligned; 3 16px body, contrast via axe; 4 no overflow at 390; 5 empty/no-match/404 intended; 6 matches design.md, no stripe/shadow cards; 7 focus ring (AC4 + T38 tab pass); 8 actions named |
+- Decision: checklist-item Delete stays without a confirm (slice labels-checklist chose it; single retypable line; this slice changes only its style).
+
+## 2026-11-27 review slice-design
+- Read: review/SKILL.md f713898
+- [x] 1. Dispatch. One nstack:reviewer, worktree, pointer brief at f4a3b99. Verdict pass: 0 important, 2 nits. It reran lint/typecheck/build, 8 specs (60 passed), token script on scratch CSS, a mutation, drive screens.
+- [x] 2. Second reviewer. n/a: no auth, payments, migrations, concurrency or public API change (CSS, markup, comment time display, test/drive tooling).
+- [x] 3. Act on every finding. Nit 1 (AC7 cannot catch a dropped `Z` in a UTC server): backlog, because a non-UTC e2e server zone touches the overdue tests; nit 2 (token regex vs hex-letter ID selectors, none exist): backlog.
+- [x] 4. Review the fixes. n/a: no fixes made.
+- [x] Done when: latest round 0 important; verify passed at f4a3b99's code; nits in backlog.md. Reviewer worktree removed.
+
+## 2026-11-27 ship slice-design
+- Read: ship/SKILL.md 47e5182
+- [x] 1. Commit. 10 code commits (T37-T40) + state commits on nstack/design.
+- [x] 2. Sync. origin/main 344be19 is an ancestor of the branch: nothing came in, verify stands.
+- [x] 3. Push. nstack/design.
+- [ ] 4. Open the PR
+- [ ] 5. Wait for CI
+- [ ] 6. Merge
+- [ ] 7. Confirm and clean up.
+- [ ] Done when: the PR is merged, CI is green on the default branch, and the fast checks pass there, or the PR is parked with a reason.

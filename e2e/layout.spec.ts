@@ -263,3 +263,11 @@ test("AC44: at 1280 the Export CSV, Export JSON and New task links are at least 
     expect(boxes[i + 1].x - (boxes[i].x + boxes[i].width)).toBeGreaterThanOrEqual(8);
   }
 });
+
+test("AC5: at 1280 the search box and both filter selects are the same height", async ({ browser }) => {
+  const page = await seedLikeBoard(browser, DESKTOP);
+  const heights = await Promise.all(
+    filterLabels(page).map(async (label) => (await label.locator(":is(input, select)").boundingBox())!.height),
+  );
+  for (const height of heights.slice(1)) expect(Math.abs(height - heights[0])).toBeLessThanOrEqual(1);
+});

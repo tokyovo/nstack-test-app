@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 export default async function SignUpPage() {
   if (await getCurrentUser()) redirect("/projects");
   return (
-    <main>
+    <main className="narrow">
       <h2>Sign up</h2>
       <CredentialsForm action={signUpAction} submitLabel="Sign up" passwordAutoComplete="new-password" />
       <p>

@@ -137,3 +137,20 @@ test("AC11: a comment request naming a project the user is not a member of adds 
 test("AC11: a comment request naming another project's task id adds nothing", async ({ browser }) => {
   await tamperedComment(browser, (a) => [null, a.taskId]); // keeps B's own project id
 });
+
+test("AC7: a comment shows its author, then a UTC <time> with an ISO dateTime, then its body", async ({ browser }) => {
+  const a = await newUser(browser);
+  const url = await createProject(a.page, "Timestamps");
+  await addTask(a.page, url, "When was this");
+  await openTask(a.page, "When was this");
+  await comment(a.page, "Noted");
+
+  const item = comments(a.page).first();
+  const time = item.locator("time");
+  await expect(time).toHaveText(/^\d{1,2} [A-Z][a-z]{2} \d{4}, \d{2}:\d{2} UTC$/);
+  const dateTime = await time.getAttribute("dateTime");
+  expect(dateTime).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.000Z$/);
+  // Stored in UTC seconds ago: the parsed instant is within a minute of now, not hours off by a zone.
+  expect(Math.abs(Date.parse(dateTime ?? "") - Date.now())).toBeLessThan(60_000);
+  await expect(item).toHaveText(new RegExp(`^${a.email.replace(/[.+]/g, "\\$&")}\\s*\\d.* UTC\\s*Noted$`));
+});
