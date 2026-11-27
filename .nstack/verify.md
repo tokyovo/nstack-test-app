@@ -4,11 +4,11 @@ Run from the repo root. Needs Node 24, `npm ci`, and Chromium for Playwright 1.6
 
 | Check | Speed | Command | Last result |
 |---|---|---|---|
-| lint | fast | `npm run lint` (eslint, then `scripts/check-css-tokens.mjs`: no colour literals in app/globals.css outside `:root`) | pass, 0 warnings (2026-11-27, a907aa4) |
-| typecheck | fast | `npm run typecheck` | pass (2026-11-27, a907aa4) |
-| build | full | `npm run build` | pass, 0 warnings (2026-11-27, a907aa4) |
-| e2e | full | `npm run check:e2e-temp` | pass, 140 tests, 0 skipped, 0 temp files left (2026-11-27, a907aa4) |
-| drive | full | `npm run drive -- check` | pass, 5 steps, 16 screenshots (2026-11-27, a907aa4) |
+| lint | fast | `npm run lint` (eslint, then `scripts/check-css-tokens.mjs`: no colour literals in app/globals.css outside `:root`) | pass, 0 warnings (2026-11-27, a03be3e) |
+| typecheck | fast | `npm run typecheck` | pass (2026-11-27, a03be3e) |
+| build | full | `npm run build` | pass, 0 warnings (2026-11-27, a03be3e) |
+| e2e | full | `npm run check:e2e-temp` | pass, 143 tests, 0 skipped, 0 temp files left (2026-11-27, a03be3e) |
+| drive | full | `npm run drive -- check` | pass, 5 steps, 16 screenshots (2026-11-27, a03be3e) |
 | ci | full | `.github/workflows/ci.yml` on push and PR: npm ci, playwright install, lint, typecheck, build, test:e2e, drive check | green on main 26a9415 (run 45778821562, 119 passed; before the drive step existed) |
 
 - `check:e2e-temp [-- <playwright args>]` runs `playwright test` (needs `npm run build` first; it starts `next start -p ${E2E_PORT:-3100}` with `DATABASE_PATH` set to a fresh temp SQLite file, also readable by tests as `E2E_DATABASE_PATH`), then exits 1 if any `taskboard-e2e-<pid>-*` file is left in the OS temp dir; else the suite's exit code. `npm run test:e2e` is the suite alone.
@@ -37,6 +37,7 @@ How an agent runs and uses the app on its own, without touching anyone's data.
 | Sessions expire after 30 days | session cookie | `e2e/session-expiry.spec.ts` "AC19: a 31-day-old session is rejected and its row deleted" |
 | Forms keep typed values after an error | /login, /signup, task forms | `e2e/keep-values.spec.ts` "AC20: the new-task form keeps title, description, assignee and due date after an error" |
 | Create a project | /projects, New project form | `e2e/projects.spec.ts` "AC5: a user creates a project and it appears in their list" |
+| Empty project list says what to do | /projects with no projects | `e2e/projects.spec.ts` "a user with no projects is told to create their first one with the New project form" |
 | Rename a project | /projects, Rename | `e2e/projects.spec.ts` "AC5: a user renames a project and the list shows the new name" |
 | Delete a project (asks first) | /projects, Delete | `e2e/projects.spec.ts` "AC5, AC14: a user confirms the delete and the project leaves the list" |
 | Only members see a project | /projects/<id> | `e2e/projects.spec.ts` "AC6: user B does not see user A's project and gets a 404 on its URL" |

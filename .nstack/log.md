@@ -201,3 +201,13 @@ Entries before 2026-11-27 are in git history: `git log -p .nstack/log.md`.
 - [x] 6. Record. verify.md results + AC7 Features row; backlog: newlines collapse (4); plan T40 extended with the duplicate chip CSS (builder finding) and checkbox alignment.
 - [x] Done when: T39 committed on nstack/design (a907aa4), items 1-6 ticked.
 - Decision (builder): comment times parsed at the DB boundary (lib/comments.ts). Only Save changes/Save labels primary. ConfirmButton takes an optional className; new `.quiet` button modifier.
+
+## 2026-11-27 build T40
+- Read: build/SKILL.md 13386ea
+- [x] 1. Branch. nstack/design.
+- [x] 2. Starting state. lint 0, typecheck 0 at a907aa4 (T39 proof).
+- [x] 3. Dispatch. Fresh nstack:builder with the pointer brief (+ design.md).
+- [x] 4. Read the reply. Done: a03be3e (projects restyle, empty state, duplicate chip CSS removed, checkboxes centred; 3 new tests red first). Removed the redundant "New project" h3 in critique.
+- [x] 5. Prove it yourself. At a03be3e: lint 0, typecheck 0, build 0 (0 warnings), `check:e2e-temp` 0 (143 passed, 0 temp files, no data/), `drive check` 0 (16 PNGs), `check-features` 0. Looked at /tmp/t40-shots/projects-390.png: rows with rename + quiet Delete, primary Create project, no overflow.
+- [x] 6. Record. verify.md results + empty-projects Features row; backlog: header Log out wraps at 390 with long email (4).
+- [x] Done when: T40 committed on nstack/design (a03be3e), items 1-6 ticked.
