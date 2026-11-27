@@ -466,7 +466,7 @@ label > :is(input, select, textarea) {
   color: var(--danger);
 }
 
-.task-card .overdue-label {
+.overdue-label {
   display: inline-block;
   padding: 0 var(--space-2);
   border-radius: 999px;
@@ -777,4 +777,133 @@ label > :is(input, select, textarea) {
 .comment-meta strong {
   color: var(--text);
   font-weight: 600;
+}
+
+/* The calendar: month title with Previous/Next, then a Mon-Sun grid of day cells (blank pads keep day 1 under its
+   weekday). On phones one column of only the days with tasks, each heading spelt out ("Sat 1 January"). */
+.calendar-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3) var(--space-4);
+  margin: var(--space-2) 0 var(--space-4);
+}
+
+.calendar-title h2 {
+  margin: 0;
+  font-size: var(--text-2xl);
+}
+
+.calendar-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.calendar-page .board-empty {
+  margin: 0 0 var(--space-4);
+}
+
+.calendar-weekdays,
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.calendar-weekdays {
+  margin-bottom: var(--space-1);
+  color: var(--muted);
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+.calendar-weekdays li {
+  padding: 0 var(--space-2);
+}
+
+.calendar-day {
+  min-width: 0;
+  min-height: 6rem;
+  padding: var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.calendar-day.today {
+  border-color: var(--accent);
+}
+
+.calendar-day h3 {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.calendar-day.today h3 {
+  color: var(--accent);
+}
+
+.calendar-day ul {
+  margin: var(--space-1) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.calendar-day ul li {
+  margin-top: var(--space-1);
+  font-size: var(--text-sm);
+  line-height: 1.35;
+}
+
+.calendar-day ul a {
+  color: var(--text);
+}
+
+.calendar-day ul a:hover {
+  color: var(--accent-hover);
+}
+
+.calendar-day li.done a {
+  color: var(--muted);
+}
+
+.calendar-day .overdue-label {
+  margin-left: var(--space-1);
+}
+
+.calendar-long {
+  display: none;
+}
+
+.calendar-undated {
+  margin-top: var(--space-4);
+  color: var(--muted);
+}
+
+@media (max-width: 640px) {
+  .calendar-weekdays,
+  .calendar-blank,
+  .calendar-day:not(.has-tasks) {
+    display: none;
+  }
+
+  .calendar-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-2);
+  }
+
+  .calendar-day {
+    min-height: 0;
+  }
+
+  .calendar-long {
+    display: inline;
+  }
 }
