@@ -322,3 +322,13 @@ Entries before 2026-11-27 are in git history: `git log -p .nstack/log.md`.
 - [x] 5. Prove it yourself. Merged into slice branch (c7d1d07, on top of T43): lint 0, typecheck 0, build 0, `check:e2e-temp -- calendar duplicate a11y seed` 0 (19 passed).
 - [x] 6. Record. Features row "Calendar view"; Drive screens list gains calendar (18 PNGs). Backlog: seed.spec near 30s under load (already a backlog line).
 - [x] Done when: the ticket is committed on the slice's branch with items 1-6 ticked in its log entry, or is parked in `plan.md`.
+
+## 2026-11-27 build T42
+- Read: build/SKILL.md 45c2dd4
+- [x] 1. Branch. nstack/labels-dup-calendar at c2af9e3 (T41, T43, T44 merged); builder in its own worktree.
+- [x] 2. Starting state. lint 0, typecheck 0 at 0770d37 (same code).
+- [ ] 3. Dispatch
+- [ ] 4. Read the reply
+- [ ] 5. Prove it yourself.
+- [ ] 6. Record.
+- [ ] Done when: the ticket is committed on the slice's branch with items 1-6 ticked in its log entry, or is parked in `plan.md`.
