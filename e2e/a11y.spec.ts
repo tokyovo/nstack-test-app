@@ -74,6 +74,14 @@ test.describe("AC2, AC3 screens pass the axe scan and phone layout checks", () =
     await expectAccessible(page, "/signup");
   });
 
+  test("/projects with no project, and with one", async ({ browser }) => {
+    const { page } = await newUser(browser);
+    await expectAccessible(page, "/projects");
+    await expect(page.getByText("No projects yet")).toBeVisible();
+    await createProject(page, "Website relaunch");
+    await expectAccessible(page, "/projects");
+  });
+
   test("a 404 page, logged in", async ({ browser }) => {
     const { page } = await newUser(browser);
     await expectAccessible(page, "/projects/999999");

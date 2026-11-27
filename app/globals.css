@@ -365,9 +365,10 @@ label > :is(input, select, textarea) {
   margin: 0;
 }
 
-/* No tasks yet, or search and filters hide every task: a quiet notice, not an error. */
+/* No projects or tasks yet, or search and filters hide every task: a quiet notice, not an error. */
 .board-empty,
-.board-start {
+.board-start,
+.projects-empty {
   padding: var(--space-3) var(--space-4);
   border: 1px dashed var(--edge);
   border-radius: var(--radius);
@@ -563,51 +564,92 @@ label > :is(input, select, textarea) {
   border-bottom: 1px solid var(--border);
 }
 
-/* A project's link, rename field and buttons share one row, wrapping on narrow screens. */
+/* The projects page: one row per project (name, rename field, Rename, a quiet Delete) on a white list,
+   then the New project form. Rows wrap on narrow screens, the name taking its own line. */
+.projects-page {
+  max-width: 48rem;
+}
+
+.project-list {
+  margin: 0 0 var(--space-6);
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  list-style: none;
+}
+
 .project-row,
 .project-row form {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-2);
 }
 
 .project-row {
-  margin-bottom: 0.5rem;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--border);
+}
+
+.project-row:last-child {
+  border-bottom: 0;
 }
 
 .project-row form {
   margin: 0;
 }
 
-/* A card's labels: small rounded chips that wrap onto more lines. */
-.board-column .task-labels {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem;
-  margin-top: 0.25rem;
+.project-row button {
+  flex: none;
+  white-space: nowrap;
 }
 
-.task-labels .label {
-  padding: 0 0.4rem;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  background: var(--background);
-  font-size: 0.75rem;
-  overflow-wrap: anywhere;
+.project-name {
+  flex: 1 1 12rem;
+  min-width: 0;
+  font-weight: 600;
+}
+
+.project-row input[name="name"] {
+  width: 14rem;
+}
+
+/* Phones: the name on its own line, then the rename field, Rename and Delete sharing the next. */
+@media (max-width: 640px) {
+  .project-name {
+    flex-basis: 100%;
+  }
+
+  .project-row form:first-of-type {
+    flex: 1 1 0;
+    flex-wrap: nowrap;
+    min-width: 0;
+  }
+
+  .project-row input[name="name"] {
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 0;
+  }
+}
+
+.new-project {
+  margin-top: var(--space-6);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border);
 }
 
 /* A checkbox and its text on one line (the text wraps), unlike the stacked field labels. */
 .checkbox-row {
   display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
+  align-items: center;
+  gap: var(--space-2);
 }
 
 /* Phones: a checkbox's label is its 44 px touch target. */
 @media (max-width: 640px) {
   .checkbox-row {
-    align-items: center;
     min-height: var(--control-height);
   }
 }
@@ -636,13 +678,9 @@ label > :is(input, select, textarea) {
 }
 
 .checklist-item > .checkbox-row {
-  align-items: center;
-  margin: 0;
-}
-
-.checklist-item > .checkbox-row {
   flex: 1;
   min-width: 0;
+  margin: 0;
 }
 
 .checklist-item span {

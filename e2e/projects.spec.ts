@@ -18,6 +18,14 @@ test("AC5: a user creates a project and it appears in their list", async ({ brow
   await expect(projectList(page).getByRole("link", { name: "Website relaunch" })).toBeVisible();
 });
 
+test("a user with no projects is told to create their first one with the New project form", async ({ browser }) => {
+  const { page } = await newUser(browser);
+  await expect(page.getByRole("main").getByText("No projects yet. Create your first project below.")).toBeVisible();
+
+  await createProject(page, "First one");
+  await expect(page.getByText("No projects yet")).toHaveCount(0);
+});
+
 test("AC5: a user renames a project and the list shows the new name", async ({ browser }) => {
   const { page } = await newUser(browser);
   await createProject(page, "Old name");
