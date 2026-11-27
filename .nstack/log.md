@@ -230,3 +230,11 @@ Entries before 2026-11-27 are in git history: `git log -p .nstack/log.md`.
 | new tests bite | 9 breaks, 8 specs | 16 failed; restored: 60 passed |
 | screens | /tmp/verify-design/{login,signup,projects,board,board-empty,board-nomatch,task,notfound}-{1280,390}.png | 1 main content+primary obvious; 2 spacing on scale, edges aligned; 3 16px body, contrast via axe; 4 no overflow at 390; 5 empty/no-match/404 intended; 6 matches design.md, no stripe/shadow cards; 7 focus ring (AC4 + T38 tab pass); 8 actions named |
 - Decision: checklist-item Delete stays without a confirm (slice labels-checklist chose it; single retypable line; this slice changes only its style).
+
+## 2026-11-27 review slice-design
+- Read: review/SKILL.md f713898
+- [x] 1. Dispatch. One nstack:reviewer, worktree, pointer brief at f4a3b99. Verdict pass: 0 important, 2 nits. It reran lint/typecheck/build, 8 specs (60 passed), token script on scratch CSS, a mutation, drive screens.
+- [x] 2. Second reviewer. n/a: no auth, payments, migrations, concurrency or public API change (CSS, markup, comment time display, test/drive tooling).
+- [x] 3. Act on every finding. Nit 1 (AC7 cannot catch a dropped `Z` in a UTC server): backlog, because a non-UTC e2e server zone touches the overdue tests; nit 2 (token regex vs hex-letter ID selectors, none exist): backlog.
+- [x] 4. Review the fixes. n/a: no fixes made.
+- [x] Done when: latest round 0 important; verify passed at f4a3b99's code; nits in backlog.md. Reviewer worktree removed.
