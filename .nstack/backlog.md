@@ -2,9 +2,7 @@
 Rescored 2026-11-26 after slice 8 (UX pass on /tmp/s8-shots/). Earlier: rescored 2026-11-25 after slice 5 (UX pass on T18 `npm run screens` output, /tmp/t18-shots/). Slice 4 and 5 shipped; items below are open.
 Scored 2026-11-25 (value + risk + cost, cost 5 = cheapest). Sources: UX pass (headless Chromium, screenshots /tmp/ux-shots/), research.md (29 sources), earlier reviews.
 
-- 6 (v2 r1 c3) Duplicate a task / templates. Evidence: 4 sources, research.md
-- 6 (v3 r1 c2) Rename / delete labels, label colors (slice 8 left them out; the goal names create, assign, filter). Evidence: plan.md slice labels-checklist, Out of scope.
-- 5 (v2 r1 c2) Calendar view. Evidence: 5 sources, research.md
+- 5 (v2 r1 c2) Task templates (duplicate shipped in PR #22; a saved template list is the rest of that research candidate). Evidence: research.md (4 sources for duplicate/templates).
 - 5 (v2 r1 c2) Multiple assignees. Evidence: 3 sources, research.md
 - 5 (v1 r1 c3) Label duplicate check and name order are ASCII-only (`COLLATE NOCASE`): "Été" and "été" can both exist. Same limit as user emails. Evidence: slice 8 security reviewer (better-sqlite3 repro).
 - 4 (v1 r1 c2) Link related tasks; recurring tasks; time tracking; timeline/Gantt (3-4 sources each, research.md).
