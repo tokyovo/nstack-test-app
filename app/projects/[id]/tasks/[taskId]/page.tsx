@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { listChecklist } from "@/lib/checklist";
-import { listComments } from "@/lib/comments";
+import { formatCommentTime, listComments } from "@/lib/comments";
 import { listLabels } from "@/lib/labels";
 import { getProject, listMembers } from "@/lib/projects";
 import { COLUMN_NAMES } from "@/lib/statuses";
@@ -95,7 +95,7 @@ export default async function TaskPage({ params }: PageProps<"/projects/[id]/tas
         <ul aria-label="Comments">
           {comments.map((comment) => (
             <li key={comment.id}>
-              <strong>{comment.authorEmail}</strong> <time>{comment.createdAt}</time>
+              <strong>{comment.authorEmail}</strong> <time dateTime={comment.createdAt.toISOString()}>{formatCommentTime(comment.createdAt)}</time>
               <p>{comment.body}</p>
             </li>
           ))}
