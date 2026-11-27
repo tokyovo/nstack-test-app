@@ -193,8 +193,8 @@ test("AC6: each column shows the count of its visible cards beside its heading; 
   await expect(columnCount(a.page, "In progress")).toHaveText("0");
   await expect(columnCount(a.page, "Done")).toHaveText("0");
   // Next to the heading, not in it: the heading and the region name stay "To do".
-  await expect(column(a.page, "To do").locator("h3 .column-count")).toHaveCount(0);
-  await expect(column(a.page, "To do").getByRole("heading", { level: 3 })).toHaveText("To do");
+  await expect(column(a.page, "To do").locator("h2 .column-count")).toHaveCount(0);
+  await expect(column(a.page, "To do").getByRole("heading", { level: 2 })).toHaveText("To do");
 
   await a.page.getByLabel("Search tasks").fill("zzzz");
   for (const name of ["To do", "In progress", "Done"] satisfies ColumnName[]) await expect(columnCount(a.page, name)).toHaveText("0");

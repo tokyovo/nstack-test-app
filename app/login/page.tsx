@@ -10,7 +10,7 @@ export default async function LoginPage() {
   if (await getCurrentUser()) redirect("/projects");
   return (
     <main className="narrow">
-      <h2>Log in</h2>
+      <h1>Log in</h1>
       <CredentialsForm action={logInAction} submitLabel="Log in" passwordAutoComplete="current-password" />
       <p>
         No account? <Link href="/signup">Sign up</Link>

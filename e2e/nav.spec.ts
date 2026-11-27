@@ -14,7 +14,7 @@ test.describe("AC28 header title links to Projects", () => {
     await expect(titleLink(page)).toHaveAttribute("href", "/projects");
     await titleLink(page).click();
     await expect(page).toHaveURL("/projects");
-    await expect(page.getByRole("heading", { name: "Task board" })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: "Projects" })).toBeVisible();
   });
 
   test("on a task page and a 404 page, the title links to /projects", async ({ browser }) => {
@@ -35,7 +35,8 @@ test.describe("AC28 header title links to Projects", () => {
   for (const path of ["/login", "/signup"]) {
     test(`logged out on ${path}, the title is plain text`, async ({ page }) => {
       await page.goto(path);
-      await expect(page.getByRole("heading", { name: "Task board" })).toBeVisible();
+      await expect(page.locator("header .app-title")).toHaveText("Task board");
+      await expect(page.getByRole("heading", { name: "Task board" })).toHaveCount(0);
       await expect(page.locator("header a")).toHaveCount(0);
     });
   }

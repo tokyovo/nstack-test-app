@@ -45,7 +45,7 @@ export default async function CalendarPage({ params, searchParams }: PageProps<"
         <Link href={`/projects/${project.id}`}>{project.name}</Link>
       </p>
       <div className="calendar-title">
-        <h2>{monthTitle(month)}</h2>
+        <h1>{monthTitle(month)}</h1>
         <nav aria-label="Months" className="calendar-nav">
           <MonthLink base={base} month={shiftMonth(month, -1)} rel="prev">
             Previous month
@@ -71,12 +71,13 @@ export default async function CalendarPage({ params, searchParams }: PageProps<"
               key={cell.date}
               className={classes.filter(Boolean).join(" ")}
               aria-current={cell.date === today ? "date" : undefined}
+              aria-label={`${cell.weekday} ${cell.day} ${name}`}
             >
-              <h3 aria-label={`${cell.weekday} ${cell.day} ${name}`}>
+              <span className="calendar-date" aria-hidden="true">
                 <span className="calendar-long">{cell.weekdayShort} </span>
                 {cell.day}
                 <span className="calendar-long"> {name}</span>
-              </h3>
+              </span>
               {dayTasks.length > 0 && (
                 <ul>
                   {dayTasks.map((task) => (

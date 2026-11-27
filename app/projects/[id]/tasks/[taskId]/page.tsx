@@ -42,7 +42,7 @@ export default async function TaskPage({ params }: PageProps<"/projects/[id]/tas
       <p className="back-link">
         <Link href={`/projects/${project.id}`}>{project.name}</Link>
       </p>
-      <h2>{task.title}</h2>
+      <h1>{task.title}</h1>
       <dl className="task-details">
         <dt>Status</dt>
         <dd>{COLUMN_NAMES[task.status]}</dd>
@@ -54,7 +54,7 @@ export default async function TaskPage({ params }: PageProps<"/projects/[id]/tas
         <dd>{task.description || "No description"}</dd>
       </dl>
       <section className="task-section">
-        <h3>Edit task</h3>
+        <h2>Edit task</h2>
         <TaskForm
           action={updateTaskAction.bind(null, project.id, task.id)}
           members={members}
@@ -73,7 +73,7 @@ export default async function TaskPage({ params }: PageProps<"/projects/[id]/tas
         </div>
       </section>
       <section className="task-section" aria-labelledby="task-labels-heading">
-        <h3 id="task-labels-heading">Labels</h3>
+        <h2 id="task-labels-heading">Labels</h2>
         {labels.length === 0 ? (
           <p className="section-empty">No labels yet; create them on the board</p>
         ) : (
@@ -85,7 +85,7 @@ export default async function TaskPage({ params }: PageProps<"/projects/[id]/tas
         )}
       </section>
       <section className="task-section" aria-labelledby="checklist-heading">
-        <h3 id="checklist-heading">Checklist</h3>
+        <h2 id="checklist-heading">Checklist</h2>
         {checklist.length === 0 && <p className="section-empty">No items yet</p>}
         <Checklist
           rows={checklist.map((item) => ({
@@ -97,7 +97,7 @@ export default async function TaskPage({ params }: PageProps<"/projects/[id]/tas
         <ChecklistForm action={addChecklistItemAction.bind(null, project.id, task.id)} />
       </section>
       <section className="task-section">
-        <h3>Comments</h3>
+        <h2>Comments</h2>
         {comments.length === 0 && <p className="section-empty">No comments yet</p>}
         <ul aria-label="Comments" className="comment-list">
           {comments.map((comment) => (

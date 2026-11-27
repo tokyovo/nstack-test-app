@@ -26,7 +26,7 @@ export function TaskLabelsForm({ action, labels, checked }: Props) {
           <LabelChip label={label} />
         </label>
       ))}
-      <button type="submit" className="primary" disabled={pending}>
+      <button type="submit" disabled={pending}>
         Save labels
       </button>
     </form>

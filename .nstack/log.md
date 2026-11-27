@@ -249,3 +249,74 @@ Entries before 2026-11-27 are in git history: `git log -p .nstack/log.md`.
 - Audit: `audit-log .nstack/log.md 2026-11-27` exit 0. Compared with what was done: the plan step line was printed as "secure-headers" and the slice named secure-access (noted in that entry); verify item 6 n/a (no UI change).
 - Servers: stopped a next-server on :3251 (pid 311528) left by the security reviewer, cwd its removed worktree. The next-server on 127.0.0.1:3400 (pid 114319, from 2026-11-26) is not from this run; left running. /tmp/taskboard-drive empty; no e2e temp DBs; worktrees: main only.
 - Slowed the run: the nstack guard hook blocks any command containing the no-verify flag text, even inside a grep pattern for the "nothing got weaker" scan; worked around with a character class. The leftover reviewer server is a backlog line (once so far).
+
+## 2026-11-27 orient (controller, run "continue: new design rules")
+- Nothing in flight: tree clean, one worktree, no unmerged nstack branches, no open nstack PRs; main == origin/main 7013a29.
+- check-env ok; lint 0; typecheck 0; check-features 0; build 0; drive check pass (18 PNGs); check-security against a drive copy: all 4 ok (36 deny proofs).
+- needs-human: no open items. Goal met; the user asked to bring every screen up to the design skill's new rules -> plan.
+
+## 2026-11-27 plan design-rules
+- Read: plan/SKILL.md fa73337
+- [x] 1. Learn the ground truth. globals.css headings h2 xl / h3 lg / column h3 md / calendar day h3 sm; header h1 "Task board" on every page; selects browser default; date input default; checkbox accent-color set. Probe: `system-ui` resolves to WenQuanYi Zen Hei here, bold width == regular width (211.3 vs 211.3px), Liberation Sans 215.8 vs 231.3 -> no heading renders bold on this machine.
+- [x] 2. Interrogate the goal yourself
+  - [x] 2.1. Questions: which element is the page title; what happens to the app name; calendar day labels; which controls share what; select chevron without colour literals; 404 logged out.
+  - [x] 2.2. Answered from code and the design skill (in the plan's Decisions and answers).
+  - [x] 2.3. Decision: drop leading system-ui from the font stack (reversible, one line). Decision: calendar day numbers stop being headings. Decision: columns become h2.
+- [x] 3. Write the spec. 10 ACs in plan.md slice design-rules.
+- [x] 4. Cut tickets. T49 headings, T50 controls; independent, parallel (both touch globals.css in different sections).
+- [x] 5. Check the plan
+  - [x] 5.1. AC1-5 -> T49 headings.spec; AC6 -> T49 calendar.spec; AC7-9 -> T50 controls.spec; AC10 -> verify critique + a11y.spec.
+  - [x] 5.2. Fresh Explore reader: 15 questions, all answered under "Plan-check answers".
+  - [x] 5.3. Slice in plan.md, branch nstack/design-rules.
+- [x] Done when: every criterion has a proof, questions answered, slice in plan.md.
+
+## 2026-11-27 build T49 T50
+- Read: build/SKILL.md 4b2ec60
+- [x] 1. Branch. nstack/design-rules from main 7013a29.
+- [x] 2. Starting state. lint 0, typecheck 0 at 98bf7ff (orient).
+- [x] 3. Dispatch. Two builders in parallel, worktrees (15 GB, 3 GB swap, 4 cores); both briefs pointer-only, Parallel: 2.
+- [x] 4. Read the reply. T50 e4559f7: select chevron, date picker fit, Save labels secondary, e2e/controls.spec.ts. T49 e3bafd4: font stack, h1 page titles, h2 sections, header .app-title, calendar day numbers not headings, e2e/headings.spec.ts; level assertions updated in calendar/move/nav/seed/smoke specs (spec change: heading levels and the header title are part of the new spec, AC1-AC3, AC6). Neither builder edits .nstack/: controller added design.md lines (controls family; font stack, headings roles, Generic check wording).
+- [x] 5. Prove it yourself. At e4559f7: lint 0, typecheck 0, build 0, controls.spec 1 passed; with globals.css from 98bf7ff it fails ("select ... appearance auto"). At merge 01576b6: lint 0, typecheck 0, build 0; headings+controls+calendar specs 10 passed; with `system-ui` put back first in --font, headings.spec fails (2 of 3 tests).
+- [x] 6. Record. This entry. Backlog: the board has two primaries ("New task" link and "Add task"); to be judged in the verify critique (line 1 / line 9), not deferred.
+- [x] Done when: T49 and T50 committed on nstack/design-rules (merge 01576b6), items ticked.
+
+## 2026-11-27 verify slice design-rules
+- Read: verify/SKILL.md 1af2e2c
+- [x] 1. Clean tree. HEAD edede51 (code); only .nstack/ uncommitted, which does not invalidate verify.
+- [x] 2. Project checks. lint 0 (0 warnings), typecheck 0, build 0 (0 warnings), check:e2e-temp 177 passed / 0 failed / 0 flaky / 0 skipped, 0 temp files, no data/ dir; drive check 0 (18 PNGs). All at edede51.
+- [x] 3. Every acceptance criterion in scope has a passing check. AC1-5 headings.spec (3 tests); AC2 also nav.spec; AC6 calendar.spec; AC7-9 controls.spec; AC11 controls.spec "at most one visible primary"; AC10 critique below + a11y.spec. Features rows added (3); check-features 0.
+- [x] 4. Every new check bites. controls.spec red on 98bf7ff CSS ("appearance auto"), green after; headings.spec red with system-ui first in --font (2 of 3 fail), green restored; primary test red on board/board-empty/board-nomatch before T51 (builder run, "New task, Add task"). git status clean after each restore.
+- [x] 5. The real thing runs. The new specs drive real Chromium against `next start` in CI; drive screens on a seeded copy.
+- [x] 6. Every changed screen looks right. Critique found the board's two primaries (lines 1/9) -> T51; removed the task page's dashed rule above Duplicate/Delete (did not earn its place) -> edede51; re-shot.
+- [x] 7. Nothing got weaker. No deleted tests; no skip/any/ts-ignore/eslint-disable added. Changed assertions are heading levels and locators only (calendar level 2->1, move h3->h2, nav/smoke/seed header title and day numbers): spec change AC1-AC3, AC6, logged in build T49 T50.
+- [x] 8. No new warnings or errors. Counts as Last result (0/0), tests 172 -> 177; verify.md Last result updated to edede51.
+- [x] 9. Access is enforced. n/a: diff touches only page markup and CSS (app/layout.tsx, page.tsx files, board.tsx, task-labels-form.tsx, globals.css); no route, action, query, table or auth code.
+- [x] Done when: all items ticked; Not verified: none.
+
+| Claim | Command | Result |
+|---|---|---|
+| full gate at edede51 | lint, typecheck, build, check:e2e-temp, drive check | 0/0/0, 177 passed, 18 PNGs |
+| headings bite | system-ui first in --font, headings.spec | 2 failed; restored, 3 passed |
+| controls bite | globals.css from 98bf7ff, controls.spec | 1 failed; restored, passed |
+| screens | /tmp/dr-final2/{login,signup,projects,board,board-empty,board-nomatch,task,calendar,notfound}-{1280,390}.png | lines 1-9 pass on each: one bold h1 largest; bold h2 sections; one green primary (board: Add task; task: Save changes); spacing on scale; no overflow at 390; empty states (board-empty, nomatch) intended; matches design.md; focus per a11y.spec AC4 (outline rule unchanged); action copy; selects chevroned, date input and checkboxes styled like the family |
+
+Not verified: none.
+
+## 2026-11-27 review slice design-rules
+- Read: review/SKILL.md 053d586
+- [x] 1. Dispatch. One reviewer, worktree, pointer brief at f982943. Verdict pass; re-ran lint/typecheck/build, 49 targeted e2e, drive check; two break tests (Save labels primary -> primary test red; column h2 at --text-md -> headings AC4 red), restored clean.
+- [x] 2. Second reviewer. n/a: no auth, payments, migration, concurrency or public API; diff is markup and CSS.
+- [x] 3. Act on every finding. 1 nit: T51 unticked in plan.md -> fixed by replacing the slice with its Done line. 0 important. Declined-to-judge (screen readers on the calendar li name; macOS/Windows font rendering) noted, not provable here.
+- [x] 4. Review the fixes. n/a: the only fix is state-only (.nstack/plan.md).
+- [x] Done when: latest round 0 important; verify passed at edede51 (state commits since do not invalidate); nit fixed.
+
+## 2026-11-27 ship slice design-rules
+- Read: ship/SKILL.md b51cd2a
+- [x] 1. Commit. T50 e4559f7, T49 e3bafd4 (merge 01576b6), T51 c907fbd, critique edede51, state commits; no hook bypass.
+- [x] 2. Sync. origin/main 7013a29 is an ancestor of the branch; nothing came in, verify stands.
+- [x] 3. Push. nstack/design-rules.
+- [x] 4. Open the PR. Body: user change, tickets, verification table, screens, merge danger (revert-safe, markup + CSS + tests), decisions.
+- [ ] 5. Wait for CI
+- [ ] 6. Merge
+- [ ] 7. Confirm and clean up.
+- [ ] Done when: the PR is merged, CI is green on the default branch, and the fast checks pass there, or the PR is parked with a reason.
