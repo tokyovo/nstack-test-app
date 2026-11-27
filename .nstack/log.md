@@ -356,3 +356,15 @@ Entries before 2026-11-27 are in git history: `git log -p .nstack/log.md`.
 - [ ] 7. Nothing got weaker.
 - [ ] 8. No new warnings or errors
 - [ ] Done when: every gate item is ticked in the log entry with its evidence, and Not verified is empty or every entry in it is parked.
+
+## 2026-11-27 debug flaky a11y calendar test
+- Read: debug/SKILL.md d67a39b
+- [x] 1. Reproduce. `check:e2e-temp -- e2e/a11y.spec.ts -g "calendar with" --repeat-each=8 --workers=2`: 1 failed, 7 passed (full suite at 727d2b6 had failed it once too).
+- [x] 2. Shrink it. One test; failure at the `.task-details` toContainText("2020-01-01") after Save changes.
+- [x] 3. Read the evidence. Trace: the last `fill internal:label="Due date"` snapshot frameUrl is /projects/5 (the board), not the task page.
+- [x] 4. Hypothesize, then test one thing. Cause: link click navigates client-side; `getByLabel("Due date")` matched the board's New task form field before the task page loaded; Save changes then saved an empty date. Prediction (fill on board URL) confirmed by the trace.
+- [x] 5. Fix the cause, not the symptom. Wait for the task page heading before the fill (the pattern of checklist.spec openTask), 41b2a93, commit "a11y calendar test waits for the task page".
+- [x] 6. Prove the fix. With fix: --repeat-each=16 --workers=3 -> 16 passed; without: 1/8 failed above. The test itself is the kept regression check.
+- [x] 7. Look for siblings. Script over e2e/*.ts and seed-app.mts for a link click followed by getByLabel(Title|Due date|Description|Assignee): only this line.
+- [x] Done when: passes, failed before, kept, no [DEBUG- lines (grep 0).
+- Cause: click-then-fill race on a label shared by the board and the task page. Fix: wait for the task heading.
