@@ -347,15 +347,24 @@ Entries before 2026-11-27 are in git history: `git log -p .nstack/log.md`.
 
 ## 2026-11-27 verify slice labels-dup-calendar
 - Read: verify/SKILL.md db15016
-- [ ] 1. Clean tree.
-- [ ] 2. Project checks.
-- [ ] 3. Every acceptance criterion in scope has a passing check.
-- [ ] 4. Every new check bites.
-- [ ] 5. The real thing runs.
-- [ ] 6. Every changed screen looks right.
-- [ ] 7. Nothing got weaker.
-- [ ] 8. No new warnings or errors
-- [ ] Done when: every gate item is ticked in the log entry with its evidence, and Not verified is empty or every entry in it is parked.
+- [x] 1. Clean tree. `git status --porcelain` empty; code at 8e7cec5 (after the debug fix 41b2a93; later commits only .nstack/).
+- [x] 2. Project checks. At 41b2a93: lint 0 (0 warnings, incl. check-css-tokens), typecheck 0, clean build 0 (0 warnings), `check:e2e-temp` 0 (166 passed, 0 skipped, 0 temp files, no data/), `drive check` 0 (18 PNGs, at 727d2b6, same code apart from one e2e line). First full run at 727d2b6 failed 1 (a11y calendar test, flaky): see debug entry below; fixed, then 166/166.
+- [x] 3. Every acceptance criterion has a passing check. AC1 labels.spec AC1 x3 + a11y (every colour, 1280/390); AC2 labels.spec AC2; AC3 labels.spec AC3 x5; AC4 labels.spec AC4 x3; AC5 duplicate.spec x4; AC6 calendar.spec x5; AC7 calendar.spec AC7 + a11y calendar test; AC8 seed.spec + drive check 18 PNGs; AC9 full suite. Features rows: label colours, migration, rename, delete, duplicate, calendar; `check-features` 0.
+- [x] 4. Every new check bites. Round 1 (10 breaks: chip class fixed gray, migration skipped, UPDATE/DELETE AND 0, dup labels not copied, calendar day+1, grid 6 cols, undated text, empty-month text hidden, New label select unkeyed): 14 failed. Round 2 (colour check off, rename/delete without membership or project scope, dup reads any task + no title cut, month pattern \d{1,2}, calendar page without membership): 11 failed. Every new test red in one round. Restored: 43 passed, `git status` clean. a11y fix: red 1/8 before, 16/16 after.
+- [x] 5. The real thing runs. `drive start` + `drive screens /tmp/verify-ldc` 0 (seed through the UI, 18 screens, no console errors); saved Playwright tests drive every AC in CI.
+- [x] 6. Every changed screen looks right. Looked at calendar-1280/390, board-1280, task-390 in /tmp/verify-ldc (others by builders: T42 label rows normal/error/long at 1280 and 390, T43 task-1280/390, T44 calendar). Critique below. Destructive Delete label confirms (AC4).
+- [x] 7. Nothing got weaker. `git diff main...HEAD -- e2e` removes 20 lines, each replaced by a chip-scoped equivalent (Q1 spec change: rows now hold edit forms); seed.spec gets a 60s timeout (logged decision, assertions unchanged). No skip/only/fixme/any/ts-ignore/eslint-disable added.
+- [x] 8. No new warnings or errors. Build 0 warnings; tests 143 -> 166; drive screens 16 -> 18; verify.md Last result updated.
+- [x] Done when: every gate item is ticked in the log entry with its evidence, and Not verified is empty or every entry in it is parked.
+
+
+| Claim | Command | Result |
+|---|---|---|
+| all checks | lint, typecheck, build, check:e2e-temp at 41b2a93; drive check | 0/0/0/0 (166 passed)/0 (18 PNGs) |
+| new tests bite | 2 rounds of breaks, labels/duplicate/calendar/seed/a11y specs | 14 + 11 failed; restored 43 passed |
+| flaky fix | a11y "calendar with" --repeat-each | before 1/8 failed; after 16/16 passed |
+| screens | /tmp/verify-ldc/{calendar-1280,calendar-390,board-1280,task-390}.png | 1 month heading + grid obvious; 2 spacing on scale, grid aligned; 3 16px body, chip contrast via axe; 4 no overflow at 390 (agenda list); 5 empty month / undated count intended; 6 tokens from design.md, flat cells; 7 focus (a11y spec); 8 actions named (Previous/Next month, Duplicate task, Delete label) |
+- Not verified: CI on the PR (runs at ship). Label edit inputs on the board have accessible names but no visible label (chip names the row): backlog.
 
 ## 2026-11-27 debug flaky a11y calendar test
 - Read: debug/SKILL.md d67a39b
