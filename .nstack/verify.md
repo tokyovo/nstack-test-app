@@ -4,11 +4,11 @@ Run from the repo root. Needs Node 24, `npm ci`, and Chromium for Playwright 1.6
 
 | Check | Speed | Command | Last result |
 |---|---|---|---|
-| lint | fast | `npm run lint` (eslint, then `scripts/check-css-tokens.mjs`: no colour literals in app/globals.css outside `:root`) | pass, 0 warnings (2026-11-27, 724980f) |
-| typecheck | fast | `npm run typecheck` | pass (2026-11-27, 724980f) |
-| build | full | `npm run build` | pass, 0 warnings (2026-11-27, 724980f) |
-| e2e | full | `npm run check:e2e-temp` | pass, 138 tests, 0 skipped, 0 temp files left (2026-11-27, 724980f) |
-| drive | full | `npm run drive -- check` | pass, 5 steps, 16 screenshots (2026-11-27, 724980f) |
+| lint | fast | `npm run lint` (eslint, then `scripts/check-css-tokens.mjs`: no colour literals in app/globals.css outside `:root`) | pass, 0 warnings (2026-11-27, a907aa4) |
+| typecheck | fast | `npm run typecheck` | pass (2026-11-27, a907aa4) |
+| build | full | `npm run build` | pass, 0 warnings (2026-11-27, a907aa4) |
+| e2e | full | `npm run check:e2e-temp` | pass, 140 tests, 0 skipped, 0 temp files left (2026-11-27, a907aa4) |
+| drive | full | `npm run drive -- check` | pass, 5 steps, 16 screenshots (2026-11-27, a907aa4) |
 | ci | full | `.github/workflows/ci.yml` on push and PR: npm ci, playwright install, lint, typecheck, build, test:e2e, drive check | green on main 26a9415 (run 45778821562, 119 passed; before the drive step existed) |
 
 - `check:e2e-temp [-- <playwright args>]` runs `playwright test` (needs `npm run build` first; it starts `next start -p ${E2E_PORT:-3100}` with `DATABASE_PATH` set to a fresh temp SQLite file, also readable by tests as `E2E_DATABASE_PATH`), then exits 1 if any `taskboard-e2e-<pid>-*` file is left in the OS temp dir; else the suite's exit code. `npm run test:e2e` is the suite alone.
@@ -50,6 +50,7 @@ How an agent runs and uses the app on its own, without touching anyone's data.
 | Failed moves show an alert | /projects/<id> | `e2e/move.spec.ts` "AC29: dragging a card deleted in another tab shows an alert and leaves it out of the target column" |
 | Overdue marker | /projects/<id>, card | `e2e/overdue.spec.ts` "AC16: a past-due task not in Done is marked overdue; future and done ones are not" |
 | Comments | /projects/<id>/tasks/<taskId>, Comment form | `e2e/comments.spec.ts` "AC11: members add comments that show the author's email and persist" |
+| Comment times show date and zone | /projects/<id>/tasks/<taskId>, Comments | `e2e/comments.spec.ts` "AC7: a comment shows its author, then a UTC <time> with an ISO dateTime, then its body" |
 | Search tasks | /projects/<id>, Search box | `e2e/search.spec.ts` "AC12: search filters the board by title or description, case-insensitively; clearing shows all" |
 | Filter by assignee (incl. My tasks, Unassigned) | /projects/<id>, Assignee select | `e2e/assignee-filter.spec.ts` "AC21: the assignee filter shows My tasks, a member's tasks or Unassigned, and combines with search" |
 | Filters kept in the URL | /projects/<id>?q=&for=&label= | `e2e/assignee-filter.spec.ts` "AC30: the assignee filter lives in the URL with the search, without adding history; a reload keeps both" |

@@ -190,3 +190,14 @@ Entries before 2026-11-27 are in git history: `git log -p .nstack/log.md`.
 - [x] 6. Record. verify.md Drive (8 screens, 16 PNGs), result rows, Features rows for AC5/AC6; backlog line added.
 - [x] Done when: T38 committed on nstack/design (724980f), items 1-6 ticked.
 - Decision (builder): count is a bare-number span (no aria-label; axe flags aria-label on a span). Done cards use background colour + muted title, not opacity. Add task submit is primary; Create label/Invite secondary. a11y setup moves its card by keyboard (drag of an off-screen card timed out; move.spec drag tests pass).
+
+## 2026-11-27 build T39
+- Read: build/SKILL.md 13386ea
+- [x] 1. Branch. nstack/design.
+- [x] 2. Starting state. lint 0, typecheck 0 at 724980f (T38 proof).
+- [x] 3. Dispatch. Fresh nstack:builder with the pointer brief (+ design.md).
+- [x] 4. Read the reply. Done: 3214a22 (AC7, red on raw "2026-11-27 04:37:25" then green), a907aa4 (task page restyle; critique 8/8 at both widths, /tmp/t39-after). Builder did not hand-shoot form error states or tab through by hand (global [role=alert] and :focus-visible cover them); left for verify's critique.
+- [x] 5. Prove it yourself. At a907aa4: lint 0, typecheck 0, build 0, `check:e2e-temp` 0 (140 passed), `drive check` 0 (16 PNGs), `check-features` 0. Looked at /tmp/t39-after/task-1280.png: details panel, ruled sections, primary saves, danger Delete task apart, comment "27 Nov 2026, 04:40 UTC"; label checkboxes sit slightly above their text.
+- [x] 6. Record. verify.md results + AC7 Features row; backlog: newlines collapse (4); plan T40 extended with the duplicate chip CSS (builder finding) and checkbox alignment.
+- [x] Done when: T39 committed on nstack/design (a907aa4), items 1-6 ticked.
+- Decision (builder): comment times parsed at the DB boundary (lib/comments.ts). Only Save changes/Save labels primary. ConfirmButton takes an optional className; new `.quiet` button modifier.
