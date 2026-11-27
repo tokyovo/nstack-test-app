@@ -832,6 +832,10 @@ label > :is(input, select, textarea) {
   padding: var(--space-2);
   border: 1px solid var(--border);
   border-radius: var(--radius);
+}
+
+/* Only days with tasks are white surfaces, so the busy days stand out of a quiet month. */
+.calendar-day.has-tasks {
   background: var(--surface);
 }
 

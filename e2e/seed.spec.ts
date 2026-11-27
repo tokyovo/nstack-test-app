@@ -1,11 +1,13 @@
 import { expect, test } from "@playwright/test";
 import { seed, DEMO_EMAIL, PROJECT_NAME } from "../scripts/seed-app.mts";
+import { localToday } from "../lib/due-dates.ts";
 import { cards, logIn, PASSWORD } from "./helpers";
 
 test("AC22, AC41: seed fills the app with a demo user, a busy board and an empty project; re-running adds nothing", async ({
   browser,
   baseURL,
 }) => {
+  const monthBeforeSeed = localToday().slice(0, 7);
   const first = await seed(browser, baseURL!);
   expect(first.email).toBe("demo@example.com");
   expect(first.password).toBe(PASSWORD);
@@ -39,4 +41,17 @@ test("AC22, AC41: seed fills the app with a demo user, a busy board and an empty
   await expect(page.getByRole("region", { name: "Checklist" }).getByRole("checkbox")).toHaveCount(3);
   await expect(page.getByRole("checkbox", { name: "Write the copy", exact: true })).toBeChecked();
   await expect(page.getByRole("checkbox", { name: "Bug", exact: true })).toBeChecked();
+
+  // AC8: the seeded month has tasks on its calendar on days 1 and 28 (the Done task is due on day 1); the overdue
+  // task, due 7 days ago, may sit in this month too.
+  const due = (await page.locator('dt:text-is("Due date") + dd').textContent()) ?? "";
+  expect(due).toMatch(/^\d{4}-\d{2}-01$/);
+  // The seed ran this month, or last month if it crossed midnight at a month end.
+  expect([monthBeforeSeed, localToday().slice(0, 7)]).toContain(due.slice(0, 7));
+  await page.goto(`${first.boardUrl}/calendar?month=${due.slice(0, 7)}`);
+  const dayOf = (title: string) =>
+    page.locator("li.calendar-day").filter({ has: page.getByRole("link", { name: title, exact: true }) });
+  await expect(dayOf("Pick the new domain name").getByRole("heading")).toHaveText("1", { useInnerText: true });
+  await expect(dayOf("Redesign the pricing page").getByRole("heading")).toHaveText("28", { useInnerText: true });
+  await expect(page.getByText("1 task has no due date")).toBeVisible();
 });
