@@ -2,8 +2,8 @@
 Rescored 2026-11-26 after slice 8 (UX pass on /tmp/s8-shots/). Earlier: rescored 2026-11-25 after slice 5 (UX pass on T18 `npm run screens` output, /tmp/t18-shots/). Slice 4 and 5 shipped; items below are open.
 Scored 2026-11-25 (value + risk + cost, cost 5 = cheapest). Sources: UX pass (headless Chromium, screenshots /tmp/ux-shots/), research.md (29 sources), earlier reviews.
 
-- 8 (v2 r2 c4) Checklist-item Delete removes the row without asking (design skill and verify item 6: a destructive action needs confirmation); the task page's other deletes already ask. Cheap: the row already has Delete; ask with window.confirm like ConfirmButton, keep the double-click guard. Evidence: verify slice design; improve 2026-11-27 (rescored: cost is low with the existing confirm pattern; risk is a one-tap data loss on the screen slice design-rules just changed).
 - 6 (v1 r1 c4) The date input's picker icon is text-coloured while the select chevron is `--muted`; tint it to match. Evidence: T50 builder.
+- 6 (v1 r2 c3) No check enforces "every destructive action asks first": the checklist Delete slipped past three critiques. An e2e that clicks each visible `.danger` button on the drive screens and expects a dialog (dismissed) would. Evidence: improve 2026-11-27.
 - 5 (v2 r1 c2) Task templates (duplicate shipped in PR #22; a saved template list is the rest of that research candidate). Evidence: research.md (4 sources for duplicate/templates).
 - 5 (v2 r1 c2) Multiple assignees. Evidence: 3 sources, research.md
 - 5 (v1 r1 c3) Label duplicate check and name order are ASCII-only (`COLLATE NOCASE`): "Été" and "été" can both exist. Same limit as user emails. Evidence: slice 8 security reviewer (better-sqlite3 repro).
