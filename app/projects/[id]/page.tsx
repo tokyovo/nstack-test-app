@@ -1,13 +1,22 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { getProject, listMembers } from "@/lib/projects";
 import { localToday } from "@/lib/due-dates";
 import { listLabels } from "@/lib/labels";
 import { listTasks } from "@/lib/tasks";
-import { createLabelAction, createTaskAction, inviteMemberAction, moveTaskAction } from "../actions";
+import {
+  createLabelAction,
+  createTaskAction,
+  deleteLabelAction,
+  inviteMemberAction,
+  moveTaskAction,
+  updateLabelAction,
+} from "../actions";
 import { Board } from "./board";
 import { InviteForm } from "./invite-form";
 import { LabelForm } from "./label-form";
+import { LabelRow } from "./label-row";
 import { TaskForm } from "./task-form";
 
 export const dynamic = "force-dynamic";
@@ -31,6 +40,9 @@ export default async function ProjectPage({ params, searchParams }: PageProps<"/
       <div className="board-title">
         <h2>{project.name}</h2>
         <p className="export-links">
+          <Link className="button" href={`/projects/${project.id}/calendar`}>
+            Calendar
+          </Link>
           {/* A plain link, not next/link: a download from a route handler, no prefetch or client navigation. */}
           <a className="button" href={`/projects/${project.id}/export?format=csv`} download>
             Export CSV
@@ -66,7 +78,12 @@ export default async function ProjectPage({ params, searchParams }: PageProps<"/
           {labels.length === 0 && <p className="section-empty">No labels yet</p>}
           <ul aria-label="Labels" className="plain-list">
             {labels.map((label) => (
-              <li key={label.id}>{label.name}</li>
+              <LabelRow
+                key={label.id}
+                label={label}
+                update={updateLabelAction.bind(null, project.id, label.id)}
+                remove={deleteLabelAction.bind(null, project.id, label.id)}
+              />
             ))}
           </ul>
           <LabelForm action={createLabelAction.bind(null, project.id)} />

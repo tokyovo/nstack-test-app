@@ -270,3 +270,139 @@ Entries before 2026-11-27 are in git history: `git log -p .nstack/log.md`.
 - Audit: `audit-log .nstack/log.md 2026-11-27` exit 0 after renaming the orient heading (its third word `go` matched a skill name). Compared with what was done: form error states were screenshotted by the builders (T37, T38, T40), not by the controller in verify; verify item 2 used the a03be3e run (code identical at f4ce432).
 - Servers: none of ours listening (cloudflared and claude are not ours); /tmp/taskboard-drive empty; no e2e temp DBs; reviewer worktree removed.
 - Slowed the run: a full e2e suite (~5 min) per ticket plus one for verify on 2 CPUs; CI waits run in sequence. Not cheap to cut without losing per-ticket proof; left as is.
+
+## 2026-11-27 orient (controller, /nstack:go continue + goal additions)
+- In flight: none. `git status` clean, no worktrees, no unmerged nstack/* branches, no open nstack PRs, main == origin/main 762fb7f.
+- Parked retry: needs-human.md has no open items; plan.md has no Retry when.
+- Verification on main 762fb7f: lint 0, typecheck 0, `check-features` 0, `drive check` 0 (16 PNGs).
+- Formats: all sections present.
+- Goal changed: owner added label rename/delete/colour, duplicate a task, and a calendar view by due date; written into goal.md on nstack/labels-dup-calendar. Next: plan.
+
+## 2026-11-27 plan slice labels-dup-calendar
+- Read: plan/SKILL.md 9d86f42
+- [x] 1. Learn the ground truth. Read lib/db.ts (CREATE IF NOT EXISTS, no migrations), lib/labels.ts, lib/tasks.ts, actions.ts, board page, task page, design.md, verify.md Features; tests for labels in e2e/labels.spec.ts.
+- [x] 2. Interrogate the goal yourself
+  - [x] 2.1. Questions: colour storage, migration of existing files, rename collisions, delete confirm, what a duplicate copies, calendar range/week start/no-date tasks/narrow layout.
+  - [x] 2.2. From code: duplicate check COLLATE NOCASE, ConfirmButton for deletes, localToday for dates, tokens only in :root.
+  - [x] 2.3. Four Decision lines in the slice (colour keys, duplicate copy rules, Monday weeks, rename/delete on board).
+- [x] 3. Write the spec. 9 ACs, out of scope, two designs each for colour/calendar/migration.
+- [x] 4. Cut tickets. T41 colour+migration (riskiest, first), T42 rename/delete (Needs T41), T43 duplicate, T44 calendar (independent).
+- [x] 5. Check the plan
+  - [x] 5.1. AC1-2 T41; AC3-4 T42; AC5 T43; AC6-7 T44; AC8 T41+T44; AC9 all.
+  - [x] 5.2. Fresh general-purpose reader: 15 questions, all answered in the slice's Plan check answers.
+  - [x] 5.3. Slice in plan.md, branch nstack/labels-dup-calendar.
+- [x] Done when: every criterion has a proof, the fresh reader's questions are answered in the plan, and the slice is in `plan.md`.
+
+## 2026-11-27 build T41
+- Read: build/SKILL.md 45c2dd4
+- [x] 1. Branch. nstack/labels-dup-calendar from main 762fb7f; builder in its own worktree.
+- [x] 2. Starting state. lint 0, typecheck 0 at 47388eb (tsconfig now excludes .claude worktrees).
+- [x] 3. Dispatch. Fresh nstack:builder, worktree, pointer brief, Parallel: 3.
+- [x] 4. Read the reply. Done at 8bf1e3c: lib/schema.ts (applySchema + idempotent colour migration, CHECK on keys), lib/label-colors.ts, LabelChip, Colour select, seed Bug=Red Design=Purple; AC1/AC2 red first; mutation (weak red text) failed axe. Spec changes: AC37 class assertion, forms-layout centring, seed chip classes.
+- [x] 5. Prove it yourself. Merged (0770d37; lib/tasks.ts import conflict, kept both): lint 0, typecheck 0, build 0, `check:e2e-temp -- labels a11y seed forms-layout duplicate calendar` 0 (39 passed).
+- [x] 6. Record. design.md Tokens gets the six chip pairs; Features rows for label colour and old-DB migration.
+- [x] Done when: the ticket is committed on the slice's branch with items 1-6 ticked in its log entry, or is parked in `plan.md`.
+
+## 2026-11-27 build T43
+- Read: build/SKILL.md 45c2dd4
+- [x] 1. Branch. nstack/labels-dup-calendar from main 762fb7f; builder in its own worktree.
+- [x] 2. Starting state. lint 0, typecheck 0 at 47388eb (tsconfig now excludes .claude worktrees).
+- [x] 3. Dispatch. Fresh nstack:builder, worktree, pointer brief, Parallel: 3.
+- [x] 4. Read the reply. Done at eab7cb6: duplicateTask (one transaction: task, labels, checklist unticked), duplicateTaskAction, button in .task-actions; 4 tests red first, mutation (keep ticks) seen red.
+- [x] 5. Prove it yourself. Fast-forwarded slice branch to eab7cb6: lint 0, typecheck 0, build 0, `check:e2e-temp -- e2e/duplicate.spec.ts` 0 (4 passed). Full suite runs at verify (other builders still running).
+- [x] 6. Record. Features row "Duplicate a task" added; backlog: drive screens --port help.
+- [x] Done when: the ticket is committed on the slice's branch with items 1-6 ticked in its log entry, or is parked in `plan.md`.
+
+## 2026-11-27 build T44
+- Read: build/SKILL.md 45c2dd4
+- [x] 1. Branch. nstack/labels-dup-calendar from main 762fb7f; builder in its own worktree.
+- [x] 2. Starting state. lint 0, typecheck 0 at 47388eb (tsconfig now excludes .claude worktrees).
+- [x] 3. Dispatch. Fresh nstack:builder, worktree, pointer brief, Parallel: 3.
+- [x] 4. Read the reply. Done at 57020e6: lib/calendar.ts (pure, UTC date math), calendar page, board Calendar link, seed due dates on days 1 and 28, drive calendar screen; 5/6 calendar tests red first; drive check 18 PNGs in its worktree.
+- [x] 5. Prove it yourself. Merged into slice branch (c7d1d07, on top of T43): lint 0, typecheck 0, build 0, `check:e2e-temp -- calendar duplicate a11y seed` 0 (19 passed).
+- [x] 6. Record. Features row "Calendar view"; Drive screens list gains calendar (18 PNGs). Backlog: seed.spec near 30s under load (already a backlog line).
+- [x] Done when: the ticket is committed on the slice's branch with items 1-6 ticked in its log entry, or is parked in `plan.md`.
+
+## 2026-11-27 build T42
+- Read: build/SKILL.md 45c2dd4
+- [x] 1. Branch. nstack/labels-dup-calendar at c2af9e3 (T41, T43, T44 merged); builder in its own worktree.
+- [x] 2. Starting state. lint 0, typecheck 0 at 0770d37 (same code).
+- [x] 3. Dispatch. Fresh nstack:builder, worktree, pointer brief (alone).
+- [x] 4. Read the reply. Done at 518b0a2: renameLabel/deleteLabel, label-row.tsx (chip, Delete label with confirm, edit form), shared readLabel validation; AC3 5 + AC4 3 tests red first; its full suite 165 passed, drive check 18 PNGs.
+- [x] 5. Prove it yourself. Fast-forwarded slice branch to 518b0a2: lint 0, typecheck 0, build 0, `check:e2e-temp -- e2e/labels.spec.ts` 0 (23 passed).
+- [x] 6. Record. Features rows rename + delete label. Builder's backlog line (New label form may drop the picked colour after an error) is a T41 defect against the plan answer: became T45 with the seed timeout.
+- [x] Done when: the ticket is committed on the slice's branch with items 1-6 ticked in its log entry, or is parked in `plan.md`.
+- Earlier, during T42: full suite at 263085e (T41+T43+T44) 156 passed, 1 failed: seed.spec AC22 timed out at 30s in ensureColumn's reload while the T42 builder loaded the machine; third time this test hit the limit (backlog line, 2026-11-25 twice). Rule 8: T45 gives it a 60s timeout. drive check 0 (18 PNGs).
+- Decision: seed.spec gets test.setTimeout(60_000): it seeds twice through the UI and now does more (colours, due dates); assertions unchanged, so no test is weakened.
+
+## 2026-11-27 build T45
+- Read: build/SKILL.md 45c2dd4
+- [x] 1. Branch. nstack/labels-dup-calendar at 518b0a2 + state; builder in its own worktree.
+- [x] 2. Starting state. lint 0, typecheck 0 at 518b0a2.
+- [x] 3. Dispatch. Fresh nstack:builder, worktree, pointer brief (alone).
+- [x] 4. Read the reply. Done: e96250f (New label form select keyed by value, like label-row.tsx; new AC1 test red first: got gray, expected blue), 7ac76ce (seed.spec 60s timeout). The backlog line it could not find was already removed by the controller.
+- [x] 5. Prove it yourself. Fast-forwarded to 7ac76ce: lint 0, typecheck 0, build 0, `check:e2e-temp -- labels seed` 0 (25 passed).
+- [x] 6. Record. Backlog: a forged colour (e.g. pink) leaves the select on Gray after the error (nothing stored).
+- [x] Done when: the ticket is committed on the slice's branch with items 1-6 ticked in its log entry, or is parked in `plan.md`.
+
+## 2026-11-27 verify slice labels-dup-calendar
+- Read: verify/SKILL.md db15016
+- [x] 1. Clean tree. `git status --porcelain` empty; code at 8e7cec5 (after the debug fix 41b2a93; later commits only .nstack/).
+- [x] 2. Project checks. At 41b2a93: lint 0 (0 warnings, incl. check-css-tokens), typecheck 0, clean build 0 (0 warnings), `check:e2e-temp` 0 (166 passed, 0 skipped, 0 temp files, no data/), `drive check` 0 (18 PNGs, at 727d2b6, same code apart from one e2e line). First full run at 727d2b6 failed 1 (a11y calendar test, flaky): see debug entry below; fixed, then 166/166.
+- [x] 3. Every acceptance criterion has a passing check. AC1 labels.spec AC1 x3 + a11y (every colour, 1280/390); AC2 labels.spec AC2; AC3 labels.spec AC3 x5; AC4 labels.spec AC4 x3; AC5 duplicate.spec x4; AC6 calendar.spec x5; AC7 calendar.spec AC7 + a11y calendar test; AC8 seed.spec + drive check 18 PNGs; AC9 full suite. Features rows: label colours, migration, rename, delete, duplicate, calendar; `check-features` 0.
+- [x] 4. Every new check bites. Round 1 (10 breaks: chip class fixed gray, migration skipped, UPDATE/DELETE AND 0, dup labels not copied, calendar day+1, grid 6 cols, undated text, empty-month text hidden, New label select unkeyed): 14 failed. Round 2 (colour check off, rename/delete without membership or project scope, dup reads any task + no title cut, month pattern \d{1,2}, calendar page without membership): 11 failed. Every new test red in one round. Restored: 43 passed, `git status` clean. a11y fix: red 1/8 before, 16/16 after.
+- [x] 5. The real thing runs. `drive start` + `drive screens /tmp/verify-ldc` 0 (seed through the UI, 18 screens, no console errors); saved Playwright tests drive every AC in CI.
+- [x] 6. Every changed screen looks right. Looked at calendar-1280/390, board-1280, task-390 in /tmp/verify-ldc (others by builders: T42 label rows normal/error/long at 1280 and 390, T43 task-1280/390, T44 calendar). Critique below. Destructive Delete label confirms (AC4).
+- [x] 7. Nothing got weaker. `git diff main...HEAD -- e2e` removes 20 lines, each replaced by a chip-scoped equivalent (Q1 spec change: rows now hold edit forms); seed.spec gets a 60s timeout (logged decision, assertions unchanged). No skip/only/fixme/any/ts-ignore/eslint-disable added.
+- [x] 8. No new warnings or errors. Build 0 warnings; tests 143 -> 166; drive screens 16 -> 18; verify.md Last result updated.
+- [x] Done when: every gate item is ticked in the log entry with its evidence, and Not verified is empty or every entry in it is parked.
+
+
+| Claim | Command | Result |
+|---|---|---|
+| all checks | lint, typecheck, build, check:e2e-temp at 41b2a93; drive check | 0/0/0/0 (166 passed)/0 (18 PNGs) |
+| new tests bite | 2 rounds of breaks, labels/duplicate/calendar/seed/a11y specs | 14 + 11 failed; restored 43 passed |
+| flaky fix | a11y "calendar with" --repeat-each | before 1/8 failed; after 16/16 passed |
+| screens | /tmp/verify-ldc/{calendar-1280,calendar-390,board-1280,task-390}.png | 1 month heading + grid obvious; 2 spacing on scale, grid aligned; 3 16px body, chip contrast via axe; 4 no overflow at 390 (agenda list); 5 empty month / undated count intended; 6 tokens from design.md, flat cells; 7 focus (a11y spec); 8 actions named (Previous/Next month, Duplicate task, Delete label) |
+- Not verified: CI on the PR (runs at ship). Label edit inputs on the board have accessible names but no visible label (chip names the row): backlog.
+
+## 2026-11-27 debug flaky a11y calendar test
+- Read: debug/SKILL.md d67a39b
+- [x] 1. Reproduce. `check:e2e-temp -- e2e/a11y.spec.ts -g "calendar with" --repeat-each=8 --workers=2`: 1 failed, 7 passed (full suite at 727d2b6 had failed it once too).
+- [x] 2. Shrink it. One test; failure at the `.task-details` toContainText("2020-01-01") after Save changes.
+- [x] 3. Read the evidence. Trace: the last `fill internal:label="Due date"` snapshot frameUrl is /projects/5 (the board), not the task page.
+- [x] 4. Hypothesize, then test one thing. Cause: link click navigates client-side; `getByLabel("Due date")` matched the board's New task form field before the task page loaded; Save changes then saved an empty date. Prediction (fill on board URL) confirmed by the trace.
+- [x] 5. Fix the cause, not the symptom. Wait for the task page heading before the fill (the pattern of checklist.spec openTask), 41b2a93, commit "a11y calendar test waits for the task page".
+- [x] 6. Prove the fix. With fix: --repeat-each=16 --workers=3 -> 16 passed; without: 1/8 failed above. The test itself is the kept regression check.
+- [x] 7. Look for siblings. Script over e2e/*.ts and seed-app.mts for a link click followed by getByLabel(Title|Due date|Description|Assignee): only this line.
+- [x] Done when: passes, failed before, kept, no [DEBUG- lines (grep 0).
+- Cause: click-then-fill race on a label shared by the board and the task page. Fix: wait for the task heading.
+
+## 2026-11-27 review slice labels-dup-calendar
+- Read: review/SKILL.md f713898
+- [x] 1. Dispatch. One nstack:reviewer, worktree, pointer brief at 988bfe9. Verdict pass: 0 important, 1 nit (Copy of title cut can split a surrogate pair). Reran lint/typecheck/build, 34 targeted tests, a mutation (dup keeps ticks -> red), drive check 18, screens.
+- [x] 2. Second reviewer (data migration): Focus security and failure modes, own worktree, in parallel. Verdict pass: 0 important, 2 nits (colour CHECK baked into existing files makes a future colour a 500; same surrogate cut). Membership/project scoping, allow-listed class names, strict month regex confirmed; forged tests pass.
+- [x] 3. Act on every finding. All 3 nits (2 distinct) cheap: fixed in T46 (copy title by code points; colour CHECK dropped).
+- [x] 4. Review the fixes. Used the small-fix exception: T46 changes 20 lines of lib code for two nits, both new tests seen red with the fix reverted and green after, full verify passed at b5a09ef (168 passed, drive check 18).
+- [x] Done when: the latest round has no important findings, `verify` passed after the last fix, and nits are fixed or in `backlog.md`.
+
+## 2026-11-27 build T46
+- Read: build/SKILL.md 45c2dd4
+- [x] 1. Branch. nstack/labels-dup-calendar; builder in its own worktree.
+- [x] 2. Starting state. lint 0, typecheck 0 at 41b2a93 code (verify).
+- [x] 3. Dispatch. Fresh nstack:builder, worktree, pointer brief (alone).
+- [x] 4. Read the reply. Done at b5a09ef: copyTitle() by code points; LABEL_COLOR_COLUMN without CHECK; 2 new tests (emoji copy, future colour after applySchema) red first.
+- [x] 5. Prove it yourself. Fast-forwarded to b5a09ef. With lib/tasks.ts + lib/schema.ts at 4c9f14c: the 2 new tests failed; restored: full gate lint 0, typecheck 0, clean build 0 (0 warnings), `check:e2e-temp` 0 (168 passed), `drive check` 0 (18 PNGs), check-features 0, no data/.
+- [x] 6. Record. Backlog: none new (dev DB files from this unshipped branch keep the CHECK; main never had it).
+- [x] Done when: the ticket is committed on the slice's branch with items 1-6 ticked in its log entry, or is parked in `plan.md`.
+
+## 2026-11-27 ship slice labels-dup-calendar
+- Read: ship/SKILL.md 47e5182
+- [x] 1. Commit. T41-T46 code commits + debug fix + state commits on nstack/labels-dup-calendar.
+- [x] 2. Sync. origin/main 762fb7f is an ancestor of the branch: nothing came in, verify stands.
+- [x] 3. Push. nstack/labels-dup-calendar.
+- [ ] 4. Open the PR
+- [ ] 5. Wait for CI
+- [ ] 6. Merge
+- [ ] 7. Confirm and clean up.
+- [ ] Done when: the PR is merged, CI is green on the default branch, and the fast checks pass there, or the PR is parked with a reason.

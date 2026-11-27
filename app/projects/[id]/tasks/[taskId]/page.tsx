@@ -12,6 +12,7 @@ import {
   addCommentAction,
   deleteChecklistItemAction,
   deleteTaskAction,
+  duplicateTaskAction,
   saveTaskLabelsAction,
   toggleChecklistItemAction,
   updateTaskAction,
@@ -60,11 +61,16 @@ export default async function TaskPage({ params }: PageProps<"/projects/[id]/tas
           task={task}
           submitLabel="Save changes"
         />
-        <form className="task-delete" action={deleteTaskAction.bind(null, project.id, task.id)}>
-          <ConfirmButton className="danger" message={`Delete task "${task.title}"? This also deletes its comments.`}>
-            Delete task
-          </ConfirmButton>
-        </form>
+        <div className="task-actions">
+          <form action={duplicateTaskAction.bind(null, project.id, task.id)}>
+            <button type="submit">Duplicate task</button>
+          </form>
+          <form action={deleteTaskAction.bind(null, project.id, task.id)}>
+            <ConfirmButton className="danger" message={`Delete task "${task.title}"? This also deletes its comments.`}>
+              Delete task
+            </ConfirmButton>
+          </form>
+        </div>
       </section>
       <section className="task-section" aria-labelledby="task-labels-heading">
         <h3 id="task-labels-heading">Labels</h3>

@@ -95,6 +95,22 @@ test.describe("AC2, AC3 screens pass the axe scan and phone layout checks", () =
     await expect(page.getByRole("status").filter({ hasText: "No tasks match" })).toBeVisible();
   });
 
+  test("the calendar with an overdue, a Done and an undated task, and an empty month", async ({ browser }) => {
+    const { page } = await newUser(browser);
+    const url = await busyBoard(page);
+    await page.goto(url);
+    await page.getByRole("link", { name: "Finished task", exact: true }).click();
+    // The board's New task form also has a "Due date" field: wait for the task page before filling.
+    await expect(page.getByRole("heading", { name: "Finished task", exact: true })).toBeVisible();
+    await page.getByLabel("Due date").fill("2020-01-01");
+    await page.getByRole("button", { name: "Save changes" }).click();
+    await expect(page.locator(".task-details")).toContainText("2020-01-01");
+    await expectAccessible(page, `${url}/calendar?month=2020-01`);
+    await expect(page.locator("li.calendar-day.has-tasks").getByRole("link")).toHaveText(["Late task", "Finished task"]);
+    await expectAccessible(page, `${url}/calendar?month=2999-12`);
+    await expect(page.getByText("No tasks due this month")).toBeVisible();
+  });
+
   test("the task page with labels, checklist items and a comment", async ({ browser }) => {
     const { page } = await newUser(browser);
     const url = await busyBoard(page);
@@ -107,16 +123,31 @@ test.describe("AC2, AC3 screens pass the axe scan and phone layout checks", () =
   });
 });
 
+/** One label per colour, named after it, so axe checks every chip's contrast (AC1). */
+const LABEL_COLOURS = ["Gray", "Green", "Blue", "Purple", "Orange", "Red"];
+
+/** Ticks every colour's label on the open task page and saves. */
+async function labelWithEveryColour(page: Page) {
+  for (const name of LABEL_COLOURS) await page.getByRole("checkbox", { name, exact: true }).check();
+  await page.getByRole("button", { name: "Save labels" }).click();
+  await expect(page.getByRole("status")).toHaveText("Labels saved");
+}
+
 /**
- * A board showing every card state: an overdue task with a label and a checklist, a plain task, and a Done
- * task. Returns its path.
+ * A board showing every card state: an overdue task with a label of every colour and a checklist, a plain task,
+ * and a Done task with a label of every colour. Returns its path.
  */
 async function busyBoard(page: Page): Promise<string> {
   const url = await createProject(page, "Busy board");
   await page.goto(url);
-  await page.getByLabel("Label name").fill("Bug");
-  await page.getByRole("button", { name: "Create label" }).click();
-  await expect(page.getByRole("list", { name: "Labels" }).getByText("Bug")).toBeVisible();
+  const labelForm = page.locator("form").filter({ has: page.getByRole("button", { name: "Create label" }) });
+  for (const name of LABEL_COLOURS) {
+    await page.getByLabel("Label name").fill(name);
+    await labelForm.getByLabel("Colour").selectOption({ label: name });
+    await page.getByRole("button", { name: "Create label" }).click();
+    const chip = page.getByRole("list", { name: "Labels", exact: true }).locator(".label-chip", { hasText: new RegExp(`^${name}$`) });
+    await expect(chip).toBeVisible();
+  }
   for (const [title, due] of [
     ["Late task", "2020-01-01"],
     ["Plain task", ""],
@@ -134,10 +165,11 @@ async function busyBoard(page: Page): Promise<string> {
     await expect(cards(page, target)).toContainText(["Finished task"]);
   }
 
+  await page.getByRole("link", { name: "Finished task", exact: true }).click();
+  await labelWithEveryColour(page);
+  await page.goto(url);
   await page.getByRole("link", { name: "Late task", exact: true }).click();
-  await page.getByRole("checkbox", { name: "Bug" }).check();
-  await page.getByRole("button", { name: "Save labels" }).click();
-  await expect(page.getByRole("status")).toHaveText("Labels saved");
+  await labelWithEveryColour(page);
   for (const item of ["Draft", "Review"]) {
     await page.getByLabel("New item").fill(item);
     await page.getByRole("button", { name: "Add item" }).click();

@@ -7,10 +7,11 @@ import { requireUser } from "@/lib/auth";
 import { createProject, deleteProject, getProject, inviteMember, renameProject } from "@/lib/projects";
 import { addChecklistItem, deleteChecklistItem, setChecklistItemDone } from "@/lib/checklist";
 import { addComment } from "@/lib/comments";
-import { createLabel, setTaskLabels } from "@/lib/labels";
+import { isLabelColor, type LabelColor } from "@/lib/label-colors";
+import { createLabel, deleteLabel, setTaskLabels, updateLabel } from "@/lib/labels";
 import { MAX_CHECKLIST_ITEM_LENGTH, MAX_LABEL_LENGTH, MAX_TITLE_LENGTH } from "@/lib/limits";
 import { isStatus } from "@/lib/statuses";
-import { createTask, deleteTask, moveTask, updateTask, type NewTask } from "@/lib/tasks";
+import { createTask, deleteTask, duplicateTask, moveTask, updateTask, type NewTask } from "@/lib/tasks";
 
 function readName(formData: FormData): string {
   return String(formData.get("name") ?? "").trim();
@@ -136,6 +137,18 @@ export async function deleteTaskAction(projectId: number, taskId: number): Promi
   redirect(`/projects/${projectId}`);
 }
 
+/** Copies a task and opens the copy; a task gone from a project the user is in leads back to the board. */
+export async function duplicateTaskAction(projectId: number, taskId: number): Promise<void> {
+  const user = await requireUser();
+  const copyId = duplicateTask(user.id, projectId, taskId);
+  if (copyId === null) {
+    if (getProject(user.id, projectId)) redirect(`/projects/${projectId}`);
+    return;
+  }
+  revalidatePath(`/projects/${projectId}`);
+  redirect(`/projects/${projectId}/tasks/${copyId}`);
+}
+
 /** Moves a task to another column; called from the board with untrusted arguments. True when the move was stored. */
 export async function moveTaskAction(projectId: number, taskId: unknown, status: unknown): Promise<boolean> {
   const user = await requireUser();
@@ -159,12 +172,27 @@ export async function addCommentAction(
   return {};
 }
 
-export type LabelFormState = FormState & { values?: { name: string } };
+export type LabelFormState = FormState & { values?: { name: string; color: string } };
 
 const LABEL_ERRORS = {
   "not-found": "Project not found",
   duplicate: "That label already exists",
 } as const;
+
+/** Reads and validates the label form fields shared by create and edit; an error message if invalid. */
+function readLabel(formData: FormData): { name: string; color: LabelColor } | { error: string } {
+  const name = String(formData.get("name") ?? "").trim();
+  if (!name) return { error: "Label name is required" };
+  if (name.length > MAX_LABEL_LENGTH) return { error: `Label name must be at most ${MAX_LABEL_LENGTH} characters` };
+  const color = String(formData.get("color") ?? "");
+  if (!isLabelColor(color)) return { error: "Pick a colour from the list" };
+  return { name, color };
+}
+
+/** The label form fields as typed, sent back with an error so the form can be refilled. */
+function typedLabel(formData: FormData): LabelFormState["values"] {
+  return { name: String(formData.get("name") ?? ""), color: String(formData.get("color") ?? "") };
+}
 
 export async function createLabelAction(
   projectId: number,
@@ -172,16 +200,35 @@ export async function createLabelAction(
   formData: FormData,
 ): Promise<LabelFormState> {
   const user = await requireUser();
-  const typed = String(formData.get("name") ?? "");
-  const name = typed.trim();
-  if (!name) return { error: "Label name is required", values: { name: typed } };
-  if (name.length > MAX_LABEL_LENGTH) {
-    return { error: `Label name must be at most ${MAX_LABEL_LENGTH} characters`, values: { name: typed } };
-  }
-  const result = createLabel(user.id, projectId, name);
-  if (result !== "created") return { error: LABEL_ERRORS[result], values: { name: typed } };
+  const label = readLabel(formData);
+  if ("error" in label) return { error: label.error, values: typedLabel(formData) };
+  const result = createLabel(user.id, projectId, label.name, label.color);
+  if (result !== "created") return { error: LABEL_ERRORS[result], values: typedLabel(formData) };
   revalidatePath(`/projects/${projectId}`);
   return {};
+}
+
+/** Renames and recolours a label from its row in the board's Labels list. */
+export async function updateLabelAction(
+  projectId: number,
+  labelId: number,
+  _prev: LabelFormState,
+  formData: FormData,
+): Promise<LabelFormState> {
+  const user = await requireUser();
+  const label = readLabel(formData);
+  if ("error" in label) return { error: label.error, values: typedLabel(formData) };
+  const result = updateLabel(user.id, projectId, labelId, label.name, label.color);
+  if (result === "not-found") return { error: "Label not found", values: typedLabel(formData) };
+  if (result === "duplicate") return { error: LABEL_ERRORS.duplicate, values: typedLabel(formData) };
+  revalidatePath(`/projects/${projectId}`);
+  return {};
+}
+
+/** Deletes a label from its row in the board's Labels list; its tasks stay. Anything else changes nothing. */
+export async function deleteLabelAction(projectId: number, labelId: number): Promise<void> {
+  const user = await requireUser();
+  if (deleteLabel(user.id, projectId, labelId)) revalidatePath(`/projects/${projectId}`);
 }
 
 export type SaveLabelsState = FormState & { saved?: boolean };

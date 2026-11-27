@@ -4,11 +4,11 @@ Run from the repo root. Needs Node 24, `npm ci`, and Chromium for Playwright 1.6
 
 | Check | Speed | Command | Last result |
 |---|---|---|---|
-| lint | fast | `npm run lint` (eslint, then `scripts/check-css-tokens.mjs`: no colour literals in app/globals.css outside `:root`) | pass, 0 warnings (2026-11-27, a03be3e) |
-| typecheck | fast | `npm run typecheck` | pass (2026-11-27, a03be3e) |
-| build | full | `npm run build` | pass, 0 warnings (2026-11-27, a03be3e) |
-| e2e | full | `npm run check:e2e-temp` | pass, 143 tests, 0 skipped, 0 temp files left (2026-11-27, a03be3e) |
-| drive | full | `npm run drive -- check` | pass, 5 steps, 16 screenshots (2026-11-27, a03be3e) |
+| lint | fast | `npm run lint` (eslint, then `scripts/check-css-tokens.mjs`: no colour literals in app/globals.css outside `:root`) | pass, 0 warnings (2026-11-27, b5a09ef) |
+| typecheck | fast | `npm run typecheck` | pass (2026-11-27, b5a09ef) |
+| build | full | `npm run build` | pass, 0 warnings (2026-11-27, b5a09ef) |
+| e2e | full | `npm run check:e2e-temp` | pass, 168 tests, 0 skipped, 0 temp files left (2026-11-27, b5a09ef) |
+| drive | full | `npm run drive -- check` | pass, 5 steps, 18 screenshots (2026-11-27, b5a09ef) |
 | ci | full | `.github/workflows/ci.yml` on push and PR: npm ci, playwright install, lint, typecheck, build, test:e2e, drive check | green on main e9490a1 (run 45945258200, 143 passed, drive check 16 PNGs) |
 
 - `check:e2e-temp [-- <playwright args>]` runs `playwright test` (needs `npm run build` first; it starts `next start -p ${E2E_PORT:-3100}` with `DATABASE_PATH` set to a fresh temp SQLite file, also readable by tests as `E2E_DATABASE_PATH`), then exits 1 if any `taskboard-e2e-<pid>-*` file is left in the OS temp dir; else the suite's exit code. `npm run test:e2e` is the suite alone.
@@ -21,8 +21,8 @@ How an agent runs and uses the app on its own, without touching anyone's data.
 - **Start:** `npm run drive -- start --json` builds if `.next/BUILD_ID` is missing (`--build` forces; a stale build is not detected), starts `next start` on 127.0.0.1 on a free port (`--port N`) with a temp database, waits for /login, prints `{"url","db","pid","port"}`. Instance state: `<os tmp>/taskboard-drive/<port>.json`; server log: `<dir>/server.log`.
 - **Seed:** `npm run drive -- seed [--port N | --url U] [--json]`, through the UI: demo user, a member with a long email, "Website relaunch" (overdue task, 200-char title, assigned In progress task, Done task with a comment, labels, checklist) and empty "Team offsite". Idempotent. ~15s.
 - **Sign in:** demo@example.com / correct-horse-1 (after seed), or sign up at /signup with any email and an 8+ char password. In tests: `e2e/helpers.ts` `signUp()` / `newUser()`.
-- **Screens:** /login, /signup, /projects, /projects/<id> (board), /projects/<id>/tasks/<taskId> (task page), /projects/999999 (404 page, logged in), plus the board of the empty "Team offsite" (board-empty) and the busy board with `?q=zzzz` (board-nomatch).
-- **Evidence:** `npm run drive -- screens <dir>` seeds, then writes those 8 screens at 1280 and 390 px (16 full-page PNGs); exits 1 listing console or page errors (favicon.ico 404 and the 404 screen's own load ignored).
+- **Screens:** /login, /signup, /projects, /projects/<id> (board), /projects/<id>/tasks/<taskId> (task page), /projects/999999 (404 page, logged in), plus the board of the empty "Team offsite" (board-empty) and the busy board with `?q=zzzz` (board-nomatch), and /projects/<id>/calendar of "Website relaunch" (calendar).
+- **Evidence:** `npm run drive -- screens <dir>` seeds, then writes those 9 screens at 1280 and 390 px (18 full-page PNGs); exits 1 listing console or page errors (favicon.ico 404 and the 404 screen's own load ignored).
 - **Health:** `npm run drive -- check` starts, seeds, takes screens, checks the non-empty PNGs, stops and cleans up even after a failure; exit 0 means this section is true.
 - **Clean up:** `npm run drive -- stop [--port N | --all] [--dry-run]` kills the instance's process group by its recorded pid and deletes its temp dir and state file; stale instances are pruned (not under `--dry-run`). State files are validated on read: one naming a dir that is not `<os tmp>/taskboard-drive-*`, a bad pid or bad JSON is reported and only the state file is removed. The state dir is kept at mode 0700. Ctrl-C during `check` leaves its server; run `stop`.
 - **Isolate:** each instance has its own port and temp database; e2e uses `E2E_PORT` and its own temp DB.
@@ -45,6 +45,7 @@ How an agent runs and uses the app on its own, without touching anyone's data.
 | Create a task | /projects/<id>, New task form | `e2e/tasks.spec.ts` "AC8: a member creates a task with all fields and it appears in To do" |
 | New-task form confirms what it added | /projects/<id>, New task form | `e2e/tasks.spec.ts` "AC46: after adding a task the new-task form says what it added; the next submit replaces or clears it" |
 | Edit a task | /projects/<id>/tasks/<taskId>, edit form | `e2e/edit-task.spec.ts` "AC17: a member edits a task's fields; the changes persist and show on the board" |
+| Duplicate a task | /projects/<id>/tasks/<taskId>, Duplicate task | `e2e/duplicate.spec.ts` "AC5: duplicating copies the fields, labels and an unticked checklist into To do, without comments" |
 | Delete a task (asks first) | /projects/<id>/tasks/<taskId>, Delete | `e2e/edit-task.spec.ts` "AC17: deleting a task asks first; dismissing keeps it, accepting removes it and its URL 404s" |
 | Move a task by drag and drop | /projects/<id>, drag a card | `e2e/move.spec.ts` "AC9: dragging a card to In progress, then Done, moves it and persists" |
 | Move a task with arrow keys | /projects/<id>, focused card + ArrowLeft/ArrowRight | `e2e/move.spec.ts` "AC10: ArrowRight moves a focused card one column right, ArrowLeft one left; persists" |
@@ -52,10 +53,15 @@ How an agent runs and uses the app on its own, without touching anyone's data.
 | Overdue marker | /projects/<id>, card | `e2e/overdue.spec.ts` "AC16: a past-due task not in Done is marked overdue; future and done ones are not" |
 | Comments | /projects/<id>/tasks/<taskId>, Comment form | `e2e/comments.spec.ts` "AC11: members add comments that show the author's email and persist" |
 | Comment times show date and zone | /projects/<id>/tasks/<taskId>, Comments | `e2e/comments.spec.ts` "AC7: a comment shows its author, then a UTC <time> with an ISO dateTime, then its body" |
+| Calendar view by due date | /projects/<id>/calendar?month=YYYY-MM, board Calendar link | `e2e/calendar.spec.ts` "AC6: the board's Calendar link opens the current month; tasks sit under their due days as links" |
 | Search tasks | /projects/<id>, Search box | `e2e/search.spec.ts` "AC12: search filters the board by title or description, case-insensitively; clearing shows all" |
 | Filter by assignee (incl. My tasks, Unassigned) | /projects/<id>, Assignee select | `e2e/assignee-filter.spec.ts` "AC21: the assignee filter shows My tasks, a member's tasks or Unassigned, and combines with search" |
 | Filters kept in the URL | /projects/<id>?q=&for=&label= | `e2e/assignee-filter.spec.ts` "AC30: the assignee filter lives in the URL with the search, without adding history; a reload keeps both" |
 | Create labels | /projects/<id>, New label form | `e2e/labels.spec.ts` "AC36: creating labels lists them on the board in name order, any case" |
+| Label colours | /projects/<id>, New label form Colour select; chips on list, cards, task page | `e2e/labels.spec.ts` "AC1: a label's colour shows on its chip in the Labels list, on cards and on the task page; Gray is the default" |
+| Old databases gain label colours | lib/schema.ts `applySchema` on an existing file | `e2e/labels.spec.ts` "AC2: a database file from before label colours opens; its labels become Gray and keep names and task links" |
+| Rename and recolour a label | /projects/<id>, Labels list row edit form | `e2e/labels.spec.ts` "AC3: renaming and recolouring a label shows everywhere: list, cards, filter and task page" |
+| Delete a label (asks first) | /projects/<id>, Labels list Delete label | `e2e/labels.spec.ts` "AC4: Delete label asks first; accepting removes it from the list, the filter and every card; tasks stay" |
 | Assign labels to a task | /projects/<id>/tasks/<taskId>, Labels checkboxes | `e2e/labels.spec.ts` "AC37: a task's labels are ticked on its page, saved, and shown on its card" |
 | Filter by label | /projects/<id>, Label select | `e2e/labels.spec.ts` "AC38: the label filter shows only tasks with that label and combines with search and assignee" |
 | Checklist items | /projects/<id>/tasks/<taskId>, Checklist | `e2e/checklist.spec.ts` "AC39: items are added to the end, unchecked, and kept after reload" |

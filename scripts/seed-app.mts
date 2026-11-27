@@ -12,7 +12,15 @@ const EMPTY_PROJECT_NAME = "Team offsite";
 type Column = "To do" | "In progress" | "Done";
 const COLUMNS: Column[] = ["To do", "In progress", "Done"];
 
-type SeedTask = { title: string; description?: string; assignee?: string; dueInDays?: number; column: Column };
+/** Due `dueInDays` from today, or on day `dueOnDay` of the current local month (so the calendar has tasks). */
+type SeedTask = {
+  title: string;
+  description?: string;
+  assignee?: string;
+  dueInDays?: number;
+  dueOnDay?: number;
+  column: Column;
+};
 
 const LONG_TITLE = (
   "Audit every page of the old site for broken links, missing alt text, outdated pricing, stale team photos " +
@@ -23,7 +31,10 @@ const LONG_TITLE = (
 
 const COMMENTED_TITLE = "Pick the new domain name";
 const COMMENT = "Registered relaunch.example.com; the old domain redirects there from Monday.";
-const LABELS = ["Bug", "Design"];
+const LABELS = [
+  { name: "Bug", colour: "Red" },
+  { name: "Design", colour: "Purple" },
+];
 const CHECKLIST = [
   { text: "Write the copy", done: true },
   { text: "Pick screenshots", done: false },
@@ -33,8 +44,8 @@ const CHECKLIST = [
 const TASKS: SeedTask[] = [
   { title: "Write the launch announcement", description: "Blog post and newsletter.", dueInDays: -7, column: "To do" },
   { title: LONG_TITLE, column: "To do" },
-  { title: "Redesign the pricing page", assignee: MEMBER_EMAIL, dueInDays: 14, column: "In progress" },
-  { title: COMMENTED_TITLE, assignee: DEMO_EMAIL, column: "Done" },
+  { title: "Redesign the pricing page", assignee: MEMBER_EMAIL, dueOnDay: 28, column: "In progress" },
+  { title: COMMENTED_TITLE, assignee: DEMO_EMAIL, dueOnDay: 1, column: "Done" },
 ];
 
 export type Seeded = { email: string; password: string; boardUrl: string; emptyBoardUrl: string; taskUrl: string };
@@ -48,14 +59,14 @@ export async function seed(browser: Browser, baseURL: string): Promise<Seeded> {
   const emptyBoardPath = await ensureProject(page, EMPTY_PROJECT_NAME);
   await page.goto(boardPath);
   await ensureMember(page, MEMBER_EMAIL);
-  for (const name of LABELS) await ensureLabel(page, name);
+  for (const label of LABELS) await ensureLabel(page, label.name, label.colour);
   for (const task of TASKS) await ensureTask(page, task);
   for (const task of TASKS) await ensureColumn(page, task.title, task.column);
   const taskPath = await taskLink(page, COMMENTED_TITLE).getAttribute("href");
   if (!taskPath) throw new Error(`No link for task "${COMMENTED_TITLE}"`);
   await page.goto(taskPath);
   await ensureComment(page, COMMENT);
-  await ensureTaskLabels(page, LABELS);
+  await ensureTaskLabels(page, LABELS.map((label) => label.name));
   for (const item of CHECKLIST) await ensureChecklistItem(page, item.text, item.done);
   await page.context().close();
 
@@ -108,10 +119,13 @@ async function ensureMember(page: Page, email: string) {
   await member.waitFor();
 }
 
-async function ensureLabel(page: Page, name: string) {
+async function ensureLabel(page: Page, name: string, colour: string) {
   const label = page.getByRole("list", { name: "Labels", exact: true }).getByText(name, { exact: true });
   if ((await label.count()) > 0) return;
   await page.getByLabel("Label name").fill(name);
+  // The select's accessible name also holds the picked option ("Colour Gray"), so find it inside the form.
+  const form = page.locator("form").filter({ has: page.getByRole("button", { name: "Create label" }) });
+  await form.getByLabel("Colour").selectOption({ label: colour });
   await page.getByRole("button", { name: "Create label" }).click();
   await label.waitFor();
 }
@@ -157,9 +171,18 @@ function taskLink(page: Page, title: string) {
   return page.getByRole("link", { name: title, exact: true });
 }
 
-/** A due date `days` from today, as the date input's yyyy-mm-dd. */
-function dateInDays(days: number): string {
-  return new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+/** A date as the date input's yyyy-mm-dd, from local parts like the server's `localToday` (not UTC). */
+function localDate(date: Date): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+/** The task's due date, or null if it has none. */
+function dueDate(task: SeedTask, now = new Date()): string | null {
+  const [year, month, day] = [now.getFullYear(), now.getMonth(), now.getDate()];
+  if (task.dueOnDay !== undefined) return localDate(new Date(year, month, task.dueOnDay));
+  if (task.dueInDays !== undefined) return localDate(new Date(year, month, day + task.dueInDays));
+  return null;
 }
 
 async function ensureTask(page: Page, task: SeedTask) {
@@ -167,7 +190,8 @@ async function ensureTask(page: Page, task: SeedTask) {
   await page.getByLabel("Title").fill(task.title);
   await page.getByLabel("Description").fill(task.description ?? "");
   if (task.assignee) await page.getByLabel("Assignee").selectOption({ label: task.assignee });
-  if (task.dueInDays !== undefined) await page.getByLabel("Due date").fill(dateInDays(task.dueInDays));
+  const due = dueDate(task);
+  if (due) await page.getByLabel("Due date").fill(due);
   await page.getByRole("button", { name: "Add task" }).click();
   await taskLink(page, task.title).waitFor();
 }

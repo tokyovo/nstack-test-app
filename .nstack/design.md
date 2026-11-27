@@ -4,6 +4,7 @@ Kind: work tool
 ## Tokens
 - background #F3F4F1, surface #FFFFFF, text #1E2329, muted #57606A, accent #1D6B57 (primary buttons, links, focus, selection), danger #B91C1C (overdue, delete, errors); border #D5D9DD
 - derived: accent-hover #16503F, danger-hover #8F1515 (hover), accent-soft #E3EFEA (selection), danger-soft #FBEAEA (error tint), edge #8A939C (control edges, 3:1 on surface)
+- label chips (bg/text, each 6.2:1+): gray #E8EAED/#3A4149, green #DDF1E4/#1F5F3A, blue #DFEBFB/#1F4F8F, purple #ECE4F8/#5A3594, orange #FCE9D9/#8A4111, red #FBE3E3/#9B1C1C
 - type: system-ui stack for everything; scale 0.875 / 1 / 1.125 / 1.375 / 1.75 rem (ratio ~1.2); body 1rem; numbers tabular
 - space: 4 px base (4, 8, 12, 16, 24, 32, 48); radius 6 px; border 1px #D5D9DD; shadow only on a dragged card
 - controls: one height for buttons, inputs and selects (2.5rem, 2.75rem = 44 px at <= 640 px); focus is a 2 px accent outline 2 px off the edge

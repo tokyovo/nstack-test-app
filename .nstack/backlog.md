@@ -6,7 +6,6 @@ Scored 2026-11-25 (value + risk + cost, cost 5 = cheapest). Sources: UX pass (he
 - 6 (v3 r1 c2) Rename / delete labels, label colors (slice 8 left them out; the goal names create, assign, filter). Evidence: plan.md slice labels-checklist, Out of scope.
 - 5 (v2 r1 c2) Calendar view. Evidence: 5 sources, research.md
 - 5 (v2 r1 c2) Multiple assignees. Evidence: 3 sources, research.md
-- 5 (v2 r2 c1) (T22) e2e/seed.spec.ts AC22 takes 19-29s against the 30s default test timeout (1 worker, 2 CPUs); under load from a parallel run it timed out twice in T22 `check:e2e-temp` full runs. Give it `test.setTimeout(60_000)` (it seeds twice through the UI) or speed up seed.
 - 5 (v1 r1 c3) Label duplicate check and name order are ASCII-only (`COLLATE NOCASE`): "Été" and "été" can both exist. Same limit as user emails. Evidence: slice 8 security reviewer (better-sqlite3 repro).
 - 4 (v1 r1 c2) Link related tasks; recurring tasks; time tracking; timeline/Gantt (3-4 sources each, research.md).
 - 4 (v1 r1 c2) `withLabels` in lib/tasks.ts matches labels to tasks with a filter per row (O(tasks x labels)); a Map if boards get large. Evidence: T25 builder.
@@ -17,6 +16,8 @@ Scored 2026-11-25 (value + risk + cost, cost 5 = cheapest). Sources: UX pass (he
 - 4 (v1 r1 c2) At 390 px with a long email the header "Log out" wraps under the email (projects-empty-390). Predates slice design. Evidence: T40 builder.
 - 4 (v2 r1 c1) Checklist-item Delete removes the row without asking or undo (design skill wants confirmation on destructive actions); add an undo toast or confirm. Evidence: verify slice design.
 - 4 (v1 r2 c1) AC7 test (e2e/comments.spec.ts:153) cannot catch a dropped `Z` in lib/comments.ts:33 because the e2e server runs in UTC; run the e2e server with a non-UTC `TZ` (check the overdue tests, which use the server local date) or unit-check the parse. Evidence: review slice design.
+- 3 (v1 r1 c1) `drive screens --port N` fails with connection refused unless `drive start` ran first; its --help does not say so. Evidence: T43 builder.
+- 3 (v1 r1 c1) Board Labels rows: the edit name input and colour select have accessible names ("Name for Bug") but no visible label; the chip names the row. Evidence: verify labels-dup-calendar.
 - 3 (v1 r1 c1) favicon.ico 404 in console (cosmetic, ignored by drive screens).
 - 3 (v1 r1 c1) (T18 review nit) Project rename fields do not line up across rows (start after each link); project list keeps the default ul indent at 390px.
 - 3 (v1 r1 c1) Alert style is scoped to `main [role="alert"]`; an alert outside <main> would be unstyled, and no test checks font-weight. Evidence: T34 builder.
@@ -26,6 +27,7 @@ Scored 2026-11-25 (value + risk + cost, cost 5 = cheapest). Sources: UX pass (he
 - 3 (v1 r1 c1) `drive stop --all`: if one instance fails to stop, the loop ends there without reporting the ones already stopped or trying the rest. Evidence: drive-tool review round 3.
 - 3 (v1 r1 c1) `page.getByRole("alert")` also matches Next's route announcer; tests and scripts should scope alerts to `main [role=alert]`. Evidence: T37 builder.
 - 3 (v1 r1 c1) Headless Chromium here renders 500/600 font weights as regular (system font has no medium face), so headings look light in screenshots; consider weight 700 or a check on a machine with the font. Evidence: T37, T38 builders.
+- 2 (v1 r0 c1) A forged label colour (not in the list) shows the error but leaves the Colour select on Gray, not the typed value (no option matches; nothing stored). Evidence: T45 builder.
 - 2 (v1 r0 c1) scripts/check-css-tokens.mjs:8 would flag an ID selector made of hex letters (`#feed`) as a colour; none exist. Evidence: review slice design.
 
 ## Rejected

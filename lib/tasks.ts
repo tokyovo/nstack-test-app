@@ -1,5 +1,7 @@
 import "server-only";
 import { getDb } from "@/lib/db";
+import type { Label } from "@/lib/labels";
+import { MAX_TITLE_LENGTH } from "@/lib/limits";
 import { getProject } from "@/lib/projects";
 import type { Status } from "@/lib/statuses";
 
@@ -12,7 +14,7 @@ export type Task = {
   assigneeId: number | null;
   assigneeEmail: string | null;
   /** The task's labels in name order (any case). */
-  labels: { id: number; name: string }[];
+  labels: Label[];
   /** Checklist items ticked, and all items; both 0 for a task without a checklist. */
   checklistDone: number;
   checklistTotal: number;
@@ -29,15 +31,15 @@ const TASK_SELECT = `SELECT tasks.id, tasks.title, tasks.description, tasks.stat
 function withLabels(rows: TaskRow[]): Task[] {
   const labels = getDb()
     .prepare(
-      `SELECT task_labels.task_id AS taskId, labels.id, labels.name
+      `SELECT task_labels.task_id AS taskId, labels.id, labels.name, labels.color
        FROM task_labels JOIN labels ON labels.id = task_labels.label_id
        WHERE task_labels.task_id IN (SELECT value FROM json_each(?))
        ORDER BY labels.name COLLATE NOCASE, labels.id`,
     )
-    .all(JSON.stringify(rows.map((row) => row.id))) as { taskId: number; id: number; name: string }[];
+    .all(JSON.stringify(rows.map((row) => row.id))) as (Label & { taskId: number })[];
   return rows.map((row) => ({
     ...row,
-    labels: labels.filter((label) => label.taskId === row.id).map(({ id, name }) => ({ id, name })),
+    labels: labels.filter((label) => label.taskId === row.id).map(({ id, name, color }) => ({ id, name, color })),
   }));
 }
 
@@ -98,6 +100,44 @@ export function updateTask(userId: number, projectId: number, taskId: number, ta
     )
     .run(task.title, task.description, task.assigneeId, task.dueDate, taskId, projectId);
   return result.changes > 0 ? "updated" : "not-found";
+}
+
+/** "Copy of <title>", cut by whole code points so it fits MAX_TITLE_LENGTH UTF-16 units without splitting an emoji. */
+function copyTitle(title: string): string {
+  let copy = "";
+  for (const char of `Copy of ${title}`) {
+    if (copy.length + char.length > MAX_TITLE_LENGTH) break;
+    copy += char;
+  }
+  return copy;
+}
+
+/**
+ * Copies a task of the project into "To do" as "Copy of <title>" (cut to the title limit), with its description,
+ * due date, labels and checklist (all unticked), but no comments; the assignee is kept only if still a member.
+ * Returns the copy's id, or null unless the task is in the project and the user is a member.
+ */
+export function duplicateTask(userId: number, projectId: number, taskId: number): number | null {
+  const task = getTask(userId, projectId, taskId);
+  if (!task) return null;
+  const db = getDb();
+  const assigneeId = task.assigneeId !== null && isMember(projectId, task.assigneeId) ? task.assigneeId : null;
+  return db.transaction(() => {
+    const copyId = Number(
+      db
+        .prepare("INSERT INTO tasks (project_id, title, description, assignee_id, due_date) VALUES (?, ?, ?, ?, ?)")
+        .run(projectId, copyTitle(task.title), task.description, assigneeId, task.dueDate)
+        .lastInsertRowid,
+    );
+    db.prepare("INSERT INTO task_labels (task_id, label_id) SELECT ?, label_id FROM task_labels WHERE task_id = ?").run(
+      copyId,
+      taskId,
+    );
+    db.prepare(
+      "INSERT INTO checklist_items (task_id, text) SELECT ?, text FROM checklist_items WHERE task_id = ? ORDER BY id",
+    ).run(copyId, taskId);
+    return copyId;
+  })();
 }
 
 /** Deletes the task (and, by cascade, its comments, labels and checklist) if it is in the project and the user is a member. */
