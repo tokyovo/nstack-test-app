@@ -75,7 +75,8 @@ const KEY_STEPS: Record<string, -1 | 1> = { ArrowLeft: -1, ArrowRight: 1 };
  * the assignee filter narrows that further to all, the viewer's, unassigned, or one member's tasks,
  * and the label filter to the tasks with one label. All three live in the URL, so a reload or a shared link shows the same board.
  * Each column heading has the count of its visible cards beside it; Done cards are dimmed.
- * An empty column says "No tasks"; when the project has tasks but none match, the board says so above the columns.
+ * An empty column says "No tasks"; above the columns, a project without tasks points to the New task form, and one
+ * whose tasks all fail the search or filters says nothing matches.
  */
 export function Board({
   projectId,
@@ -198,6 +199,11 @@ export function Board({
       {moveError && (
         <p role="alert" className="board-error">
           {moveError}
+        </p>
+      )}
+      {shown.length === 0 && (
+        <p className="board-start">
+          No tasks yet. Add the first one under <a href="#new-task">New task</a>.
         </p>
       )}
       {shown.length > 0 && visible.length === 0 && (

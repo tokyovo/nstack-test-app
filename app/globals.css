@@ -343,14 +343,21 @@ label > :is(input, select, textarea) {
   font-weight: 500;
 }
 
+.board > label > :is(input, select) {
+  font-size: var(--text-md);
+  font-weight: 400;
+}
+
 .board-error,
-.board-empty {
+.board-empty,
+.board-start {
   grid-column: 1 / -1;
   margin: 0;
 }
 
-/* Search or filters hide every task: a quiet notice, not an error. */
-.board-empty {
+/* No tasks yet, or search and filters hide every task: a quiet notice, not an error. */
+.board-empty,
+.board-start {
   padding: var(--space-3) var(--space-4);
   border: 1px dashed var(--edge);
   border-radius: var(--radius);
@@ -512,7 +519,7 @@ label > :is(input, select, textarea) {
 /* Below the board: New task, Labels and Members side by side on wide screens, stacked below 64rem. */
 .board-sections {
   display: grid;
-  gap: 0 var(--space-6);
+  gap: var(--space-6);
   margin-top: var(--space-8);
 }
 
