@@ -304,10 +304,34 @@ label > :is(input, select, textarea) {
   margin-top: 0.25rem;
 }
 
+/* The board page: a title row (name, exports, New task), the filters row, three columns, then the
+   New task, Labels and Members sections. */
+.board-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3) var(--space-4);
+  margin: var(--space-6) 0 var(--space-4);
+}
+
+.board-title h2 {
+  min-width: 0;
+  margin: 0;
+}
+
+/* The board's links (exports, "New task") on one row with room between them. */
+.export-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+}
+
 .board {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1rem;
+  gap: var(--space-4);
   align-items: start;
 }
 
@@ -315,6 +339,8 @@ label > :is(input, select, textarea) {
    32rem field cap, so each field fills it); the grid gap spaces them. */
 .board > label {
   margin: 0;
+  font-size: var(--text-sm);
+  font-weight: 500;
 }
 
 .board-error,
@@ -323,23 +349,51 @@ label > :is(input, select, textarea) {
   margin: 0;
 }
 
-.column-empty {
-  margin: 0;
+/* Search or filters hide every task: a quiet notice, not an error. */
+.board-empty {
+  padding: var(--space-3) var(--space-4);
+  border: 1px dashed var(--edge);
+  border-radius: var(--radius);
+  background: var(--surface);
   color: var(--muted);
 }
 
+/* Columns are flat areas on the page background; the cards are the only white surfaces. */
 .board-column {
   min-width: 0;
   min-height: 6rem;
-  padding: 0.5rem;
-  border-radius: 6px;
+  padding: var(--space-3);
   border: 1px solid var(--border);
-  background: var(--surface);
+  border-radius: var(--radius);
 }
 
-.board-column h3 {
-  margin: 0 0 0.5rem;
-  font-size: 1rem;
+.column-header {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.column-header h3 {
+  margin: 0;
+  font-size: var(--text-md);
+}
+
+.column-count {
+  min-width: 1.5rem;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: var(--text-sm);
+  text-align: center;
+}
+
+.column-empty {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--text-sm);
 }
 
 .board-column ul {
@@ -349,18 +403,104 @@ label > :is(input, select, textarea) {
 }
 
 .task-card {
-  margin-bottom: 0.5rem;
-  padding: 0.5rem;
+  margin-bottom: var(--space-2);
+  padding: var(--space-3);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--radius);
   background: var(--surface);
   cursor: grab;
+  transition: border-color var(--transition);
+}
+
+.task-card:hover {
+  border-color: var(--edge);
+}
+
+.task-card:active {
+  cursor: grabbing;
+}
+
+.task-card strong {
+  display: block;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+/* The title reads as text until hovered or focused. */
+.task-card strong a {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.task-card strong a:hover,
+.task-card strong a:focus-visible {
+  color: var(--accent-hover);
+  text-decoration: underline;
 }
 
 .task-card p {
-  margin: 0.25rem 0 0;
-  font-size: 0.875rem;
+  margin: var(--space-1) 0 0;
   color: var(--muted);
+  font-size: var(--text-sm);
+}
+
+.task-card.overdue .due {
+  color: var(--danger);
+}
+
+.task-card .overdue-label {
+  display: inline-block;
+  padding: 0 var(--space-2);
+  border-radius: 999px;
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-weight: 600;
+}
+
+/* A card's labels: small rounded chips that wrap onto more lines. */
+.board-column .task-labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin-top: var(--space-2);
+}
+
+.task-labels .label {
+  min-width: 0;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--background);
+  font-size: var(--text-sm);
+  overflow-wrap: anywhere;
+}
+
+/* Checklist progress: the count, then a 4 px bar under the card text. */
+.checklist-bar {
+  height: 4px;
+  margin-top: var(--space-1);
+  border-radius: 2px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.checklist-bar span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+
+/* Done cards step back: the page background instead of white, muted title. */
+.task-card.done {
+  background: var(--background);
+}
+
+.task-card.done strong a {
+  color: var(--muted);
+}
+
+.task-card.done .checklist-bar span {
+  background: var(--muted);
 }
 
 @media (max-width: 640px) {
@@ -369,21 +509,41 @@ label > :is(input, select, textarea) {
   }
 }
 
-/* The board's links (exports, "New task") on one row with room between them. */
-.export-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
+/* Below the board: New task, Labels and Members side by side on wide screens, stacked below 64rem. */
+.board-sections {
+  display: grid;
+  gap: 0 var(--space-6);
+  margin-top: var(--space-8);
 }
 
-.task-card.overdue {
-  border-color: var(--danger);
-  border-left-width: 4px;
+@media (min-width: 64rem) {
+  .board-sections {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
-.task-card .overdue-label {
-  color: var(--danger);
-  font-weight: 600;
+.board-sections > section {
+  min-width: 0;
+}
+
+.board-sections h3 {
+  margin-top: 0;
+}
+
+.section-empty {
+  color: var(--muted);
+}
+
+/* Label and member lists: plain rows, no bullets. */
+.plain-list {
+  margin: 0 0 var(--space-4);
+  padding: 0;
+  list-style: none;
+}
+
+.plain-list li {
+  padding: var(--space-1) 0;
+  border-bottom: 1px solid var(--border);
 }
 
 /* A project's link, rename field and buttons share one row, wrapping on narrow screens. */
@@ -465,6 +625,3 @@ label > :is(input, select, textarea) {
   overflow-wrap: anywhere;
 }
 
-.checklist-progress {
-  font-size: 0.875rem;
-}

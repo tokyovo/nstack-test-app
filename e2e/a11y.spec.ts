@@ -1,6 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Locator, type Page } from "@playwright/test";
-import { newUser } from "./helpers";
+import { cards, createProject, newUser, persistedMove, type ColumnName } from "./helpers";
 
 const DESKTOP = { width: 1280, height: 800 };
 const PHONE = { width: 390, height: 844 };
@@ -78,7 +78,54 @@ test.describe("AC2, AC3 screens pass the axe scan and phone layout checks", () =
     const { page } = await newUser(browser);
     await expectAccessible(page, "/projects/999999");
   });
+
+  test("the board with tasks, and with a search that matches nothing", async ({ browser }) => {
+    const { page } = await newUser(browser);
+    const url = await busyBoard(page);
+    await expectAccessible(page, url);
+    await expectAccessible(page, `${url}?q=zzzz`);
+    await expect(page.getByRole("status").filter({ hasText: "No tasks match" })).toBeVisible();
+  });
 });
+
+/**
+ * A board showing every card state: an overdue task with a label and a checklist, a plain task, and a Done
+ * task. Returns its path.
+ */
+async function busyBoard(page: Page): Promise<string> {
+  const url = await createProject(page, "Busy board");
+  await page.goto(url);
+  await page.getByLabel("Label name").fill("Bug");
+  await page.getByRole("button", { name: "Create label" }).click();
+  await expect(page.getByRole("list", { name: "Labels" }).getByText("Bug")).toBeVisible();
+  for (const [title, due] of [
+    ["Late task", "2020-01-01"],
+    ["Plain task", ""],
+    ["Finished task", ""],
+  ]) {
+    await page.getByLabel("Title").fill(title);
+    if (due) await page.getByLabel("Due date").fill(due);
+    await page.getByRole("button", { name: "Add task" }).click();
+    await expect(page.getByRole("link", { name: title, exact: true })).toBeVisible();
+  }
+  const finished = page.getByRole("listitem").filter({ hasText: "Finished task" });
+  for (const target of ["In progress", "Done"] satisfies ColumnName[]) {
+    await finished.focus();
+    await persistedMove(page, () => page.keyboard.press("ArrowRight"));
+    await expect(cards(page, target)).toContainText(["Finished task"]);
+  }
+
+  await page.getByRole("link", { name: "Late task", exact: true }).click();
+  await page.getByRole("checkbox", { name: "Bug" }).check();
+  await page.getByRole("button", { name: "Save labels" }).click();
+  await expect(page.getByRole("status")).toHaveText("Labels saved");
+  for (const item of ["Draft", "Review"]) {
+    await page.getByLabel("New item").fill(item);
+    await page.getByRole("button", { name: "Add item" }).click();
+    await expect(page.getByRole("checkbox", { name: item })).toBeVisible();
+  }
+  return url;
+}
 
 test("AC4: on /login, Tab reaches the email, the submit button and Sign up in turn, each with a visible focus", async ({
   page,
