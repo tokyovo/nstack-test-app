@@ -135,9 +135,9 @@ test("on the task page at 1280, each label checkbox is vertically centred on its
   await page.goto(taskUrl);
 
   const { box, text } = await page.getByRole("checkbox", { name: "Bug" }).evaluate((input) => {
+    // The label's name sits in its colour chip (AC1 of labels-dup-calendar).
     const range = document.createRange();
-    const node = [...input.parentElement!.childNodes].findLast((n) => n.nodeType === Node.TEXT_NODE && n.textContent!.trim())!;
-    range.selectNodeContents(node);
+    range.selectNodeContents(input.parentElement!.querySelector(".label-chip")!);
     const middle = (rect: DOMRect) => rect.top + rect.height / 2;
     return { box: middle(input.getBoundingClientRect()), text: middle(range.getBoundingClientRect()) };
   });
