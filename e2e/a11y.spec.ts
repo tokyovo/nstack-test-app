@@ -100,6 +100,8 @@ test.describe("AC2, AC3 screens pass the axe scan and phone layout checks", () =
     const url = await busyBoard(page);
     await page.goto(url);
     await page.getByRole("link", { name: "Finished task", exact: true }).click();
+    // The board's New task form also has a "Due date" field: wait for the task page before filling.
+    await expect(page.getByRole("heading", { name: "Finished task", exact: true })).toBeVisible();
     await page.getByLabel("Due date").fill("2020-01-01");
     await page.getByRole("button", { name: "Save changes" }).click();
     await expect(page.locator(".task-details")).toContainText("2020-01-01");
