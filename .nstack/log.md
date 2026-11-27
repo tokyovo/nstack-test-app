@@ -162,3 +162,25 @@ Entries before 2026-11-27 are in git history: `git log -p .nstack/log.md`.
 - Servers: a next-server on 127.0.0.1:3400 (pid 114319, started 2026-11-26 20:04, DATABASE_PATH under ~/.local/share/nstack-test-app/demo.db) is not from this run; left running. /tmp/taskboard-drive empty; no e2e temp DBs; all worktrees removed.
 - Log trimmed to this run (was 423 lines).
 - Slowed the run: parallel builders pushed seed.spec past 30s (fixed: 60s timeout, T45); a click-then-fill race on a label shared by board and task page (fixed; the sibling scan found no other case). tsconfig now excludes .claude worktrees so typecheck ignores builders' copies.
+
+## 2026-11-27 orient (controller, run "continue")
+- Nothing in flight: tree clean, one worktree, no unmerged nstack branches, no open nstack PRs; CI on main c1574a6 success (45959198563).
+- check-env ok; lint 0; typecheck 0; check-features 0; build 0; drive check pass (18 PNGs).
+- check-security against a drive copy FAILED: no Access/Deny proof columns; no CSP or X-Frame-Options; no nosniff. npm audit 0 high/critical, no secrets in bundle. -> first slice secure-access.
+- needs-human: no open items.
+
+## 2026-11-27 plan slice secure-headers
+- Read: plan/SKILL.md fa73337
+- [x] 1. Learn the ground truth. Every server action calls `requireUser`; membership via `getProject` (lib/projects.ts:16); deny tests exist for every member write except create label; no no-session test for a server action; next.config.ts has no headers.
+- [x] 2. Interrogate the goal yourself
+  - [x] 2.1. Questions: which CSP; where headers go; access level of non-request rows; how to send a sessionless action; how to prove deny tests bite.
+  - [x] 2.2. Answered from code/conventions: headers via next.config `headers()`; sessionless = clearCookies then submit; bite = drop the membership condition in getProject.
+  - [x] 2.3. Decision: CSP `frame-ancestors 'none'` only (script-src needs nonces, every page dynamic; backlog). Decision: rows with no request path are `public`.
+- [x] 3. Write the spec. plan.md slice secure-access, AC1-AC6, out of scope, design line.
+- [x] 4. Cut tickets. T47 headers, T48 access map + deny proofs; independent, buildable in parallel.
+- [x] 5. Check the plan
+  - [x] 5.1. AC1->T47; AC2-AC5->T48; AC6->T47+T48 (check-security, check-features).
+  - [x] 5.2. Fresh Explore reader listed 12 questions; answered in the slice's "Answers" paragraph.
+  - [x] 5.3. Slice in plan.md, branch nstack/secure-access.
+- [x] Done when: every criterion has a proof, the fresh reader's questions are answered in the plan, and the slice is in `plan.md`.
+- (Slice was named secure-access after the step line was printed with "secure-headers"; same step.)
