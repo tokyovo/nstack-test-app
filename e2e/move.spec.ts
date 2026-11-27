@@ -1,5 +1,5 @@
 import { expect, test, type Browser, type Page } from "@playwright/test";
-import { cards, column, createProject, newUser, persistedMove } from "./helpers";
+import { cards, column, createProject, newUser, persistedMove, type ColumnName } from "./helpers";
 
 async function projectWithTask(page: Page, projectName: string, title: string): Promise<string> {
   const url = await createProject(page, projectName);
@@ -173,4 +173,36 @@ test("AC29: ArrowRight on a card deleted in another tab shows an alert; the next
   await persistedMove(a.page, () => a.page.keyboard.press("ArrowRight"));
   await expect(cards(a.page, "Done")).toContainText(["Live task"]);
   await expect(moveAlert(a.page)).toHaveCount(0);
+});
+
+/** The count beside a column's heading. */
+function columnCount(page: Page, name: ColumnName) {
+  return column(page, name).locator(".column-count");
+}
+
+test("AC6: each column shows the count of its visible cards beside its heading; search and moves change the counts", async ({
+  browser,
+}) => {
+  const a = await newUser(browser);
+  await projectWithTask(a.page, "Counts", "Write docs");
+  await a.page.getByLabel("Title").fill("Fix bug");
+  await a.page.getByRole("button", { name: "Add task" }).click();
+  await expect(cards(a.page, "To do")).toHaveCount(2);
+
+  await expect(columnCount(a.page, "To do")).toHaveText("2");
+  await expect(columnCount(a.page, "In progress")).toHaveText("0");
+  await expect(columnCount(a.page, "Done")).toHaveText("0");
+  // Next to the heading, not in it: the heading and the region name stay "To do".
+  await expect(column(a.page, "To do").locator("h3 .column-count")).toHaveCount(0);
+  await expect(column(a.page, "To do").getByRole("heading", { level: 3 })).toHaveText("To do");
+
+  await a.page.getByLabel("Search tasks").fill("zzzz");
+  for (const name of ["To do", "In progress", "Done"] satisfies ColumnName[]) await expect(columnCount(a.page, name)).toHaveText("0");
+  await a.page.getByLabel("Search tasks").fill("");
+  await expect(columnCount(a.page, "To do")).toHaveText("2");
+
+  await card(a.page, "Write docs").focus();
+  await persistedMove(a.page, () => a.page.keyboard.press("ArrowRight"));
+  await expect(columnCount(a.page, "To do")).toHaveText("1");
+  await expect(columnCount(a.page, "In progress")).toHaveText("1");
 });

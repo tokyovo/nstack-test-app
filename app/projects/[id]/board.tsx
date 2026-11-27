@@ -216,7 +216,10 @@ export function Board({
             onDragOver={(event) => event.preventDefault()}
             onDrop={(event) => onDrop(event, status)}
           >
-            <h3 id={headingId}>{name}</h3>
+            <div className="column-header">
+              <h3 id={headingId}>{name}</h3>
+              <span className="column-count">{columnTasks.length}</span>
+            </div>
             <ul>
               {columnTasks.map((task) => {
                 const overdue = isOverdue(task, today);
