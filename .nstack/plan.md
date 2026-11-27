@@ -14,6 +14,7 @@ Acceptance criteria:
 8. Every `select` has computed `appearance: none` and a non-`none` background-image (a chevron drawn from token colours, no colour literal outside `:root`: `npm run lint` passes); its text does not run under the chevron (padding-right >= 2rem).
 9. Every checkbox has computed accent-color equal to `--accent`; the date input has the same padding-left, font and color as a text input.
 10. Design critique: all nine lines of the design skill critique pass on every screen at 1280 and 390 (drive screens), and the axe scan in a11y.spec passes.
+11. At most one visible primary (`.primary`) button on each screen.
 
 Decisions: font stack drops leading `system-ui` (it resolves to a no-bold CJK face on this machine; platform UI fonts are named instead: `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", "Liberation Sans", Arial, sans-serif`). Column headings become `h2` at 1.375rem rather than losing heading semantics. Calendar day numbers stop being headings (22px day numbers in 7 cells would crowd the grid); the cell keeps its name. Existing tests that assert a heading level change with the spec (log the spec change); tests by heading name stay.
 
@@ -33,6 +34,7 @@ Plan-check answers (fresh reader, 2026-11-27):
 
 - [x] T49 Heading hierarchy on every screen: font stack, `h1` page titles, `h2` sections at 1.375rem/600, header title not a heading, calendar day numbers not headings, design.md tokens updated (font stack, heading roles). Update tests that assert levels (calendar.spec level 2 -> 1, move.spec column level 3 -> 2, duplicate.spec level 1 stays meaning the task title, any `locator("h2")`). Proof: new `e2e/headings.spec.ts` "AC1-AC5: every screen has one h1 page title, the largest text, and every heading is 22px+, bold, and renders bold" over all 9 screens at both widths (seed with helpers like a11y.spec does); AC6 in calendar.spec; full suite green. Needs: none
 - [x] T50 Form controls as one family: selects `appearance: none` with a token-coloured chevron (e.g. two linear-gradients of `var(--muted)`), padding-right for it; date input matched to text inputs (padding, colour, picker indicator sized to fit); checkbox accent kept; task page "Save labels" secondary; design.md controls line updated. Proof: new `e2e/controls.spec.ts` "AC7-AC9: every screen's inputs, selects, date inputs and buttons share height, radius, border and font; selects have a chevron; checkboxes use the accent" over all 9 screens at both widths; `npm run lint`. Needs: none
+- [ ] T51 One primary action per screen (found in the verify critique, line 1 and line 9: the board shows two green buttons, the "New task" link in the title row and the form's "Add task"). The "New task" link becomes a secondary `.button`; "Add task" stays primary. Proof: `e2e/controls.spec.ts` gains "every screen shows at most one visible primary button" over the same screens and widths, seen failing on the board before the change; `npm run lint`. Needs: T50
 
 ## Done
 - task-board v1: T1-T8, PR #1
