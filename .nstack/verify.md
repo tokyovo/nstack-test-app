@@ -4,11 +4,11 @@ Run from the repo root. Needs Node 24, `npm ci`, and Chromium for Playwright 1.6
 
 | Check | Speed | Command | Last result |
 |---|---|---|---|
-| lint | fast | `npm run lint` | pass, 0 warnings (2026-11-27, e65299e) |
-| typecheck | fast | `npm run typecheck` | pass (2026-11-27, e65299e) |
-| build | full | `npm run build` | pass (2026-11-26, c724786) |
-| e2e | full | `npm run check:e2e-temp` | pass, 119 tests, 0 temp files left (2026-11-26, c724786) |
-| drive | full | `npm run drive -- check` | pass, 5 steps, 10 screenshots (2026-11-27, e65299e) |
+| lint | fast | `npm run lint` | pass, 0 warnings (2026-11-27, 14474dc) |
+| typecheck | fast | `npm run typecheck` | pass (2026-11-27, 14474dc) |
+| build | full | `npm run build` | pass, 0 warnings (2026-11-27, 14474dc) |
+| e2e | full | `npm run check:e2e-temp` | pass, 119 tests, 0 skipped, 0 temp files left (2026-11-27, 14474dc) |
+| drive | full | `npm run drive -- check` | pass, 5 steps, 10 screenshots (2026-11-27, 14474dc) |
 | ci | full | `.github/workflows/ci.yml` on push and PR: npm ci, playwright install, lint, typecheck, build, test:e2e, drive check | green on main 26a9415 (run 45778821562, 119 passed; before the drive step existed) |
 
 - `check:e2e-temp [-- <playwright args>]` runs `playwright test` (needs `npm run build` first; it starts `next start -p ${E2E_PORT:-3100}` with `DATABASE_PATH` set to a fresh temp SQLite file, also readable by tests as `E2E_DATABASE_PATH`), then exits 1 if any `taskboard-e2e-<pid>-*` file is left in the OS temp dir; else the suite's exit code. `npm run test:e2e` is the suite alone.

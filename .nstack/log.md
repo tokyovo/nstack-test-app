@@ -737,3 +737,23 @@
 - [x] 5. Prove it yourself. `check-features .nstack/verify.md` exit 0 (36 rows); scratch copy `<tmp>/x/.nstack/verify.md` with e2e symlinked and one test name altered: exit 1 "missing test: Overdue marker". Seed row contents checked against scripts/seed-app.mts (labels, checklist).
 - [x] 6. Record. this entry; per-ticket Proof chain sections removed (evidence is in log.md and git history).
 - [x] Done when: committed with the state commit below.
+
+## 2026-11-27 verify slice drive-tool
+- Read: verify/SKILL.md 7f18bc2
+- [x] 1. Clean tree. `git status` empty; HEAD 14474dc.
+- [x] 2. Project checks. `rm -rf .next`; lint 0; typecheck 0; build 0 (0 warnings); `E2E_PORT=3227 npm run check:e2e-temp` exit 0, 119 passed, 0 skipped/flaky, 0 temp files; `drive check` exit 0, 5 steps; no `data/`.
+- [x] 3. Every acceptance criterion in scope has a passing check. AC1-6: T35 commands (log above) at e65299e, scripts/package.json/ci.yml unchanged since (`git diff --quiet e65299e HEAD` 0) + `drive check` 0 at 14474dc; AC7: grep exit 1, seed.spec in the 119; AC8: ci.yml step, runs on the PR; AC9: check-features exit 0.
+- [x] 4. Every new check bites. `drive check` red (exit 1) with a console.error mutant, restored, green; check-features red (exit 1) on a scratch copy with an altered test name. No new e2e tests.
+- [x] 5. The real thing runs. `drive check` starts the real app, seeds through the UI, screenshots 10 pages; start/seed/stop run by hand in T35. The drive tool is a CLI, run as a user would.
+- [x] 6. Every changed screen looks right. n/a: no product UI change (scripts and state only).
+- [x] 7. Nothing got weaker. diff d52bc4c...HEAD: no test files changed; no any/ts-ignore/eslint-disable/skip added (grep exit 1).
+- [x] 8. No new warnings or errors. 0 lint warnings, 0 build warnings, 119 tests as before (c724786: 119); verify.md Last result updated.
+- [x] Done when: met. Not verified: CI's new drive step until the PR runs (ship waits for it).
+
+| Claim | Command | Result |
+|---|---|---|
+| suite unchanged | `E2E_PORT=3227 npm run check:e2e-temp` | 119 passed, 0 temp files |
+| drive works | `npm run drive -- check` | 5 steps ok, exit 0 |
+| drive check bites | console.error mutant in shoot() | exit 1, cleaned up |
+| features map true | `check-features .nstack/verify.md` | exit 0; altered copy exit 1 |
+| screens | n/a: no UI change | - |
