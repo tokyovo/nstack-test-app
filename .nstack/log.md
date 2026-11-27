@@ -374,3 +374,22 @@ Not verified: none.
 - [x] 9. Access is enforced. Deny proof "AC39: a non-member's checklist requests change nothing" passes (accepts the dialog so the request is sent); no route/action change.
 - [x] Done when: all ticked. Not verified: none.
 - Lesson: a stale `.next` after a bite restore made a full run test old code (no rebuild). Once so far; backlog: make check:e2e-temp refuse a build older than the newest app/ or lib/ file.
+
+## 2026-11-27 review slice checklist-confirm
+- Read: review/SKILL.md 053d586
+- [x] 1. Dispatch. One reviewer, worktree, at 665b91a. Pass, 0 findings; lint/typecheck/build pass, checklist.spec 10 passed; mutations: ignoring the confirm answer -> AC39 red; removing disabled={removing} -> AC47 red 3/3 (2 dialogs). Reverted, clean.
+- [x] 2. Second reviewer. n/a: no auth, payments, migration, concurrency or public API.
+- [x] 3. Act on every finding. None.
+- [x] 4. Review the fixes. n/a: no fixes.
+- [x] Done when: 0 important; verify passed at 665b91a code; no nits.
+
+## 2026-11-27 ship slice checklist-confirm
+- Read: ship/SKILL.md b51cd2a
+- [x] 1. Commit. T52 ae4a27d plus state commits.
+- [x] 2. Sync. origin/main 7457fcc is an ancestor; nothing came in.
+- [x] 3. Push. nstack/checklist-confirm.
+- [x] 4. Open the PR. Body: change, ticket, verification, merge danger (revert-safe, one client component and its spec), decisions.
+- [ ] 5. Wait for CI
+- [ ] 6. Merge
+- [ ] 7. Confirm and clean up.
+- [ ] Done when: the PR is merged, CI is green on the default branch, and the fast checks pass there, or the PR is parked with a reason.
