@@ -50,7 +50,7 @@ export default async function ProjectPage({ params, searchParams }: PageProps<"/
           <a className="button" href={`/projects/${project.id}/export?format=json`} download>
             Export JSON
           </a>
-          <a className="button primary" href="#new-task">
+          <a className="button" href="#new-task">
             New task
           </a>
         </p>

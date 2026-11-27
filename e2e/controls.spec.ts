@@ -131,3 +131,22 @@ test("AC7-AC9: every screen's inputs, selects, date inputs and buttons share hei
   // The screens must hold each kind of control, or the checks above prove nothing.
   expect([sawSelect, sawDate, sawCheckbox]).toEqual([true, true, true]);
 });
+
+test("every screen shows at most one visible primary button", async ({ browser }) => {
+  test.setTimeout(60_000);
+  const { page: signedIn, list } = await screens(browser);
+  const loggedOut = await (await browser.newContext()).newPage();
+  for (const [screen, path, needsSession] of list) {
+    const page = needsSession ? signedIn : loggedOut;
+    for (const width of WIDTHS) {
+      await page.setViewportSize({ width, height: 844 });
+      await page.goto(path);
+      const primaries = await page.locator(":is(button, .button).primary").evaluateAll((elements) =>
+        elements
+          .filter((element) => element.getClientRects().length > 0 && getComputedStyle(element).visibility !== "hidden")
+          .map((element) => (element.textContent ?? "").trim()),
+      );
+      expect.soft(primaries.length, `${screen} at ${width}: ${primaries.join(", ")}`).toBeLessThanOrEqual(1);
+    }
+  }
+});
