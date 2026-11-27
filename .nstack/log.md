@@ -208,3 +208,11 @@ Entries before 2026-11-27 are in git history: `git log -p .nstack/log.md`.
 - [x] 8. No new warnings or errors. Counts as base (0 lint/build warnings); e2e 168 -> 172; verify.md Last result updated.
 - [x] 9. Access is enforced. check-security against drive copy exit 0: access map ok, no secrets, headers and cookies ok, npm audit 0 high/critical.
 - [x] Done when: every gate item ticked; Not verified: none.
+
+## 2026-11-27 review slice secure-access
+- Read: review/SKILL.md 053d586
+- [x] 1. Dispatch. nstack:reviewer in a worktree at e7a140c: pass, 0 findings (lint/typecheck/build, 44 e2e passed, bite on 3 guards red then restored, check-security ok).
+- [x] 2. Second reviewer. Auth-touching: second nstack:reviewer, "Focus: security and failure modes", in parallel: pass, 0 findings (bite red, check-security ok, favicon 404 and POST /login carry both headers).
+- [x] 3. Act on every finding. n/a: no findings in either round.
+- [x] 4. Review the fixes. n/a: no fixes.
+- [x] Done when: latest round has no important findings, verify passed at e7a140c, no nits.
