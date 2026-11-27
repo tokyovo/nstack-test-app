@@ -95,6 +95,20 @@ test.describe("AC2, AC3 screens pass the axe scan and phone layout checks", () =
     await expect(page.getByRole("status").filter({ hasText: "No tasks match" })).toBeVisible();
   });
 
+  test("the calendar with an overdue, a Done and an undated task, and an empty month", async ({ browser }) => {
+    const { page } = await newUser(browser);
+    const url = await busyBoard(page);
+    await page.goto(url);
+    await page.getByRole("link", { name: "Finished task", exact: true }).click();
+    await page.getByLabel("Due date").fill("2020-01-01");
+    await page.getByRole("button", { name: "Save changes" }).click();
+    await expect(page.locator(".task-details")).toContainText("2020-01-01");
+    await expectAccessible(page, `${url}/calendar?month=2020-01`);
+    await expect(page.locator("li.calendar-day.has-tasks").getByRole("link")).toHaveText(["Late task", "Finished task"]);
+    await expectAccessible(page, `${url}/calendar?month=2999-12`);
+    await expect(page.getByText("No tasks due this month")).toBeVisible();
+  });
+
   test("the task page with labels, checklist items and a comment", async ({ browser }) => {
     const { page } = await newUser(browser);
     const url = await busyBoard(page);

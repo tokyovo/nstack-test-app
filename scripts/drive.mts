@@ -273,7 +273,7 @@ const VIEWPORTS = [
   { width: 1280, height: 800 },
   { width: 390, height: 844 },
 ];
-const SCREEN_NAMES = ["login", "signup", "projects", "board", "board-empty", "board-nomatch", "task", "notfound"];
+const SCREEN_NAMES = ["login", "signup", "projects", "board", "board-empty", "board-nomatch", "task", "calendar", "notfound"];
 /** A project id no seed creates, for the 404 screen; its document's 404 is not a console error. */
 const NOT_FOUND_PATH = "/projects/999999";
 /** Paths whose 404 the browser logs to the console on purpose. */
@@ -319,6 +319,7 @@ async function screens(baseURL: string, dir: string): Promise<{ dir: string; fil
       await shoot(page, seeded.emptyBoardUrl, "board-empty", viewport.width);
       await shoot(page, `${seeded.boardUrl}?q=zzzz`, "board-nomatch", viewport.width);
       await shoot(page, seeded.taskUrl, "task", viewport.width);
+      await shoot(page, `${seeded.boardUrl}/calendar`, "calendar", viewport.width);
       await shoot(page, NOT_FOUND_PATH, "notfound", viewport.width);
       await page.context().close();
     }
@@ -420,7 +421,7 @@ const COMMANDS: Record<string, { usage: string; summary: string; options: Record
   },
   screens: {
     usage: "screens <dir> [--url U | --port N] [--json]",
-    summary: "Seed, then save 16 full-page PNGs; exit 1 listing console/page errors.",
+    summary: "Seed, then save 18 full-page PNGs; exit 1 listing console/page errors.",
     options: {
       url: { type: "string", description: "base URL of the app (default: the single running instance)" },
       port: { type: "string", description: "use http://localhost:N" },

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { getProject, listMembers } from "@/lib/projects";
@@ -31,6 +32,9 @@ export default async function ProjectPage({ params, searchParams }: PageProps<"/
       <div className="board-title">
         <h2>{project.name}</h2>
         <p className="export-links">
+          <Link className="button" href={`/projects/${project.id}/calendar`}>
+            Calendar
+          </Link>
           {/* A plain link, not next/link: a download from a route handler, no prefetch or client navigation. */}
           <a className="button" href={`/projects/${project.id}/export?format=csv`} download>
             Export CSV
