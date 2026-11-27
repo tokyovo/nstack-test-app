@@ -1,4 +1,9 @@
 import { expect, test, type Browser, type Page } from "@playwright/test";
+import Database from "better-sqlite3";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { applySchema } from "../lib/schema";
 import { cards, createProject, newUser, tamperBoundIds, type ColumnName } from "./helpers";
 
 function labelList(page: Page) {
@@ -356,4 +361,57 @@ test("AC38: an unknown or another project's label id shows all labels", async ({
   await expect.poll(() => query(a.page, "q")).toBe("Plain");
   expect(query(a.page, "label")).toBeNull();
   await expect(cardTitles(a.page)).toHaveText(["Plain"]);
+});
+
+/** The tables a label touches, as they were before labels had a colour. */
+const OLD_LABELS_SCHEMA = `
+CREATE TABLE projects (id INTEGER PRIMARY KEY, name TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT (datetime('now')));
+CREATE TABLE tasks (
+  id INTEGER PRIMARY KEY,
+  project_id INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  description TEXT NOT NULL DEFAULT '',
+  assignee_id INTEGER,
+  due_date TEXT,
+  status TEXT NOT NULL DEFAULT 'todo' CHECK (status IN ('todo', 'in_progress', 'done')),
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE TABLE labels (
+  id INTEGER PRIMARY KEY,
+  project_id INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  UNIQUE (project_id, name COLLATE NOCASE)
+);
+CREATE TABLE task_labels (
+  task_id INTEGER NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
+  label_id INTEGER NOT NULL REFERENCES labels(id) ON DELETE CASCADE,
+  PRIMARY KEY (task_id, label_id)
+);
+INSERT INTO projects (id, name) VALUES (1, 'Old project');
+INSERT INTO tasks (id, project_id, title) VALUES (7, 1, 'Old task');
+INSERT INTO labels (id, project_id, name) VALUES (3, 1, 'Legacy');
+INSERT INTO task_labels (task_id, label_id) VALUES (7, 3);
+`;
+
+test("AC2: a database file from before label colours opens; its labels become Gray and keep names and task links", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "taskboard-migrate-"));
+  try {
+    const file = path.join(dir, "old.db");
+    const old = new Database(file);
+    old.exec(OLD_LABELS_SCHEMA);
+    old.close();
+
+    for (let open = 0; open < 2; open++) {
+      const db = new Database(file);
+      try {
+        applySchema(db);
+        expect(db.prepare("SELECT id, name, color FROM labels").all()).toEqual([{ id: 3, name: "Legacy", color: "gray" }]);
+        expect(db.prepare("SELECT task_id, label_id FROM task_labels").all()).toEqual([{ task_id: 7, label_id: 3 }]);
+      } finally {
+        db.close();
+      }
+    }
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
 });

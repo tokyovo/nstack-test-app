@@ -1,6 +1,11 @@
 import type Database from "better-sqlite3";
+import { DEFAULT_LABEL_COLOR, LABEL_COLORS } from "./label-colors";
 
-// No "server-only" here: e2e tests import this to migrate an old database file.
+// No "server-only" and relative imports only: e2e tests import this to migrate an old database file.
+
+const LABEL_COLOR_COLUMN = `TEXT NOT NULL DEFAULT '${DEFAULT_LABEL_COLOR}' CHECK (color IN (${LABEL_COLORS.map(
+  (color) => `'${color.key}'`,
+).join(", ")}))`;
 
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS users (
@@ -46,6 +51,7 @@ CREATE TABLE IF NOT EXISTS labels (
   id INTEGER PRIMARY KEY,
   project_id INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
+  color ${LABEL_COLOR_COLUMN},
   UNIQUE (project_id, name COLLATE NOCASE)
 );
 CREATE TABLE IF NOT EXISTS task_labels (
@@ -61,7 +67,14 @@ CREATE TABLE IF NOT EXISTS checklist_items (
 );
 `;
 
-/** Creates any missing tables on `db`, so a new or an existing database file is ready to use. */
+/**
+ * Creates any missing tables on `db` and adds the columns older files lack, so a new or an existing
+ * database file is ready to use. Safe to run on every open.
+ */
 export function applySchema(db: Database.Database): void {
   db.exec(SCHEMA);
+  const labelColumns = db.prepare("PRAGMA table_info(labels)").all() as { name: string }[];
+  if (!labelColumns.some((column) => column.name === "color")) {
+    db.exec(`ALTER TABLE labels ADD COLUMN color ${LABEL_COLOR_COLUMN}`);
+  }
 }
