@@ -339,8 +339,8 @@ Entries before 2026-11-27 are in git history: `git log -p .nstack/log.md`.
 - Read: build/SKILL.md 45c2dd4
 - [x] 1. Branch. nstack/labels-dup-calendar at 518b0a2 + state; builder in its own worktree.
 - [x] 2. Starting state. lint 0, typecheck 0 at 518b0a2.
-- [ ] 3. Dispatch
-- [ ] 4. Read the reply
-- [ ] 5. Prove it yourself.
-- [ ] 6. Record.
-- [ ] Done when: the ticket is committed on the slice's branch with items 1-6 ticked in its log entry, or is parked in `plan.md`.
+- [x] 3. Dispatch. Fresh nstack:builder, worktree, pointer brief (alone).
+- [x] 4. Read the reply. Done: e96250f (New label form select keyed by value, like label-row.tsx; new AC1 test red first: got gray, expected blue), 7ac76ce (seed.spec 60s timeout). The backlog line it could not find was already removed by the controller.
+- [x] 5. Prove it yourself. Fast-forwarded to 7ac76ce: lint 0, typecheck 0, build 0, `check:e2e-temp -- labels seed` 0 (25 passed).
+- [x] 6. Record. Backlog: a forged colour (e.g. pink) leaves the select on Gray after the error (nothing stored).
+- [x] Done when: the ticket is committed on the slice's branch with items 1-6 ticked in its log entry, or is parked in `plan.md`.

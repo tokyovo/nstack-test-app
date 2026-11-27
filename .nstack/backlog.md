@@ -26,6 +26,7 @@ Scored 2026-11-25 (value + risk + cost, cost 5 = cheapest). Sources: UX pass (he
 - 3 (v1 r1 c1) `drive stop --all`: if one instance fails to stop, the loop ends there without reporting the ones already stopped or trying the rest. Evidence: drive-tool review round 3.
 - 3 (v1 r1 c1) `page.getByRole("alert")` also matches Next's route announcer; tests and scripts should scope alerts to `main [role=alert]`. Evidence: T37 builder.
 - 3 (v1 r1 c1) Headless Chromium here renders 500/600 font weights as regular (system font has no medium face), so headings look light in screenshots; consider weight 700 or a check on a machine with the font. Evidence: T37, T38 builders.
+- 2 (v1 r0 c1) A forged label colour (not in the list) shows the error but leaves the Colour select on Gray, not the typed value (no option matches; nothing stored). Evidence: T45 builder.
 - 2 (v1 r0 c1) scripts/check-css-tokens.mjs:8 would flag an ID selector made of hex letters (`#feed`) as a colour; none exist. Evidence: review slice design.
 
 ## Rejected
