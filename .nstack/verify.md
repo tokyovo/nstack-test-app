@@ -4,11 +4,11 @@ Run from the repo root. Needs Node 24, `npm ci`, and Chromium for Playwright 1.6
 
 | Check | Speed | Command | Last result |
 |---|---|---|---|
-| lint | fast | `npm run lint` (eslint, then `scripts/check-css-tokens.mjs`: no colour literals in app/globals.css outside `:root`) | pass, 0 warnings (2026-11-27, b5a09ef) |
-| typecheck | fast | `npm run typecheck` | pass (2026-11-27, b5a09ef) |
-| build | full | `npm run build` | pass, 0 warnings (2026-11-27, b5a09ef) |
-| e2e | full | `npm run check:e2e-temp` | pass, 168 tests, 0 skipped, 0 temp files left (2026-11-27, b5a09ef) |
-| drive | full | `npm run drive -- check` | pass, 5 steps, 18 screenshots (2026-11-27, b5a09ef) |
+| lint | fast | `npm run lint` (eslint, then `scripts/check-css-tokens.mjs`: no colour literals in app/globals.css outside `:root`) | pass, 0 warnings (2026-11-27, 7e77685) |
+| typecheck | fast | `npm run typecheck` | pass (2026-11-27, 7e77685) |
+| build | full | `npm run build` | pass, 0 warnings (2026-11-27, 7e77685) |
+| e2e | full | `npm run check:e2e-temp` | pass, 172 tests, 0 skipped, 0 temp files left (2026-11-27, 7e77685) |
+| drive | full | `npm run drive -- check` | pass, 5 steps, 18 screenshots (2026-11-27, 7e77685) |
 | ci | full | `.github/workflows/ci.yml` on push and PR: npm ci, playwright install, lint, typecheck, build, test:e2e, drive check | green on main e9490a1 (run 45945258200, 143 passed, drive check 16 PNGs) |
 
 - `check:e2e-temp [-- <playwright args>]` runs `playwright test` (needs `npm run build` first; it starts `next start -p ${E2E_PORT:-3100}` with `DATABASE_PATH` set to a fresh temp SQLite file, also readable by tests as `E2E_DATABASE_PATH`), then exits 1 if any `taskboard-e2e-<pid>-*` file is left in the OS temp dir; else the suite's exit code. `npm run test:e2e` is the suite alone.
@@ -79,4 +79,5 @@ How an agent runs and uses the app on its own, without touching anyone's data.
 | Board layout: columns above the fold, no horizontal scroll at 390px | /projects/<id> at 1280 and 390 | member | `e2e/layout.spec.ts` "AC42: at 1280x800 the columns start above the fold and the three filters share one row" | `e2e/projects.spec.ts` "AC6: user B does not see user A's project and gets a 404 on its URL" |
 | Form labels above fields | all forms | public | `e2e/forms-layout.spec.ts` "AC24: project, task, invite and comment form labels sit above their fields" | - |
 | Demo data seed | `npm run drive -- seed` | public | `e2e/seed.spec.ts` "AC22, AC41: seed fills the app with a demo user, a busy board and an empty project; re-running adds nothing" | - |
+| Pages refuse framing and content-type sniffing | every response | public | `e2e/headers.spec.ts` "AC1: pages, the export, a 404 and a static file carry frame-ancestors 'none' and nosniff" | - |
 | Drive tool never deletes or kills what a bad state file names | `npm run drive -- stop` | public | `e2e/drive.spec.ts` "a state file naming a dir that is not a drive temp dir is reported and the dir is never deleted" | - |

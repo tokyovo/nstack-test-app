@@ -195,3 +195,16 @@ Entries before 2026-11-27 are in git history: `git log -p .nstack/log.md`.
 - [x] 6. Record. plan.md T47/T48 ticked with bite results; 2 backlog lines (MEMBER_CHECK duplicate, script-src CSP).
 - [x] Done when: both tickets committed on nstack/secure-access with items 1-6 ticked.
 - Decision: T48's bite for AC5 found rename/delete project use their own membership SQL; proved by neutralising it separately rather than refactoring now (backlog, not in slice scope).
+
+## 2026-11-27 verify slice secure-access
+- Read: verify/SKILL.md 1af2e2c
+- [x] 1. Clean tree. 7e77685, `git status` empty.
+- [x] 2. Project checks. lint 0 (0 warnings), typecheck 0, build 0 (0 warnings), check:e2e-temp 0: 172 passed, 0 skipped, 0 temp files; no data/ dir; drive check pass (18 PNGs).
+- [x] 3. Every acceptance criterion in scope has a passing check. AC1 headers.spec; AC2 access.spec x2; AC3 labels.spec AC36 create-label; AC4 check-security access map (36 deny proofs); AC5 bite runs (T48 builder, re-done below for the new tests); AC6 check-security exit 0, check-features 0. New Features row for the headers.
+- [x] 4. Every new check bites. Broke all 3 guards at once (headers source -> /never-matches; createLabel membership line; requireUser in createProjectAction and /projects page), rebuilt: the 4 new tests red, restored via git checkout, rebuilt: 6/6 green, tree clean.
+- [x] 5. The real thing runs. Drive copy: `curl -sI <url>/login` -> 200 with `Content-Security-Policy: frame-ancestors 'none'` and `X-Content-Type-Options: nosniff`.
+- [x] 6. Every changed screen looks right. n/a: no UI change (headers and tests only); drive screens still render 18 PNGs with no console errors.
+- [x] 7. Nothing got weaker. `git diff main...HEAD` on e2e/app/lib/next.config: no removed lines; no skip/only/any/ts-ignore/eslint-disable added.
+- [x] 8. No new warnings or errors. Counts as base (0 lint/build warnings); e2e 168 -> 172; verify.md Last result updated.
+- [x] 9. Access is enforced. check-security against drive copy exit 0: access map ok, no secrets, headers and cookies ok, npm audit 0 high/critical.
+- [x] Done when: every gate item ticked; Not verified: none.
