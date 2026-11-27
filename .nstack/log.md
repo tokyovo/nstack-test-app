@@ -320,3 +320,33 @@ Not verified: none.
 - [ ] 6. Merge
 - [ ] 7. Confirm and clean up.
 - [ ] Done when: the PR is merged, CI is green on the default branch, and the fast checks pass there, or the PR is parked with a reason.
+
+## 2026-11-27 improve
+- Read: improve/SKILL.md c8daf07
+- [x] 1. Gather evidence
+  - [x] 1.1. Broken things. None: full gate green at edede51; CI green on PR #26.
+  - [x] 1.2. Known problems. 0 open issues; needs-human none open; backlog read.
+  - [x] 1.3. Gaps against the goal. None: every feature has a Features row and passing proof (check-features 0).
+  - [x] 1.4. Outside demand. research.md 2026-11-25 (2 days, fresh); its candidates in backlog (top 5: templates, multiple assignees).
+  - [x] 1.5. Risk. npm audit 0 high/critical, no secrets in bundle (check-security at orient).
+  - [x] 1.6. User experience. Critique of all 18 screens in verify design-rules: pass. Reconsidered: checklist Delete has no confirmation, which verify item 6 counts as a failure on a changed screen (the task page); my verify entry missed it. New: date picker icon text-coloured vs muted chevron (T50 builder).
+  - [x] 1.7. Code health. Nothing slowing work beyond backlog items.
+- [x] 2. Score. Checklist confirm rescored 8 (v2 r2 c4: ConfirmButton pattern exists); date icon tint 6 (v1 r1 c4). scripts/score exit 0.
+- [x] 3. Decide. Top 3: 8, 6, 5. 8 meets bar 7 -> plan slice checklist-confirm. Icon tint not grouped (below bar).
+- [x] Done when: sources checked, scored, slice planned.
+- Lesson: verify item 6 says "a destructive action with no confirmation fails this item", but the critique list in the design skill has no such line, so the critique on the task page passed without checking it. Structure for it: T52's test makes confirmation the spec for the last unconfirmed delete; see hand-off for a check.
+
+## 2026-11-27 plan checklist-confirm
+- Read: plan/SKILL.md fa73337
+- [x] 1. Learn the ground truth. checklist-item.tsx Delete is type=button with useTransition, no confirm; ConfirmButton is a submit button; checklist.spec has 8 Delete clicks.
+- [x] 2. Interrogate the goal yourself
+  - [x] 2.1. Questions: message text; dismiss behaviour; double-click with a blocking confirm; tests that click Delete.
+  - [x] 2.2. Answered from the code: same window.confirm pattern as task/project/label deletes.
+  - [x] 2.3. Decision: window.confirm in the row, not a reused ConfirmButton (different button type).
+- [x] 3. Write the spec. 5 ACs.
+- [x] 4. Cut tickets. T52 alone (one component plus its spec).
+- [x] 5. Check the plan
+  - [x] 5.1. AC1-5 -> T52 proof (new AC39 test, AC47, full checklist.spec).
+  - [x] 5.2. Fresh Explore reader: 10 questions, answered under "Plan-check answers".
+  - [x] 5.3. Slice in plan.md, branch nstack/checklist-confirm.
+- [x] Done when: criteria mapped, questions answered, slice written.
