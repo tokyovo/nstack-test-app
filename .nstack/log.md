@@ -344,3 +344,15 @@ Entries before 2026-11-27 are in git history: `git log -p .nstack/log.md`.
 - [x] 5. Prove it yourself. Fast-forwarded to 7ac76ce: lint 0, typecheck 0, build 0, `check:e2e-temp -- labels seed` 0 (25 passed).
 - [x] 6. Record. Backlog: a forged colour (e.g. pink) leaves the select on Gray after the error (nothing stored).
 - [x] Done when: the ticket is committed on the slice's branch with items 1-6 ticked in its log entry, or is parked in `plan.md`.
+
+## 2026-11-27 verify slice labels-dup-calendar
+- Read: verify/SKILL.md db15016
+- [ ] 1. Clean tree.
+- [ ] 2. Project checks.
+- [ ] 3. Every acceptance criterion in scope has a passing check.
+- [ ] 4. Every new check bites.
+- [ ] 5. The real thing runs.
+- [ ] 6. Every changed screen looks right.
+- [ ] 7. Nothing got weaker.
+- [ ] 8. No new warnings or errors
+- [ ] Done when: every gate item is ticked in the log entry with its evidence, and Not verified is empty or every entry in it is parked.
