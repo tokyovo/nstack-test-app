@@ -4,11 +4,11 @@ Run from the repo root. Needs Node 24, `npm ci`, and Chromium for Playwright 1.6
 
 | Check | Speed | Command | Last result |
 |---|---|---|---|
-| lint | fast | `npm run lint` (eslint, then `scripts/check-css-tokens.mjs`: no colour literals in app/globals.css outside `:root`) | pass, 0 warnings (2026-11-27, 6792ffe) |
-| typecheck | fast | `npm run typecheck` | pass (2026-11-27, 6792ffe) |
-| build | full | `npm run build` | pass, 0 warnings (2026-11-27, 6792ffe) |
-| e2e | full | `npm run check:e2e-temp` | pass, 134 tests, 0 skipped, 0 temp files left (2026-11-27, 6792ffe) |
-| drive | full | `npm run drive -- check` | pass, 5 steps, 12 screenshots (2026-11-27, 6792ffe) |
+| lint | fast | `npm run lint` (eslint, then `scripts/check-css-tokens.mjs`: no colour literals in app/globals.css outside `:root`) | pass, 0 warnings (2026-11-27, 724980f) |
+| typecheck | fast | `npm run typecheck` | pass (2026-11-27, 724980f) |
+| build | full | `npm run build` | pass, 0 warnings (2026-11-27, 724980f) |
+| e2e | full | `npm run check:e2e-temp` | pass, 138 tests, 0 skipped, 0 temp files left (2026-11-27, 724980f) |
+| drive | full | `npm run drive -- check` | pass, 5 steps, 16 screenshots (2026-11-27, 724980f) |
 | ci | full | `.github/workflows/ci.yml` on push and PR: npm ci, playwright install, lint, typecheck, build, test:e2e, drive check | green on main 26a9415 (run 45778821562, 119 passed; before the drive step existed) |
 
 - `check:e2e-temp [-- <playwright args>]` runs `playwright test` (needs `npm run build` first; it starts `next start -p ${E2E_PORT:-3100}` with `DATABASE_PATH` set to a fresh temp SQLite file, also readable by tests as `E2E_DATABASE_PATH`), then exits 1 if any `taskboard-e2e-<pid>-*` file is left in the OS temp dir; else the suite's exit code. `npm run test:e2e` is the suite alone.
@@ -21,8 +21,8 @@ How an agent runs and uses the app on its own, without touching anyone's data.
 - **Start:** `npm run drive -- start --json` builds if `.next/BUILD_ID` is missing (`--build` forces; a stale build is not detected), starts `next start` on 127.0.0.1 on a free port (`--port N`) with a temp database, waits for /login, prints `{"url","db","pid","port"}`. Instance state: `<os tmp>/taskboard-drive/<port>.json`; server log: `<dir>/server.log`.
 - **Seed:** `npm run drive -- seed [--port N | --url U] [--json]`, through the UI: demo user, a member with a long email, "Website relaunch" (overdue task, 200-char title, assigned In progress task, Done task with a comment, labels, checklist) and empty "Team offsite". Idempotent. ~15s.
 - **Sign in:** demo@example.com / correct-horse-1 (after seed), or sign up at /signup with any email and an 8+ char password. In tests: `e2e/helpers.ts` `signUp()` / `newUser()`.
-- **Screens:** /login, /signup, /projects, /projects/<id> (board), /projects/<id>/tasks/<taskId> (task page), /projects/999999 (404 page, logged in).
-- **Evidence:** `npm run drive -- screens <dir>` seeds, then writes those 6 screens at 1280 and 390 px (12 full-page PNGs); exits 1 listing console or page errors (favicon.ico 404 and the 404 screen's own load ignored).
+- **Screens:** /login, /signup, /projects, /projects/<id> (board), /projects/<id>/tasks/<taskId> (task page), /projects/999999 (404 page, logged in), plus the board of the empty "Team offsite" (board-empty) and the busy board with `?q=zzzz` (board-nomatch).
+- **Evidence:** `npm run drive -- screens <dir>` seeds, then writes those 8 screens at 1280 and 390 px (16 full-page PNGs); exits 1 listing console or page errors (favicon.ico 404 and the 404 screen's own load ignored).
 - **Health:** `npm run drive -- check` starts, seeds, takes screens, checks the non-empty PNGs, stops and cleans up even after a failure; exit 0 means this section is true.
 - **Clean up:** `npm run drive -- stop [--port N | --all] [--dry-run]` kills the instance's process group by its recorded pid and deletes its temp dir and state file; stale instances are pruned (not under `--dry-run`). State files are validated on read: one naming a dir that is not `<os tmp>/taskboard-drive-*`, a bad pid or bad JSON is reported and only the state file is removed. The state dir is kept at mode 0700. Ctrl-C during `check` leaves its server; run `stop`.
 - **Isolate:** each instance has its own port and temp database; e2e uses `E2E_PORT` and its own temp DB.
@@ -59,6 +59,8 @@ How an agent runs and uses the app on its own, without touching anyone's data.
 | Checklist items | /projects/<id>/tasks/<taskId>, Checklist | `e2e/checklist.spec.ts` "AC39: items are added to the end, unchecked, and kept after reload" |
 | Checklist progress on the card | /projects/<id>, card | `e2e/checklist.spec.ts` "AC40: the card shows checklist progress, and none without items" |
 | Checklist failures show an alert | /projects/<id>/tasks/<taskId>, Checklist | `e2e/checklist.spec.ts` "AC47: ticking an item deleted in another tab shows an alert and drops the row; the next tick clears it" |
+| Column card counts | /projects/<id>, column headings | `e2e/move.spec.ts` "AC6: each column shows the count of its visible cards beside its heading; search and moves change the counts" |
+| Search and filters share one height | /projects/<id> at 1280 | `e2e/layout.spec.ts` "AC5: at 1280 the search box and both filter selects are the same height" |
 | Empty board and no-match messages | /projects/<id> | `e2e/empty-states.spec.ts` "AC49: when search or filters hide every task the board says so above the columns, until a task matches" |
 | Export CSV | /projects/<id>, Export CSV | `e2e/export.spec.ts` "AC32/AC33: Export CSV downloads every task, RFC 4180 quoted, formula-guarded, with a BOM" |
 | Export JSON | /projects/<id>, Export JSON | `e2e/export.spec.ts` "AC34: Export JSON downloads the project and every task with stored status keys" |

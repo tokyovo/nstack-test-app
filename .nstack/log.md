@@ -179,3 +179,14 @@ Entries before 2026-11-27 are in git history: `git log -p .nstack/log.md`.
 - [x] Done when: T37 committed on nstack/design (6792ffe), items 1-6 ticked.
 - Decision (builder): derived tokens accent-hover, danger-hover, accent-soft, danger-soft and control edge #8A939C because border #D5D9DD gives control edges ~1.4:1 (needs 3:1). Controls 2.5rem, 2.75rem at <=640px.
 - Note: AC4 focus test passed before the CSS (Chromium's default ring); it guards against later removal.
+
+## 2026-11-27 build T38
+- Read: build/SKILL.md 13386ea
+- [x] 1. Branch. nstack/design.
+- [x] 2. Starting state. lint 0, typecheck 0 at 6792ffe (T37 proof).
+- [x] 3. Dispatch. Fresh nstack:builder with the pointer brief (+ design.md).
+- [x] 4. Read the reply. Done: 00652bd (AC6 count, red->green), 203afd3 (restyle, drive screens board-empty/board-nomatch), 724980f (critique fixes: filter text 16px, stacked headings spaced, empty-project pointer + test; removed the danger border on overdue cards).
+- [x] 5. Prove it yourself. At 724980f: lint 0, typecheck 0, build 0, `check:e2e-temp` 0 (138 passed), `drive check` 0 (16 PNGs), `check-features` 0. Looked at /tmp/t38-shots/board-1280.png: title row with secondary exports + primary New task, counted columns, overdue badge, checklist bar, dimmed Done card, three sections below.
+- [x] 6. Record. verify.md Drive (8 screens, 16 PNGs), result rows, Features rows for AC5/AC6; backlog line added.
+- [x] Done when: T38 committed on nstack/design (724980f), items 1-6 ticked.
+- Decision (builder): count is a bare-number span (no aria-label; axe flags aria-label on a span). Done cards use background colour + muted title, not opacity. Add task submit is primary; Create label/Invite secondary. a11y setup moves its card by keyboard (drag of an off-screen card timed out; move.spec drag tests pass).
