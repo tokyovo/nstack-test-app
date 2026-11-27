@@ -316,6 +316,79 @@ Not verified: none.
 - [x] 2. Sync. origin/main 7013a29 is an ancestor of the branch; nothing came in, verify stands.
 - [x] 3. Push. nstack/design-rules.
 - [x] 4. Open the PR. Body: user change, tickets, verification table, screens, merge danger (revert-safe, markup + CSS + tests), decisions.
+- [x] 5. Wait for CI. PR #26: runs 45972246117 and 45972277688 pass.
+- [x] 6. Merge. merge: auto, 0 important findings -> squash 7457fcc.
+- [x] 7. Confirm and clean up. main pulled; lint 0, typecheck 0; CI on 7457fcc success (45972984885); nstack/design-rules deleted local and remote; worktrees: main only.
+- [x] Done when: the PR is merged, CI is green on the default branch, and the fast checks pass there, or the PR is parked with a reason.
+
+## 2026-11-27 improve
+- Read: improve/SKILL.md c8daf07
+- [x] 1. Gather evidence
+  - [x] 1.1. Broken things. None: full gate green at edede51; CI green on PR #26.
+  - [x] 1.2. Known problems. 0 open issues; needs-human none open; backlog read.
+  - [x] 1.3. Gaps against the goal. None: every feature has a Features row and passing proof (check-features 0).
+  - [x] 1.4. Outside demand. research.md 2026-11-25 (2 days, fresh); its candidates in backlog (top 5: templates, multiple assignees).
+  - [x] 1.5. Risk. npm audit 0 high/critical, no secrets in bundle (check-security at orient).
+  - [x] 1.6. User experience. Critique of all 18 screens in verify design-rules: pass. Reconsidered: checklist Delete has no confirmation, which verify item 6 counts as a failure on a changed screen (the task page); my verify entry missed it. New: date picker icon text-coloured vs muted chevron (T50 builder).
+  - [x] 1.7. Code health. Nothing slowing work beyond backlog items.
+- [x] 2. Score. Checklist confirm rescored 8 (v2 r2 c4: ConfirmButton pattern exists); date icon tint 6 (v1 r1 c4). scripts/score exit 0.
+- [x] 3. Decide. Top 3: 8, 6, 5. 8 meets bar 7 -> plan slice checklist-confirm. Icon tint not grouped (below bar).
+- [x] Done when: sources checked, scored, slice planned.
+- Lesson: verify item 6 says "a destructive action with no confirmation fails this item", but the critique list in the design skill has no such line, so the critique on the task page passed without checking it. Structure for it: T52's test makes confirmation the spec for the last unconfirmed delete; see hand-off for a check.
+
+## 2026-11-27 plan checklist-confirm
+- Read: plan/SKILL.md fa73337
+- [x] 1. Learn the ground truth. checklist-item.tsx Delete is type=button with useTransition, no confirm; ConfirmButton is a submit button; checklist.spec has 8 Delete clicks.
+- [x] 2. Interrogate the goal yourself
+  - [x] 2.1. Questions: message text; dismiss behaviour; double-click with a blocking confirm; tests that click Delete.
+  - [x] 2.2. Answered from the code: same window.confirm pattern as task/project/label deletes.
+  - [x] 2.3. Decision: window.confirm in the row, not a reused ConfirmButton (different button type).
+- [x] 3. Write the spec. 5 ACs.
+- [x] 4. Cut tickets. T52 alone (one component plus its spec).
+- [x] 5. Check the plan
+  - [x] 5.1. AC1-5 -> T52 proof (new AC39 test, AC47, full checklist.spec).
+  - [x] 5.2. Fresh Explore reader: 10 questions, answered under "Plan-check answers".
+  - [x] 5.3. Slice in plan.md, branch nstack/checklist-confirm.
+- [x] Done when: criteria mapped, questions answered, slice written.
+
+## 2026-11-27 build T52
+- Read: build/SKILL.md 4b2ec60
+- [x] 1. Branch. nstack/checklist-confirm from main 7457fcc.
+- [x] 2. Starting state. lint 0, typecheck 0 on main 7457fcc.
+- [x] 3. Dispatch. One builder, pointer brief, in the main checkout (alone).
+- [x] 4. Read the reply. ae4a27d: window.confirm('Delete item "<text>"?') before the delete; deleteItem(page, text, accept|dismiss) helper for every Delete click; the useRef guard was tried and dropped (the pending transition disables the button; AC47 counts exactly 1 dialog and 1 action). Spec change: "AC39: Delete removes the item without asking" -> "AC39: Delete asks first; dismissing keeps the item, accepting removes it".
+- [x] 5. Prove it yourself. At ae4a27d: lint 0, typecheck 0, build 0, check:e2e-temp checklist.spec 10 passed; with checklist-item.tsx from 1a0e96d: 7 failed, 3 passed; restored, tree clean.
+- [x] 6. Record. This entry; no Backlog lines.
+- [x] Done when: T52 committed on nstack/checklist-confirm, items ticked.
+
+## 2026-11-27 verify slice checklist-confirm
+- Read: verify/SKILL.md 1af2e2c
+- [x] 1. Clean tree. HEAD 35a804e (code ae4a27d).
+- [x] 2. Project checks. lint 0, typecheck 0, build 0 (0 warnings), check:e2e-temp 177 passed / 0 failed / 0 skipped, 0 temp files, no data/; drive check 0 (18 PNGs). First full run: 9 failed, because I restored checklist-item.tsx after the bite run without rebuilding (.next held the no-confirm build; the 7 checklist failures equal the bite run), plus 2 a11y timeouts at load 6.5; after `npm run build` all 177 passed.
+- [x] 3. Every acceptance criterion in scope has a passing check. AC1-3, AC5 checklist.spec "AC39: Delete asks first; ..."; AC4 "AC47: double-clicking Delete ..." (exactly 1 dialog, 1 action). check-features 0 (Checklist items row proof name unchanged).
+- [x] 4. Every new check bites. checklist-item.tsx from 1a0e96d: 7 failed; restored + rebuilt: 10 passed.
+- [x] 5. The real thing runs. Playwright against next start, in CI.
+- [x] 6. Every changed screen looks right. Task page markup and CSS unchanged (diff: onClick only); the confirm is the browser's native dialog, as for task/project/label deletes. Every delete in the app now asks first.
+- [x] 7. Nothing got weaker. Removed test "AC39: Delete removes the item without asking" is the spec change (replaced by the asks-first test), logged in build T52; no skip/any/ignore added.
+- [x] 8. No new warnings or errors. 0/0; 177 tests as before.
+- [x] 9. Access is enforced. Deny proof "AC39: a non-member's checklist requests change nothing" passes (accepts the dialog so the request is sent); no route/action change.
+- [x] Done when: all ticked. Not verified: none.
+- Lesson: a stale `.next` after a bite restore made a full run test old code (no rebuild). Once so far; backlog: make check:e2e-temp refuse a build older than the newest app/ or lib/ file.
+
+## 2026-11-27 review slice checklist-confirm
+- Read: review/SKILL.md 053d586
+- [x] 1. Dispatch. One reviewer, worktree, at 665b91a. Pass, 0 findings; lint/typecheck/build pass, checklist.spec 10 passed; mutations: ignoring the confirm answer -> AC39 red; removing disabled={removing} -> AC47 red 3/3 (2 dialogs). Reverted, clean.
+- [x] 2. Second reviewer. n/a: no auth, payments, migration, concurrency or public API.
+- [x] 3. Act on every finding. None.
+- [x] 4. Review the fixes. n/a: no fixes.
+- [x] Done when: 0 important; verify passed at 665b91a code; no nits.
+
+## 2026-11-27 ship slice checklist-confirm
+- Read: ship/SKILL.md b51cd2a
+- [x] 1. Commit. T52 ae4a27d plus state commits.
+- [x] 2. Sync. origin/main 7457fcc is an ancestor; nothing came in.
+- [x] 3. Push. nstack/checklist-confirm.
+- [x] 4. Open the PR. Body: change, ticket, verification, merge danger (revert-safe, one client component and its spec), decisions.
 - [ ] 5. Wait for CI
 - [ ] 6. Merge
 - [ ] 7. Confirm and clean up.

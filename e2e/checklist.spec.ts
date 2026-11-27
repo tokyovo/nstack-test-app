@@ -53,6 +53,26 @@ async function setDone(page: Page, text: string, done: boolean) {
   await persistedMove(page, () => (done ? box(page, text).check() : box(page, text).uncheck()));
 }
 
+function deleteButton(page: Page, text: string) {
+  return checklist(page).getByRole("button", { name: `Delete item "${text}"` });
+}
+
+/** Presses Delete on an item and answers the confirm; returns the confirm's message. */
+async function deleteItem(page: Page, text: string, answer: "accept" | "dismiss"): Promise<string> {
+  let message = "";
+  page.once("dialog", (dialog) => {
+    message = dialog.message();
+    void dialog[answer]();
+  });
+  await deleteButton(page, text).click();
+  await expect.poll(() => message).not.toBe("");
+  return message;
+}
+
+function isAction(request: Request) {
+  return request.method() === "POST" && !!request.headers()["next-action"];
+}
+
 function progress(page: Page, title: string) {
   return cards(page, "To do").filter({ hasText: title }).locator("p.checklist-progress");
 }
@@ -120,7 +140,7 @@ test("AC39: ticking and unticking is saved without a button", async ({ browser }
   await expect(box(a.page, "Second")).not.toBeChecked();
 });
 
-test("AC39: Delete removes the item without asking", async ({ browser }) => {
+test("AC39: Delete asks first; dismissing keeps the item, accepting removes it", async ({ browser }) => {
   const a = await newUser(browser);
   const url = await createProject(a.page, "Trim");
   await addTask(a.page, url, "Shorten");
@@ -128,7 +148,19 @@ test("AC39: Delete removes the item without asking", async ({ browser }) => {
   await addItem(a.page, "Keep");
   await addItem(a.page, "Drop");
 
-  await checklist(a.page).getByRole("button", { name: 'Delete item "Drop"' }).click();
+  let sent = 0;
+  const countAction = (request: Request) => void (isAction(request) && sent++);
+  a.page.on("request", countAction);
+  expect(await deleteItem(a.page, "Drop", "dismiss")).toBe('Delete item "Drop"?');
+  await expect(items(a.page)).toHaveText([/Keep/, /Drop/]);
+  a.page.off("request", countAction);
+  expect(sent).toBe(0);
+  await a.page.goto(taskUrl);
+  await expect(items(a.page)).toHaveText([/Keep/, /Drop/]);
+  await expect(box(a.page, "Drop")).toBeEnabled();
+  await expect(deleteButton(a.page, "Drop")).toBeEnabled();
+
+  expect(await deleteItem(a.page, "Drop", "accept")).toBe('Delete item "Drop"?');
   await expect(items(a.page)).toHaveText([/Keep/]);
   await a.page.goto(taskUrl);
   await expect(items(a.page)).toHaveText([/Keep/]);
@@ -157,7 +189,7 @@ test("AC40: the card shows checklist progress, and none without items", async ({
   await expect(progress(a.page, "Tracked")).toHaveText("Checklist 2/3");
 
   await openTask(a.page, "Tracked");
-  await checklist(a.page).getByRole("button", { name: 'Delete item "One"' }).click();
+  await deleteItem(a.page, "One", "accept");
   await expect(items(a.page)).toHaveCount(2);
   await a.page.goto(url);
   await expect(progress(a.page, "Tracked")).toHaveText("Checklist 2/2");
@@ -190,7 +222,7 @@ test("AC39: an item id of another task in the project is not toggled or deleted"
   await setDone(a.page, "Bait", true);
   await toggled();
   const deleted = await tamperBoundIds(a.page, [null, null, protectedId]);
-  await checklist(a.page).getByRole("button", { name: 'Delete item "Bait"' }).click();
+  await deleteItem(a.page, "Bait", "accept");
   await deleted();
 
   await a.page.goto(targetUrl);
@@ -219,7 +251,7 @@ async function tamperedByNonMember(browser: Browser) {
   await setDone(b.page, "Decoy", true);
   await toggled();
   const deleted = await tamperBoundIds(b.page, [target.projectId, target.taskId, target.itemId]);
-  await checklist(b.page).getByRole("button", { name: 'Delete item "Decoy"' }).click();
+  await deleteItem(b.page, "Decoy", "accept");
   await deleted();
   const added = await tamperBoundIds(b.page, [target.projectId, target.taskId]);
   await submitItem(b.page, "Planted");
@@ -242,7 +274,7 @@ function checklistAlert(page: Page) {
 async function deleteItemInOtherTab(page: Page, text: string) {
   const other = await page.context().newPage();
   await other.goto(page.url());
-  await checklist(other).getByRole("button", { name: `Delete item "${text}"` }).click();
+  await deleteItem(other, text, "accept");
   await expect(box(other, text)).toHaveCount(0);
   await other.close();
 }
@@ -282,11 +314,11 @@ test("AC47: deleting an item already deleted in another tab shows an alert and d
   await addItem(a.page, "Gone");
 
   await deleteItemInOtherTab(a.page, "Gone");
-  await checklist(a.page).getByRole("button", { name: 'Delete item "Gone"' }).click();
+  await deleteItem(a.page, "Gone", "accept");
   await expect(checklistAlert(a.page)).toHaveText('Could not update "Gone"');
   await expect(items(a.page)).toHaveText([/Keep/, /Drop/]);
 
-  await checklist(a.page).getByRole("button", { name: 'Delete item "Drop"' }).click();
+  await deleteItem(a.page, "Drop", "accept");
   await expect(items(a.page)).toHaveText([/Keep/]);
   await expect(checklistAlert(a.page)).toHaveCount(0);
 });
@@ -295,7 +327,6 @@ test("AC47: deleting an item already deleted in another tab shows an alert and d
 async function settledActions(page: Page, act: () => Promise<void>) {
   let sent = 0;
   let answered = 0;
-  const isAction = (request: Request) => request.method() === "POST" && !!request.headers()["next-action"];
   const onRequest = (request: Request) => void (isAction(request) && sent++);
   const onFinished = (request: Request) => void (isAction(request) && answered++);
   page.on("request", onRequest);
@@ -315,7 +346,13 @@ test("AC47: double-clicking Delete removes the item and shows no alert", async (
   await addItem(a.page, "Keep");
   await addItem(a.page, "Twice");
 
-  await settledActions(a.page, () => checklist(a.page).getByRole("button", { name: 'Delete item "Twice"' }).dblclick());
+  let dialogs = 0;
+  a.page.on("dialog", (dialog) => {
+    dialogs++;
+    void dialog.accept();
+  });
+  await settledActions(a.page, () => deleteButton(a.page, "Twice").dblclick());
+  expect(dialogs).toBe(1);
   await expect(items(a.page)).toHaveText([/Keep/]);
   await expect(checklistAlert(a.page)).toHaveCount(0);
 });

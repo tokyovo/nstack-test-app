@@ -15,4 +15,5 @@
 - design: T37-T40, PR #20
 - labels-dup-calendar: T41-T46, PR #22
 - secure-access: T47-T48, PR #24
-- design-rules: T49-T51, PR #<pr>
+- design-rules: T49-T51, PR #26
+- checklist-confirm: T52, PR #<pr>

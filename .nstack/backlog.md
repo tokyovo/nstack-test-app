@@ -2,9 +2,12 @@
 Rescored 2026-11-26 after slice 8 (UX pass on /tmp/s8-shots/). Earlier: rescored 2026-11-25 after slice 5 (UX pass on T18 `npm run screens` output, /tmp/t18-shots/). Slice 4 and 5 shipped; items below are open.
 Scored 2026-11-25 (value + risk + cost, cost 5 = cheapest). Sources: UX pass (headless Chromium, screenshots /tmp/ux-shots/), research.md (29 sources), earlier reviews.
 
+- 8 (v2 r2 c4) Checklist-item Delete removes the row without asking (design skill and verify item 6: a destructive action needs confirmation); the task page's other deletes already ask. Cheap: the row already has Delete; ask with window.confirm like ConfirmButton, keep the double-click guard. Evidence: verify slice design; improve 2026-11-27 (rescored: cost is low with the existing confirm pattern; risk is a one-tap data loss on the screen slice design-rules just changed).
+- 6 (v1 r1 c4) The date input's picker icon is text-coloured while the select chevron is `--muted`; tint it to match. Evidence: T50 builder.
 - 5 (v2 r1 c2) Task templates (duplicate shipped in PR #22; a saved template list is the rest of that research candidate). Evidence: research.md (4 sources for duplicate/templates).
 - 5 (v2 r1 c2) Multiple assignees. Evidence: 3 sources, research.md
 - 5 (v1 r1 c3) Label duplicate check and name order are ASCII-only (`COLLATE NOCASE`): "Été" and "été" can both exist. Same limit as user emails. Evidence: slice 8 security reviewer (better-sqlite3 repro).
+- 5 (v1 r2 c2) `check:e2e-temp` and `drive` run whatever `.next` holds; after a bite-run restore without `npm run build` a full suite tested old code (verify checklist-confirm). Refuse a build older than the newest file in app/ or lib/. Evidence: verify slice checklist-confirm.
 - 4 (v1 r2 c1) The security reviewer ran `next start` by hand (port 3251) and left it running after its worktree was removed; the controller found it at hand-off. If it happens again, make reviewers start servers only through `drive start`/`stop`. Evidence: hand-off 2026-11-27c.
 - 4 (v1 r2 c1) Project rename/delete check membership with their own `MEMBER_CHECK` SQL in lib/projects.ts, not `getProject`: two membership rules to keep in step. Use one. Evidence: T48 bite run.
 - 4 (v1 r2 c1) CSP is `frame-ancestors 'none'` only; a script-src policy needs per-request nonces (every page dynamic). Evidence: slice secure-access plan.
@@ -15,7 +18,6 @@ Scored 2026-11-25 (value + risk + cost, cost 5 = cheapest). Sources: UX pass (he
 - 4 (v1 r2 c1) `drive stop` trusts a recorded pid that is alive on a listening port; a pid reused by an unrelated process would be killed. Check /proc/<pid>/cmdline for next-server. Evidence: T35 review-fix builder.
 - 4 (v2 r1 c1) Descriptions and comments collapse typed newlines; `white-space: pre-line` would keep them. Evidence: T39 builder.
 - 4 (v1 r1 c2) At 390 px with a long email the header "Log out" wraps under the email (projects-empty-390). Predates slice design. Evidence: T40 builder.
-- 4 (v2 r1 c1) Checklist-item Delete removes the row without asking or undo (design skill wants confirmation on destructive actions); add an undo toast or confirm. Evidence: verify slice design.
 - 4 (v1 r2 c1) AC7 test (e2e/comments.spec.ts:153) cannot catch a dropped `Z` in lib/comments.ts:33 because the e2e server runs in UTC; run the e2e server with a non-UTC `TZ` (check the overdue tests, which use the server local date) or unit-check the parse. Evidence: review slice design.
 - 3 (v1 r1 c1) `drive screens --port N` fails with connection refused unless `drive start` ran first; its --help does not say so. Evidence: T43 builder.
 - 3 (v1 r1 c1) Board Labels rows: the edit name input and colour select have accessible names ("Name for Bug") but no visible label; the chip names the row. Evidence: verify labels-dup-calendar.
