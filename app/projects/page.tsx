@@ -14,7 +14,7 @@ export default async function ProjectsPage() {
   const projects = listProjects(user.id);
   return (
     <main className="projects-page">
-      <h2>Projects</h2>
+      <h1>Projects</h1>
       {projects.length === 0 ? (
         <p className="projects-empty">No projects yet. Create your first project below.</p>
       ) : (

@@ -57,7 +57,7 @@ test("AC22, AC41: seed fills the app with a demo user, a busy board and an empty
   await page.goto(`${first.boardUrl}/calendar?month=${due.slice(0, 7)}`);
   const dayOf = (title: string) =>
     page.locator("li.calendar-day").filter({ has: page.getByRole("link", { name: title, exact: true }) });
-  await expect(dayOf("Pick the new domain name").getByRole("heading")).toHaveText("1", { useInnerText: true });
-  await expect(dayOf("Redesign the pricing page").getByRole("heading")).toHaveText("28", { useInnerText: true });
+  await expect(dayOf("Pick the new domain name").locator(".calendar-date")).toHaveText("1", { useInnerText: true });
+  await expect(dayOf("Redesign the pricing page").locator(".calendar-date")).toHaveText("28", { useInnerText: true });
   await expect(page.getByText("1 task has no due date")).toBeVisible();
 });

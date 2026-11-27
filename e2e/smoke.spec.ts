@@ -3,7 +3,7 @@ import Database from "better-sqlite3";
 
 test("home page renders the app name", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: "Task board" })).toBeVisible();
+  await expect(page.locator("header .app-title")).toHaveText("Task board");
 });
 
 test("the app creates its schema in the DATABASE_PATH file", async ({ page }) => {

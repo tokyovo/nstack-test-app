@@ -38,7 +38,7 @@ export default async function ProjectPage({ params, searchParams }: PageProps<"/
   return (
     <main>
       <div className="board-title">
-        <h2>{project.name}</h2>
+        <h1>{project.name}</h1>
         <p className="export-links">
           <Link className="button" href={`/projects/${project.id}/calendar`}>
             Calendar
@@ -70,11 +70,11 @@ export default async function ProjectPage({ params, searchParams }: PageProps<"/
       {/* After the board so the columns show without scrolling; the "New task" link above jumps here. */}
       <div className="board-sections">
         <section id="new-task">
-          <h3>New task</h3>
+          <h2>New task</h2>
           <TaskForm action={createTaskAction.bind(null, project.id)} members={members} />
         </section>
         <section>
-          <h3>Labels</h3>
+          <h2>Labels</h2>
           {labels.length === 0 && <p className="section-empty">No labels yet</p>}
           <ul aria-label="Labels" className="plain-list">
             {labels.map((label) => (
@@ -89,7 +89,7 @@ export default async function ProjectPage({ params, searchParams }: PageProps<"/
           <LabelForm action={createLabelAction.bind(null, project.id)} />
         </section>
         <section>
-          <h3>Members</h3>
+          <h2>Members</h2>
           <ul aria-label="Members" className="plain-list">
             {members.map((member) => (
               <li key={member.id}>{member.email}</li>
