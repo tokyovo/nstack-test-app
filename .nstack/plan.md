@@ -14,4 +14,4 @@
 - drive-tool: T35-T36, PR #17
 - design: T37-T40, PR #20
 - labels-dup-calendar: T41-T46, PR #22
-- secure-access: T47-T48, PR #<n>
+- secure-access: T47-T48, PR #24
