@@ -167,3 +167,15 @@ Entries before 2026-11-27 are in git history: `git log -p .nstack/log.md`.
   - [x] 5.2. Fresh Explore subagent read /tmp/slice12-plan.md + code: 15 questions (count vs region name, danger colour vs tests, count of visible vs all, keyboard move refresh, timestamp parsing/format/regex, UTC suffix, drive screens lacks 404/empty/no-match, 404 logged in/out, not-found main, focus test page, 44 px exemptions, progress bar a11y, overdue markup, grid vs AC43/AC44, lint script rules); each answered in AC3-AC8, AC10, T37, T38 or a Decision.
   - [x] 5.3. Slice written to plan.md with branch nstack/design.
 - [x] Done when: every criterion has a proof, the reader's questions are answered, the slice is in plan.md.
+
+## 2026-11-27 build T37
+- Read: build/SKILL.md 13386ea
+- [x] 1. Branch. nstack/design from main 344be19.
+- [x] 2. Starting state. lint 0, typecheck 0 on main efcd1aa/344be19 (same code; branch adds only .nstack/).
+- [x] 3. Dispatch. Fresh nstack:builder with the pointer brief.
+- [x] 4. Read the reply. Done: f60d337 + 6792ffe (critique fixes: header height logged in/out, 404 orphan word).
+- [x] 5. Prove it yourself. At 6792ffe: lint 0 (incl. check-css-tokens), typecheck 0, build 0 (0 warnings), `check:e2e-temp` 0 (134 passed, 0 temp files, no data/), `drive check` 0 (12 PNGs), `check-features` 0. Looked at /tmp/t37-shots/login-1280.png: tokens applied, primary button accent.
+- [x] 6. Record. verify.md rows/Drive updated (6 screens, 12 PNGs; 3 Features rows); backlog lines added.
+- [x] Done when: T37 committed on nstack/design (6792ffe), items 1-6 ticked.
+- Decision (builder): derived tokens accent-hover, danger-hover, accent-soft, danger-soft and control edge #8A939C because border #D5D9DD gives control edges ~1.4:1 (needs 3:1). Controls 2.5rem, 2.75rem at <=640px.
+- Note: AC4 focus test passed before the CSS (Chromium's default ring); it guards against later removal.

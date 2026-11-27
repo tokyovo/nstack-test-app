@@ -24,6 +24,8 @@ Scored 2026-11-25 (value + risk + cost, cost 5 = cheapest). Sources: UX pass (he
 - 3 (v1 r1 c1) drive: a non-DriveError (e.g. EACCES) ends with a Node stack trace, not one line; `existsSync(STATE_DIR)` after `secureStateDir` is redundant. Evidence: T35 round-2 builder.
 - 3 (v1 r1 c1) `drive check` seeds twice (screens seeds again); idempotent but ~5-15s slower. Evidence: drive-tool review round 3.
 - 3 (v1 r1 c1) `drive stop --all`: if one instance fails to stop, the loop ends there without reporting the ones already stopped or trying the rest. Evidence: drive-tool review round 3.
+- 3 (v1 r1 c1) `page.getByRole("alert")` also matches Next's route announcer; tests and scripts should scope alerts to `main [role=alert]`. Evidence: T37 builder.
+- 3 (v1 r1 c1) Headings render at normal weight with this machine's system font; check heading weight in the design critique. Evidence: T37 builder.
 
 ## Rejected
 - Login timing leaks whether an email exists: signup and invite reveal it by design (AC2/AC7). Reconsider if: signup or invite stop revealing it.
