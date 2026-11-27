@@ -684,6 +684,12 @@ async function tamperedLabelRequest(
   await expect(labelChips(b.page)).toHaveText(["Mine"]);
 }
 
+test("AC36: a create-label request naming a project the user is not a member of adds no label there", async ({
+  browser,
+}) => {
+  await tamperedLabelRequest(browser, (a) => [a.projectId], (page) => submitLabel(page, "Hacked"));
+});
+
 const renameMine = (page: Page) => submitRename(page, "Mine", "Hacked", "Red");
 
 test("AC3: a rename request naming a project the user is not a member of changes nothing", async ({ browser }) => {

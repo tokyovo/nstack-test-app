@@ -162,3 +162,57 @@ Entries before 2026-11-27 are in git history: `git log -p .nstack/log.md`.
 - Servers: a next-server on 127.0.0.1:3400 (pid 114319, started 2026-11-26 20:04, DATABASE_PATH under ~/.local/share/nstack-test-app/demo.db) is not from this run; left running. /tmp/taskboard-drive empty; no e2e temp DBs; all worktrees removed.
 - Log trimmed to this run (was 423 lines).
 - Slowed the run: parallel builders pushed seed.spec past 30s (fixed: 60s timeout, T45); a click-then-fill race on a label shared by board and task page (fixed; the sibling scan found no other case). tsconfig now excludes .claude worktrees so typecheck ignores builders' copies.
+
+## 2026-11-27 orient (controller, run "continue")
+- Nothing in flight: tree clean, one worktree, no unmerged nstack branches, no open nstack PRs; CI on main c1574a6 success (45959198563).
+- check-env ok; lint 0; typecheck 0; check-features 0; build 0; drive check pass (18 PNGs).
+- check-security against a drive copy FAILED: no Access/Deny proof columns; no CSP or X-Frame-Options; no nosniff. npm audit 0 high/critical, no secrets in bundle. -> first slice secure-access.
+- needs-human: no open items.
+
+## 2026-11-27 plan slice secure-headers
+- Read: plan/SKILL.md fa73337
+- [x] 1. Learn the ground truth. Every server action calls `requireUser`; membership via `getProject` (lib/projects.ts:16); deny tests exist for every member write except create label; no no-session test for a server action; next.config.ts has no headers.
+- [x] 2. Interrogate the goal yourself
+  - [x] 2.1. Questions: which CSP; where headers go; access level of non-request rows; how to send a sessionless action; how to prove deny tests bite.
+  - [x] 2.2. Answered from code/conventions: headers via next.config `headers()`; sessionless = clearCookies then submit; bite = drop the membership condition in getProject.
+  - [x] 2.3. Decision: CSP `frame-ancestors 'none'` only (script-src needs nonces, every page dynamic; backlog). Decision: rows with no request path are `public`.
+- [x] 3. Write the spec. plan.md slice secure-access, AC1-AC6, out of scope, design line.
+- [x] 4. Cut tickets. T47 headers, T48 access map + deny proofs; independent, buildable in parallel.
+- [x] 5. Check the plan
+  - [x] 5.1. AC1->T47; AC2-AC5->T48; AC6->T47+T48 (check-security, check-features).
+  - [x] 5.2. Fresh Explore reader listed 12 questions; answered in the slice's "Answers" paragraph.
+  - [x] 5.3. Slice in plan.md, branch nstack/secure-access.
+- [x] Done when: every criterion has a proof, the fresh reader's questions are answered in the plan, and the slice is in `plan.md`.
+- (Slice was named secure-access after the step line was printed with "secure-headers"; same step.)
+
+## 2026-11-27 build T47 T48
+- Read: build/SKILL.md 4b2ec60
+- [x] 1. Branch. nstack/secure-access from main c1574a6.
+- [x] 2. Starting state. lint 0, typecheck 0 at 71c196d.
+- [x] 3. Dispatch. Two nstack:builder agents in worktrees, one wave (4 cores, 14 GB free, 3 GB swap), E2E_PORT 3210/3220.
+- [x] 4. Read the reply. T47 cb68fa8 (headers spec red on missing CSP, then green). T48 272e8e0 (3 new deny tests; guards already existed, so red seen by bite instead).
+- [x] 5. Prove it yourself. T47 at cb68fa8: lint 0, typecheck 0, build 0, headers.spec 1 passed. Merged ff84921: lint 0, typecheck 0, build 0, access+labels+projects+headers specs 39 passed, 0 temp files; check-features 0; check-security against drive copy exit 0 (36 deny proofs, headers ok, audit 0).
+- [x] 6. Record. plan.md T47/T48 ticked with bite results; 2 backlog lines (MEMBER_CHECK duplicate, script-src CSP).
+- [x] Done when: both tickets committed on nstack/secure-access with items 1-6 ticked.
+- Decision: T48's bite for AC5 found rename/delete project use their own membership SQL; proved by neutralising it separately rather than refactoring now (backlog, not in slice scope).
+
+## 2026-11-27 verify slice secure-access
+- Read: verify/SKILL.md 1af2e2c
+- [x] 1. Clean tree. 7e77685, `git status` empty.
+- [x] 2. Project checks. lint 0 (0 warnings), typecheck 0, build 0 (0 warnings), check:e2e-temp 0: 172 passed, 0 skipped, 0 temp files; no data/ dir; drive check pass (18 PNGs).
+- [x] 3. Every acceptance criterion in scope has a passing check. AC1 headers.spec; AC2 access.spec x2; AC3 labels.spec AC36 create-label; AC4 check-security access map (36 deny proofs); AC5 bite runs (T48 builder, re-done below for the new tests); AC6 check-security exit 0, check-features 0. New Features row for the headers.
+- [x] 4. Every new check bites. Broke all 3 guards at once (headers source -> /never-matches; createLabel membership line; requireUser in createProjectAction and /projects page), rebuilt: the 4 new tests red, restored via git checkout, rebuilt: 6/6 green, tree clean.
+- [x] 5. The real thing runs. Drive copy: `curl -sI <url>/login` -> 200 with `Content-Security-Policy: frame-ancestors 'none'` and `X-Content-Type-Options: nosniff`.
+- [x] 6. Every changed screen looks right. n/a: no UI change (headers and tests only); drive screens still render 18 PNGs with no console errors.
+- [x] 7. Nothing got weaker. `git diff main...HEAD` on e2e/app/lib/next.config: no removed lines; no skip/only/any/ts-ignore/eslint-disable added.
+- [x] 8. No new warnings or errors. Counts as base (0 lint/build warnings); e2e 168 -> 172; verify.md Last result updated.
+- [x] 9. Access is enforced. check-security against drive copy exit 0: access map ok, no secrets, headers and cookies ok, npm audit 0 high/critical.
+- [x] Done when: every gate item ticked; Not verified: none.
+
+## 2026-11-27 review slice secure-access
+- Read: review/SKILL.md 053d586
+- [x] 1. Dispatch. nstack:reviewer in a worktree at e7a140c: pass, 0 findings (lint/typecheck/build, 44 e2e passed, bite on 3 guards red then restored, check-security ok).
+- [x] 2. Second reviewer. Auth-touching: second nstack:reviewer, "Focus: security and failure modes", in parallel: pass, 0 findings (bite red, check-security ok, favicon 404 and POST /login carry both headers).
+- [x] 3. Act on every finding. n/a: no findings in either round.
+- [x] 4. Review the fixes. n/a: no fixes.
+- [x] Done when: latest round has no important findings, verify passed at e7a140c, no nits.
