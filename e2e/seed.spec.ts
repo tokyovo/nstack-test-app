@@ -7,6 +7,8 @@ test("AC22, AC41: seed fills the app with a demo user, a busy board and an empty
   browser,
   baseURL,
 }) => {
+  // Seeds twice through the UI (~17s idle); under load it passed the 30s default.
+  test.setTimeout(60_000);
   const monthBeforeSeed = localToday().slice(0, 7);
   const first = await seed(browser, baseURL!);
   expect(first.email).toBe("demo@example.com");
