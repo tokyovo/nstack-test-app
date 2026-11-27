@@ -269,3 +269,13 @@ Entries before 2026-11-27 are in git history: `git log -p .nstack/log.md`.
   - [x] 5.2. Fresh Explore reader: 15 questions, all answered under "Plan-check answers".
   - [x] 5.3. Slice in plan.md, branch nstack/design-rules.
 - [x] Done when: every criterion has a proof, questions answered, slice in plan.md.
+
+## 2026-11-27 build T49 T50
+- Read: build/SKILL.md 4b2ec60
+- [x] 1. Branch. nstack/design-rules from main 7013a29.
+- [x] 2. Starting state. lint 0, typecheck 0 at 98bf7ff (orient).
+- [x] 3. Dispatch. Two builders in parallel, worktrees (15 GB, 3 GB swap, 4 cores); both briefs pointer-only, Parallel: 2.
+- [x] 4. Read the reply. T50 e4559f7: select chevron, date picker fit, Save labels secondary, e2e/controls.spec.ts. T49 e3bafd4: font stack, h1 page titles, h2 sections, header .app-title, calendar day numbers not headings, e2e/headings.spec.ts; level assertions updated in calendar/move/nav/seed/smoke specs (spec change: heading levels and the header title are part of the new spec, AC1-AC3, AC6). Neither builder edits .nstack/: controller added design.md lines (controls family; font stack, headings roles, Generic check wording).
+- [x] 5. Prove it yourself. At e4559f7: lint 0, typecheck 0, build 0, controls.spec 1 passed; with globals.css from 98bf7ff it fails ("select ... appearance auto"). At merge 01576b6: lint 0, typecheck 0, build 0; headings+controls+calendar specs 10 passed; with `system-ui` put back first in --font, headings.spec fails (2 of 3 tests).
+- [x] 6. Record. This entry. Backlog: the board has two primaries ("New task" link and "Add task"); to be judged in the verify critique (line 1 / line 9), not deferred.
+- [x] Done when: T49 and T50 committed on nstack/design-rules (merge 01576b6), items ticked.
