@@ -395,3 +395,14 @@ Entries before 2026-11-27 are in git history: `git log -p .nstack/log.md`.
 - [x] 5. Prove it yourself. Fast-forwarded to b5a09ef. With lib/tasks.ts + lib/schema.ts at 4c9f14c: the 2 new tests failed; restored: full gate lint 0, typecheck 0, clean build 0 (0 warnings), `check:e2e-temp` 0 (168 passed), `drive check` 0 (18 PNGs), check-features 0, no data/.
 - [x] 6. Record. Backlog: none new (dev DB files from this unshipped branch keep the CHECK; main never had it).
 - [x] Done when: the ticket is committed on the slice's branch with items 1-6 ticked in its log entry, or is parked in `plan.md`.
+
+## 2026-11-27 ship slice labels-dup-calendar
+- Read: ship/SKILL.md 47e5182
+- [x] 1. Commit. T41-T46 code commits + debug fix + state commits on nstack/labels-dup-calendar.
+- [x] 2. Sync. origin/main 762fb7f is an ancestor of the branch: nothing came in, verify stands.
+- [x] 3. Push. nstack/labels-dup-calendar.
+- [ ] 4. Open the PR
+- [ ] 5. Wait for CI
+- [ ] 6. Merge
+- [ ] 7. Confirm and clean up.
+- [ ] Done when: the PR is merged, CI is green on the default branch, and the fast checks pass there, or the PR is parked with a reason.
