@@ -377,3 +377,11 @@ Entries before 2026-11-27 are in git history: `git log -p .nstack/log.md`.
 - [x] 7. Look for siblings. Script over e2e/*.ts and seed-app.mts for a link click followed by getByLabel(Title|Due date|Description|Assignee): only this line.
 - [x] Done when: passes, failed before, kept, no [DEBUG- lines (grep 0).
 - Cause: click-then-fill race on a label shared by the board and the task page. Fix: wait for the task heading.
+
+## 2026-11-27 review slice labels-dup-calendar
+- Read: review/SKILL.md f713898
+- [ ] 1. Dispatch
+- [ ] 2. Second reviewer
+- [ ] 3. Act on every finding.
+- [ ] 4. Review the fixes
+- [ ] Done when: the latest round has no important findings, `verify` passed after the last fix, and nits are fixed or in `backlog.md`.
