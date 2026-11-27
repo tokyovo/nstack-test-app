@@ -60,6 +60,8 @@ How an agent runs and uses the app on its own, without touching anyone's data.
 | Create labels | /projects/<id>, New label form | `e2e/labels.spec.ts` "AC36: creating labels lists them on the board in name order, any case" |
 | Label colours | /projects/<id>, New label form Colour select; chips on list, cards, task page | `e2e/labels.spec.ts` "AC1: a label's colour shows on its chip in the Labels list, on cards and on the task page; Gray is the default" |
 | Old databases gain label colours | lib/schema.ts `applySchema` on an existing file | `e2e/labels.spec.ts` "AC2: a database file from before label colours opens; its labels become Gray and keep names and task links" |
+| Rename and recolour a label | /projects/<id>, Labels list row edit form | `e2e/labels.spec.ts` "AC3: renaming and recolouring a label shows everywhere: list, cards, filter and task page" |
+| Delete a label (asks first) | /projects/<id>, Labels list Delete label | `e2e/labels.spec.ts` "AC4: Delete label asks first; accepting removes it from the list, the filter and every card; tasks stay" |
 | Assign labels to a task | /projects/<id>/tasks/<taskId>, Labels checkboxes | `e2e/labels.spec.ts` "AC37: a task's labels are ticked on its page, saved, and shown on its card" |
 | Filter by label | /projects/<id>, Label select | `e2e/labels.spec.ts` "AC38: the label filter shows only tasks with that label and combines with search and assignee" |
 | Checklist items | /projects/<id>/tasks/<taskId>, Checklist | `e2e/checklist.spec.ts` "AC39: items are added to the end, unchecked, and kept after reload" |

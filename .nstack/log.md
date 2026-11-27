@@ -327,6 +327,18 @@ Entries before 2026-11-27 are in git history: `git log -p .nstack/log.md`.
 - Read: build/SKILL.md 45c2dd4
 - [x] 1. Branch. nstack/labels-dup-calendar at c2af9e3 (T41, T43, T44 merged); builder in its own worktree.
 - [x] 2. Starting state. lint 0, typecheck 0 at 0770d37 (same code).
+- [x] 3. Dispatch. Fresh nstack:builder, worktree, pointer brief (alone).
+- [x] 4. Read the reply. Done at 518b0a2: renameLabel/deleteLabel, label-row.tsx (chip, Delete label with confirm, edit form), shared readLabel validation; AC3 5 + AC4 3 tests red first; its full suite 165 passed, drive check 18 PNGs.
+- [x] 5. Prove it yourself. Fast-forwarded slice branch to 518b0a2: lint 0, typecheck 0, build 0, `check:e2e-temp -- e2e/labels.spec.ts` 0 (23 passed).
+- [x] 6. Record. Features rows rename + delete label. Builder's backlog line (New label form may drop the picked colour after an error) is a T41 defect against the plan answer: became T45 with the seed timeout.
+- [x] Done when: the ticket is committed on the slice's branch with items 1-6 ticked in its log entry, or is parked in `plan.md`.
+- Earlier, during T42: full suite at 263085e (T41+T43+T44) 156 passed, 1 failed: seed.spec AC22 timed out at 30s in ensureColumn's reload while the T42 builder loaded the machine; third time this test hit the limit (backlog line, 2026-11-25 twice). Rule 8: T45 gives it a 60s timeout. drive check 0 (18 PNGs).
+- Decision: seed.spec gets test.setTimeout(60_000): it seeds twice through the UI and now does more (colours, due dates); assertions unchanged, so no test is weakened.
+
+## 2026-11-27 build T45
+- Read: build/SKILL.md 45c2dd4
+- [x] 1. Branch. nstack/labels-dup-calendar at 518b0a2 + state; builder in its own worktree.
+- [x] 2. Starting state. lint 0, typecheck 0 at 518b0a2.
 - [ ] 3. Dispatch
 - [ ] 4. Read the reply
 - [ ] 5. Prove it yourself.

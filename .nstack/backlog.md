@@ -6,7 +6,6 @@ Scored 2026-11-25 (value + risk + cost, cost 5 = cheapest). Sources: UX pass (he
 - 6 (v3 r1 c2) Rename / delete labels, label colors (slice 8 left them out; the goal names create, assign, filter). Evidence: plan.md slice labels-checklist, Out of scope.
 - 5 (v2 r1 c2) Calendar view. Evidence: 5 sources, research.md
 - 5 (v2 r1 c2) Multiple assignees. Evidence: 3 sources, research.md
-- 5 (v2 r2 c1) (T22) e2e/seed.spec.ts AC22 takes 19-29s against the 30s default test timeout (1 worker, 2 CPUs); under load from a parallel run it timed out twice in T22 `check:e2e-temp` full runs. Give it `test.setTimeout(60_000)` (it seeds twice through the UI) or speed up seed.
 - 5 (v1 r1 c3) Label duplicate check and name order are ASCII-only (`COLLATE NOCASE`): "Été" and "été" can both exist. Same limit as user emails. Evidence: slice 8 security reviewer (better-sqlite3 repro).
 - 4 (v1 r1 c2) Link related tasks; recurring tasks; time tracking; timeline/Gantt (3-4 sources each, research.md).
 - 4 (v1 r1 c2) `withLabels` in lib/tasks.ts matches labels to tasks with a filter per row (O(tasks x labels)); a Map if boards get large. Evidence: T25 builder.
