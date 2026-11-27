@@ -301,3 +301,22 @@ Entries before 2026-11-27 are in git history: `git log -p .nstack/log.md`.
 | screens | /tmp/dr-final2/{login,signup,projects,board,board-empty,board-nomatch,task,calendar,notfound}-{1280,390}.png | lines 1-9 pass on each: one bold h1 largest; bold h2 sections; one green primary (board: Add task; task: Save changes); spacing on scale; no overflow at 390; empty states (board-empty, nomatch) intended; matches design.md; focus per a11y.spec AC4 (outline rule unchanged); action copy; selects chevroned, date input and checkboxes styled like the family |
 
 Not verified: none.
+
+## 2026-11-27 review slice design-rules
+- Read: review/SKILL.md 053d586
+- [x] 1. Dispatch. One reviewer, worktree, pointer brief at f982943. Verdict pass; re-ran lint/typecheck/build, 49 targeted e2e, drive check; two break tests (Save labels primary -> primary test red; column h2 at --text-md -> headings AC4 red), restored clean.
+- [x] 2. Second reviewer. n/a: no auth, payments, migration, concurrency or public API; diff is markup and CSS.
+- [x] 3. Act on every finding. 1 nit: T51 unticked in plan.md -> fixed by replacing the slice with its Done line. 0 important. Declined-to-judge (screen readers on the calendar li name; macOS/Windows font rendering) noted, not provable here.
+- [x] 4. Review the fixes. n/a: the only fix is state-only (.nstack/plan.md).
+- [x] Done when: latest round 0 important; verify passed at edede51 (state commits since do not invalidate); nit fixed.
+
+## 2026-11-27 ship slice design-rules
+- Read: ship/SKILL.md b51cd2a
+- [x] 1. Commit. T50 e4559f7, T49 e3bafd4 (merge 01576b6), T51 c907fbd, critique edede51, state commits; no hook bypass.
+- [x] 2. Sync. origin/main 7013a29 is an ancestor of the branch; nothing came in, verify stands.
+- [x] 3. Push. nstack/design-rules.
+- [x] 4. Open the PR. Body: user change, tickets, verification table, screens, merge danger (revert-safe, markup + CSS + tests), decisions.
+- [ ] 5. Wait for CI
+- [ ] 6. Merge
+- [ ] 7. Confirm and clean up.
+- [ ] Done when: the PR is merged, CI is green on the default branch, and the fast checks pass there, or the PR is parked with a reason.
