@@ -238,3 +238,14 @@ Entries before 2026-11-27 are in git history: `git log -p .nstack/log.md`.
 - [x] 3. Act on every finding. Nit 1 (AC7 cannot catch a dropped `Z` in a UTC server): backlog, because a non-UTC e2e server zone touches the overdue tests; nit 2 (token regex vs hex-letter ID selectors, none exist): backlog.
 - [x] 4. Review the fixes. n/a: no fixes made.
 - [x] Done when: latest round 0 important; verify passed at f4a3b99's code; nits in backlog.md. Reviewer worktree removed.
+
+## 2026-11-27 ship slice-design
+- Read: ship/SKILL.md 47e5182
+- [x] 1. Commit. 10 code commits (T37-T40) + state commits on nstack/design.
+- [x] 2. Sync. origin/main 344be19 is an ancestor of the branch: nothing came in, verify stands.
+- [x] 3. Push. nstack/design.
+- [ ] 4. Open the PR
+- [ ] 5. Wait for CI
+- [ ] 6. Merge
+- [ ] 7. Confirm and clean up.
+- [ ] Done when: the PR is merged, CI is green on the default branch, and the fast checks pass there, or the PR is parked with a reason.
