@@ -45,6 +45,7 @@ How an agent runs and uses the app on its own, without touching anyone's data.
 | Create a task | /projects/<id>, New task form | `e2e/tasks.spec.ts` "AC8: a member creates a task with all fields and it appears in To do" |
 | New-task form confirms what it added | /projects/<id>, New task form | `e2e/tasks.spec.ts` "AC46: after adding a task the new-task form says what it added; the next submit replaces or clears it" |
 | Edit a task | /projects/<id>/tasks/<taskId>, edit form | `e2e/edit-task.spec.ts` "AC17: a member edits a task's fields; the changes persist and show on the board" |
+| Duplicate a task | /projects/<id>/tasks/<taskId>, Duplicate task | `e2e/duplicate.spec.ts` "AC5: duplicating copies the fields, labels and an unticked checklist into To do, without comments" |
 | Delete a task (asks first) | /projects/<id>/tasks/<taskId>, Delete | `e2e/edit-task.spec.ts` "AC17: deleting a task asks first; dismissing keeps it, accepting removes it and its URL 404s" |
 | Move a task by drag and drop | /projects/<id>, drag a card | `e2e/move.spec.ts` "AC9: dragging a card to In progress, then Done, moves it and persists" |
 | Move a task with arrow keys | /projects/<id>, focused card + ArrowLeft/ArrowRight | `e2e/move.spec.ts` "AC10: ArrowRight moves a focused card one column right, ArrowLeft one left; persists" |

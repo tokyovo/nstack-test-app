@@ -292,3 +292,33 @@ Entries before 2026-11-27 are in git history: `git log -p .nstack/log.md`.
   - [x] 5.2. Fresh general-purpose reader: 15 questions, all answered in the slice's Plan check answers.
   - [x] 5.3. Slice in plan.md, branch nstack/labels-dup-calendar.
 - [x] Done when: every criterion has a proof, the fresh reader's questions are answered in the plan, and the slice is in `plan.md`.
+
+## 2026-11-27 build T41
+- Read: build/SKILL.md 45c2dd4
+- [x] 1. Branch. nstack/labels-dup-calendar from main 762fb7f; builder in its own worktree.
+- [x] 2. Starting state. lint 0, typecheck 0 at 47388eb (tsconfig now excludes .claude worktrees).
+- [ ] 3. Dispatch
+- [ ] 4. Read the reply
+- [ ] 5. Prove it yourself.
+- [ ] 6. Record.
+- [ ] Done when: the ticket is committed on the slice's branch with items 1-6 ticked in its log entry, or is parked in `plan.md`.
+
+## 2026-11-27 build T43
+- Read: build/SKILL.md 45c2dd4
+- [x] 1. Branch. nstack/labels-dup-calendar from main 762fb7f; builder in its own worktree.
+- [x] 2. Starting state. lint 0, typecheck 0 at 47388eb (tsconfig now excludes .claude worktrees).
+- [x] 3. Dispatch. Fresh nstack:builder, worktree, pointer brief, Parallel: 3.
+- [x] 4. Read the reply. Done at eab7cb6: duplicateTask (one transaction: task, labels, checklist unticked), duplicateTaskAction, button in .task-actions; 4 tests red first, mutation (keep ticks) seen red.
+- [x] 5. Prove it yourself. Fast-forwarded slice branch to eab7cb6: lint 0, typecheck 0, build 0, `check:e2e-temp -- e2e/duplicate.spec.ts` 0 (4 passed). Full suite runs at verify (other builders still running).
+- [x] 6. Record. Features row "Duplicate a task" added; backlog: drive screens --port help.
+- [x] Done when: the ticket is committed on the slice's branch with items 1-6 ticked in its log entry, or is parked in `plan.md`.
+
+## 2026-11-27 build T44
+- Read: build/SKILL.md 45c2dd4
+- [x] 1. Branch. nstack/labels-dup-calendar from main 762fb7f; builder in its own worktree.
+- [x] 2. Starting state. lint 0, typecheck 0 at 47388eb (tsconfig now excludes .claude worktrees).
+- [ ] 3. Dispatch
+- [ ] 4. Read the reply
+- [ ] 5. Prove it yourself.
+- [ ] 6. Record.
+- [ ] Done when: the ticket is committed on the slice's branch with items 1-6 ticked in its log entry, or is parked in `plan.md`.
