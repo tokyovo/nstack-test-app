@@ -211,3 +211,22 @@ Entries before 2026-11-27 are in git history: `git log -p .nstack/log.md`.
 - [x] 5. Prove it yourself. At a03be3e: lint 0, typecheck 0, build 0 (0 warnings), `check:e2e-temp` 0 (143 passed, 0 temp files, no data/), `drive check` 0 (16 PNGs), `check-features` 0. Looked at /tmp/t40-shots/projects-390.png: rows with rename + quiet Delete, primary Create project, no overflow.
 - [x] 6. Record. verify.md results + empty-projects Features row; backlog: header Log out wraps at 390 with long email (4).
 - [x] Done when: T40 committed on nstack/design (a03be3e), items 1-6 ticked.
+
+## 2026-11-27 verify slice-design
+- Read: verify/SKILL.md db15016
+- [x] 1. Clean tree. `git status --porcelain` empty; HEAD f4ce432; `git diff --quiet a03be3e HEAD -- . ':!.nstack'` exit 0 (only .nstack/ since the code proof).
+- [x] 2. Project checks. At a03be3e (same code): lint 0 (incl. check-css-tokens), typecheck 0, build 0 (0 warnings), `check:e2e-temp` 0 (143 passed, 0 skipped, 0 temp files, no data/), `drive check` 0 (16 PNGs). CI: runs on the PR.
+- [x] 3. Every acceptance criterion in scope has a passing check. AC1 lint (bite: a `#abc` outside :root -> exit 1, T37); AC2-AC3 a11y.spec 6 cases; AC4 a11y.spec focus test; AC5 layout.spec; AC6 move.spec; AC7 comments.spec; AC8 nav.spec 3 tests; AC9 full suite 143 passed; AC10 critique below. Features rows added for 404, a11y, focus, AC5, AC6, AC7, empty projects; `check-features` 0.
+- [x] 4. Every new check bites. Broke all at once (column-count +1, " GMT" suffix, 404 heading text, both empty-state texts, `:focus-visible` outline none, `main select` 3.5rem, checkbox-row flex-start, `main` colour #bbb), rebuilt, ran the 8 touched specs: 16 failed (every new test, each on its own break), 44 passed. `git checkout -- .`, rebuilt: 60 passed; `git status` clean.
+- [x] 5. The real thing runs. `drive start` + `drive screens /tmp/verify-design` exit 0 (seeds through the UI, 16 screens, no console errors); saved Playwright tests drive every AC in CI.
+- [x] 6. Every changed screen looks right. 16 shots in /tmp/verify-design (login, signup, projects, board, board-empty, board-nomatch, task, notfound at 1280 and 390): 8/8 critique lines pass; error states hand-shot by builders (T37 login/signup, T38 label, T40 rename). Delete task/project confirm; checklist-item Delete does not (earlier spec choice, unchanged here; backlog).
+- [x] 7. Nothing got weaker. `git diff main...HEAD -- e2e` removes one line (an import list extended); no skip/fixme/only/any/ts-ignore/eslint-disable/--no-verify added.
+- [x] 8. No new warnings or errors. Build 0 warnings (as before); tests 127 -> 143; drive screens 10 -> 16 (new screens); verify.md Last result updated (a03be3e).
+- [x] Done when: all items ticked; Not verified: CI on the PR (runs at ship).
+
+| Claim | Command | Result |
+|---|---|---|
+| all checks | lint, typecheck, build, check:e2e-temp, drive check at a03be3e | 0/0/0/0 (143 passed)/0 (16 PNGs) |
+| new tests bite | 9 breaks, 8 specs | 16 failed; restored: 60 passed |
+| screens | /tmp/verify-design/{login,signup,projects,board,board-empty,board-nomatch,task,notfound}-{1280,390}.png | 1 main content+primary obvious; 2 spacing on scale, edges aligned; 3 16px body, contrast via axe; 4 no overflow at 390; 5 empty/no-match/404 intended; 6 matches design.md, no stripe/shadow cards; 7 focus ring (AC4 + T38 tab pass); 8 actions named |
+- Decision: checklist-item Delete stays without a confirm (slice labels-checklist chose it; single retypable line; this slice changes only its style).

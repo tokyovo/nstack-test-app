@@ -19,6 +19,7 @@ Scored 2026-11-25 (value + risk + cost, cost 5 = cheapest). Sources: UX pass (he
 - 4 (v1 r2 c1) `drive stop` trusts a recorded pid that is alive on a listening port; a pid reused by an unrelated process would be killed. Check /proc/<pid>/cmdline for next-server. Evidence: T35 review-fix builder.
 - 4 (v2 r1 c1) Descriptions and comments collapse typed newlines; `white-space: pre-line` would keep them. Evidence: T39 builder.
 - 4 (v1 r1 c2) At 390 px with a long email the header "Log out" wraps under the email (projects-empty-390). Predates slice design. Evidence: T40 builder.
+- 4 (v2 r1 c1) Checklist-item Delete removes the row without asking or undo (design skill wants confirmation on destructive actions); add an undo toast or confirm. Evidence: verify slice design.
 - 3 (v1 r1 c1) favicon.ico 404 in console (cosmetic, ignored by drive screens).
 - 3 (v1 r1 c1) (T18 review nit) Project rename fields do not line up across rows (start after each link); project list keeps the default ul indent at 390px.
 - 3 (v1 r1 c1) Alert style is scoped to `main [role="alert"]`; an alert outside <main> would be unstyled, and no test checks font-weight. Evidence: T34 builder.
