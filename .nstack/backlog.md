@@ -5,6 +5,8 @@ Scored 2026-11-25 (value + risk + cost, cost 5 = cheapest). Sources: UX pass (he
 - 5 (v2 r1 c2) Task templates (duplicate shipped in PR #22; a saved template list is the rest of that research candidate). Evidence: research.md (4 sources for duplicate/templates).
 - 5 (v2 r1 c2) Multiple assignees. Evidence: 3 sources, research.md
 - 5 (v1 r1 c3) Label duplicate check and name order are ASCII-only (`COLLATE NOCASE`): "Été" and "été" can both exist. Same limit as user emails. Evidence: slice 8 security reviewer (better-sqlite3 repro).
+- 4 (v1 r2 c1) Project rename/delete check membership with their own `MEMBER_CHECK` SQL in lib/projects.ts, not `getProject`: two membership rules to keep in step. Use one. Evidence: T48 bite run.
+- 4 (v1 r2 c1) CSP is `frame-ancestors 'none'` only; a script-src policy needs per-request nonces (every page dynamic). Evidence: slice secure-access plan.
 - 4 (v1 r1 c2) Link related tasks; recurring tasks; time tracking; timeline/Gantt (3-4 sources each, research.md).
 - 4 (v1 r1 c2) `withLabels` in lib/tasks.ts matches labels to tasks with a filter per row (O(tasks x labels)); a Map if boards get large. Evidence: T25 builder.
 - 4 (v1 r1 c2) No prettier config in the repo; default prettier (80 cols) reflows existing 120-col files, so builders revert reflows by hand. Check in a .prettierrc matching the code. Evidence: T32 builder.

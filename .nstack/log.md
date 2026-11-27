@@ -184,3 +184,14 @@ Entries before 2026-11-27 are in git history: `git log -p .nstack/log.md`.
   - [x] 5.3. Slice in plan.md, branch nstack/secure-access.
 - [x] Done when: every criterion has a proof, the fresh reader's questions are answered in the plan, and the slice is in `plan.md`.
 - (Slice was named secure-access after the step line was printed with "secure-headers"; same step.)
+
+## 2026-11-27 build T47 T48
+- Read: build/SKILL.md 4b2ec60
+- [x] 1. Branch. nstack/secure-access from main c1574a6.
+- [x] 2. Starting state. lint 0, typecheck 0 at 71c196d.
+- [x] 3. Dispatch. Two nstack:builder agents in worktrees, one wave (4 cores, 14 GB free, 3 GB swap), E2E_PORT 3210/3220.
+- [x] 4. Read the reply. T47 cb68fa8 (headers spec red on missing CSP, then green). T48 272e8e0 (3 new deny tests; guards already existed, so red seen by bite instead).
+- [x] 5. Prove it yourself. T47 at cb68fa8: lint 0, typecheck 0, build 0, headers.spec 1 passed. Merged ff84921: lint 0, typecheck 0, build 0, access+labels+projects+headers specs 39 passed, 0 temp files; check-features 0; check-security against drive copy exit 0 (36 deny proofs, headers ok, audit 0).
+- [x] 6. Record. plan.md T47/T48 ticked with bite results; 2 backlog lines (MEMBER_CHECK duplicate, script-src CSP).
+- [x] Done when: both tickets committed on nstack/secure-access with items 1-6 ticked.
+- Decision: T48's bite for AC5 found rename/delete project use their own membership SQL; proved by neutralising it separately rather than refactoring now (backlog, not in slice scope).
