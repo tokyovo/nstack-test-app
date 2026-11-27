@@ -98,11 +98,11 @@ function parseStateFile(file: string): Instance | string {
 
 /** Creates the state dir private to this user, or tightens one an earlier version left group-writable. */
 function secureStateDir(options: { create: boolean; dryRun?: boolean }) {
-  if (!existsSync(STATE_DIR)) {
+  const stat = lstatSync(STATE_DIR, { throwIfNoEntry: false });
+  if (!stat) {
     if (options.create) mkdirSync(STATE_DIR, { recursive: true, mode: 0o700 });
     return;
   }
-  const stat = lstatSync(STATE_DIR);
   if (!stat.isDirectory() || stat.uid !== process.getuid?.())
     throw new DriveError(`${STATE_DIR} is not a directory owned by you: remove it and retry.`);
   if ((stat.mode & 0o077) !== 0 && !options.dryRun) chmodSync(STATE_DIR, 0o700);
@@ -170,7 +170,8 @@ async function waitForLogin(url: string, child: ReturnType<typeof spawn>): Promi
   while (Date.now() < deadline) {
     if (child.exitCode !== null) return false;
     try {
-      if ((await fetch(`${url}/login`)).status === 200) return true;
+      const signal = AbortSignal.timeout(Math.max(1, deadline - Date.now()));
+      if ((await fetch(`${url}/login`, { signal })).status === 200) return true;
     } catch {
       // not listening yet
     }
@@ -188,6 +189,7 @@ async function start(options: { port?: number; build?: boolean }): Promise<Insta
     if (await isListening(options.port))
       throw new DriveError(`Port ${options.port} is in use by another process: pass another --port.`);
   }
+  secureStateDir({ create: true });
   if (options.build || !existsSync(path.join(".next", "BUILD_ID"))) build();
 
   const port = options.port ?? (await freePort());
@@ -201,21 +203,28 @@ async function start(options: { port?: number; build?: boolean }): Promise<Insta
     env: { ...process.env, DATABASE_PATH: db, INSECURE_COOKIES: "1" },
   });
   child.unref();
-  if (child.pid === undefined) throw new DriveError("Could not spawn next start");
+  if (child.pid === undefined) {
+    rmSync(dir, { recursive: true, force: true });
+    throw new DriveError("Could not spawn next start");
+  }
   const instance: Instance = { url: `http://localhost:${port}`, port, pid: child.pid, db, dir };
 
-  if (!(await waitForLogin(`http://127.0.0.1:${port}`, child))) {
+  // Past this point a failure must not leave a server or temp dir that no state file points to.
+  try {
+    if (!(await waitForLogin(`http://127.0.0.1:${port}`, child))) {
+      const why =
+        child.exitCode === null
+          ? `/login did not return 200 within ${READY_TIMEOUT_MS / 1000}s`
+          : `next start exited with ${child.exitCode}`;
+      const tail = readFileSync(log, "utf8").split("\n").slice(-21).join("\n");
+      throw new DriveError(`${why}. Last lines of server.log:\n${tail}`);
+    }
+    writeFileSync(stateFile(port), JSON.stringify(instance));
+  } catch (error) {
     killGroup(instance.pid, "SIGKILL");
-    const tail = readFileSync(log, "utf8").split("\n").slice(-21).join("\n");
     removeInstanceFiles(instance);
-    const why =
-      child.exitCode === null
-        ? `/login did not return 200 within ${READY_TIMEOUT_MS / 1000}s`
-        : `next start exited with ${child.exitCode}`;
-    throw new DriveError(`${why}. Last lines of server.log:\n${tail}`);
+    throw error;
   }
-  secureStateDir({ create: true });
-  writeFileSync(stateFile(port), JSON.stringify(instance));
   return instance;
 }
 

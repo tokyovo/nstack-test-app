@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { spawnSync } from "node:child_process";
-import { chmodSync, existsSync, mkdirSync, mkdtempSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync, statSync, symlinkSync, writeFileSync } from "node:fs";
+import net from "node:net";
 import os from "node:os";
 import path from "node:path";
 
@@ -100,6 +101,50 @@ test("a group-writable state dir left by an earlier version is tightened to 0700
   chmodSync(stateDir, 0o775);
   expect(drive("stop").code).toBe(0);
   expect(statSync(stateDir).mode & 0o777).toBe(0o700);
+});
+
+function freePort(): Promise<number> {
+  return new Promise((resolve) => {
+    const server = net.createServer().listen(0, "127.0.0.1", () => {
+      const { port } = server.address() as net.AddressInfo;
+      server.close(() => resolve(port));
+    });
+  });
+}
+
+function isListening(port: number): Promise<boolean> {
+  return new Promise((resolve) => {
+    const socket = net.connect({ port, host: "127.0.0.1" });
+    socket.once("connect", () => {
+      socket.destroy();
+      resolve(true);
+    });
+    socket.once("error", () => resolve(false));
+  });
+}
+
+test("start with an unusable state dir fails before spawning: no server, no temp dir left", async () => {
+  rmSync(stateDir, { recursive: true });
+  symlinkSync(path.join(tmp, "elsewhere"), stateDir);
+  const port = await freePort();
+
+  const result = drive("start", "--port", String(port));
+  expect(result.code).toBe(1);
+  expect(result.stderr).toContain(`${stateDir} is not a directory owned by you`);
+  expect(await isListening(port)).toBe(false);
+  expect(readdirSync(tmp).filter((name) => name.startsWith("taskboard-drive-"))).toEqual([]);
+});
+
+test("start that fails after the server is up kills it and removes its temp dir", async () => {
+  chmodSync(stateDir, 0o500); // owner-only, so start accepts it, but the state file write fails
+  const port = await freePort();
+
+  const result = drive("start", "--port", String(port));
+  chmodSync(stateDir, 0o700);
+  expect(result.code).toBe(1);
+  expect(result.stderr).toContain("EACCES");
+  expect(await isListening(port)).toBe(false);
+  expect(readdirSync(tmp).filter((name) => name.startsWith("taskboard-drive-"))).toEqual([]);
 });
 
 test("inherited object names are unknown commands", () => {
