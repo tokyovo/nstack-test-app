@@ -13,7 +13,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     <html lang="en">
       <body>
         <header>
-          <h1>{user ? <Link href="/projects">Task board</Link> : "Task board"}</h1>
+          <p className="app-title">{user ? <Link href="/projects">Task board</Link> : "Task board"}</p>
           {user && (
             <>
               <span data-testid="current-user">{user.email}</span>

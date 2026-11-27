@@ -30,7 +30,9 @@
   --label-red-bg: #fbe3e3;
   --label-red-text: #9b1c1c;
 
-  --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  /* No leading system-ui: on Linux it can resolve to a face with no bold (WenQuanYi Zen Hei), so headings
+     would not render bold. Platform UI fonts are named instead. */
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", "Liberation Sans", Arial, sans-serif;
   --text-sm: 0.875rem;
   --text-md: 1rem;
   --text-lg: 1.125rem;
@@ -84,8 +86,8 @@ body {
   background: var(--accent-soft);
 }
 
-h2,
-h3 {
+h1,
+h2 {
   line-height: 1.25;
   text-wrap: balance;
 }
@@ -94,14 +96,17 @@ p {
   text-wrap: pretty;
 }
 
-h2 {
+/* The page title is the largest text on every screen; section headings sit two steps above body, bold. */
+h1 {
   margin: var(--space-6) 0 var(--space-4);
-  font-size: var(--text-xl);
+  font-size: var(--text-2xl);
+  font-weight: 700;
 }
 
-h3 {
+h2 {
   margin: var(--space-6) 0 var(--space-3);
-  font-size: var(--text-lg);
+  font-size: var(--text-xl);
+  font-weight: 600;
 }
 
 a {
@@ -129,19 +134,21 @@ header {
   margin-bottom: var(--space-4);
 }
 
-header h1 {
+/* The app name: not a heading, the page's h1 is its title. */
+header .app-title {
   margin: 0 auto 0 0;
   font-size: var(--text-lg);
+  font-weight: 600;
 }
 
 /* The title is a link to Projects: plain until hovered or focused. */
-header h1 a {
+header .app-title a {
   color: inherit;
   text-decoration: none;
 }
 
-header h1 a:hover,
-header h1 a:focus-visible {
+header .app-title a:hover,
+header .app-title a:focus-visible {
   color: inherit;
   text-decoration: underline;
 }
@@ -361,7 +368,7 @@ label > :is(input, select, textarea) {
   margin: var(--space-6) 0 var(--space-4);
 }
 
-.board-title h2 {
+.board-title h1 {
   min-width: 0;
   margin: 0;
 }
@@ -428,9 +435,8 @@ label > :is(input, select, textarea) {
   margin-bottom: var(--space-3);
 }
 
-.column-header h3 {
+.column-header h2 {
   margin: 0;
-  font-size: var(--text-md);
 }
 
 .column-count {
@@ -614,7 +620,7 @@ label > :is(input, select, textarea) {
   min-width: 0;
 }
 
-.board-sections h3 {
+.board-sections h2 {
   margin-top: 0;
 }
 
@@ -813,9 +819,8 @@ label > :is(input, select, textarea) {
   font-size: var(--text-sm);
 }
 
-.task-page h2 {
+.task-page h1 {
   margin-top: var(--space-2);
-  font-size: var(--text-2xl);
 }
 
 .task-details {
@@ -856,7 +861,7 @@ label > :is(input, select, textarea) {
   border-top: 1px solid var(--border);
 }
 
-.task-section h3 {
+.task-section h2 {
   margin-top: var(--space-4);
 }
 
@@ -898,7 +903,7 @@ label > :is(input, select, textarea) {
 }
 
 /* The calendar: month title with Previous/Next, then a Mon-Sun grid of day cells (blank pads keep day 1 under its
-   weekday). On phones one column of only the days with tasks, each heading spelt out ("Sat 1 January"). */
+   weekday). On phones one column of only the days with tasks, each day spelt out ("Sat 1 January"). */
 .calendar-title {
   display: flex;
   flex-wrap: wrap;
@@ -908,9 +913,8 @@ label > :is(input, select, textarea) {
   margin: var(--space-2) 0 var(--space-4);
 }
 
-.calendar-title h2 {
+.calendar-title h1 {
   margin: 0;
-  font-size: var(--text-2xl);
 }
 
 .calendar-nav {
@@ -961,14 +965,14 @@ label > :is(input, select, textarea) {
   border-color: var(--accent);
 }
 
-.calendar-day h3 {
-  margin: 0;
+.calendar-date {
+  display: block;
   color: var(--muted);
   font-size: var(--text-sm);
   font-weight: 600;
 }
 
-.calendar-day.today h3 {
+.calendar-day.today .calendar-date {
   color: var(--accent);
 }
 

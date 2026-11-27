@@ -225,7 +225,7 @@ export function Board({
             onDrop={(event) => onDrop(event, status)}
           >
             <div className="column-header">
-              <h3 id={headingId}>{name}</h3>
+              <h2 id={headingId}>{name}</h2>
               <span className="column-count">{columnTasks.length}</span>
             </div>
             <ul>
