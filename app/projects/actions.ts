@@ -7,6 +7,7 @@ import { requireUser } from "@/lib/auth";
 import { createProject, deleteProject, getProject, inviteMember, renameProject } from "@/lib/projects";
 import { addChecklistItem, deleteChecklistItem, setChecklistItemDone } from "@/lib/checklist";
 import { addComment } from "@/lib/comments";
+import { isLabelColor } from "@/lib/label-colors";
 import { createLabel, setTaskLabels } from "@/lib/labels";
 import { MAX_CHECKLIST_ITEM_LENGTH, MAX_LABEL_LENGTH, MAX_TITLE_LENGTH } from "@/lib/limits";
 import { isStatus } from "@/lib/statuses";
@@ -159,7 +160,7 @@ export async function addCommentAction(
   return {};
 }
 
-export type LabelFormState = FormState & { values?: { name: string } };
+export type LabelFormState = FormState & { values?: { name: string; color: string } };
 
 const LABEL_ERRORS = {
   "not-found": "Project not found",
@@ -173,13 +174,16 @@ export async function createLabelAction(
 ): Promise<LabelFormState> {
   const user = await requireUser();
   const typed = String(formData.get("name") ?? "");
+  const color = String(formData.get("color") ?? "");
+  const values = { name: typed, color };
   const name = typed.trim();
-  if (!name) return { error: "Label name is required", values: { name: typed } };
+  if (!name) return { error: "Label name is required", values };
   if (name.length > MAX_LABEL_LENGTH) {
-    return { error: `Label name must be at most ${MAX_LABEL_LENGTH} characters`, values: { name: typed } };
+    return { error: `Label name must be at most ${MAX_LABEL_LENGTH} characters`, values };
   }
-  const result = createLabel(user.id, projectId, name);
-  if (result !== "created") return { error: LABEL_ERRORS[result], values: { name: typed } };
+  if (!isLabelColor(color)) return { error: "Pick a colour from the list", values };
+  const result = createLabel(user.id, projectId, name, color);
+  if (result !== "created") return { error: LABEL_ERRORS[result], values };
   revalidatePath(`/projects/${projectId}`);
   return {};
 }

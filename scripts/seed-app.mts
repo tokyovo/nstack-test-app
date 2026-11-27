@@ -23,7 +23,10 @@ const LONG_TITLE = (
 
 const COMMENTED_TITLE = "Pick the new domain name";
 const COMMENT = "Registered relaunch.example.com; the old domain redirects there from Monday.";
-const LABELS = ["Bug", "Design"];
+const LABELS = [
+  { name: "Bug", colour: "Red" },
+  { name: "Design", colour: "Purple" },
+];
 const CHECKLIST = [
   { text: "Write the copy", done: true },
   { text: "Pick screenshots", done: false },
@@ -48,14 +51,14 @@ export async function seed(browser: Browser, baseURL: string): Promise<Seeded> {
   const emptyBoardPath = await ensureProject(page, EMPTY_PROJECT_NAME);
   await page.goto(boardPath);
   await ensureMember(page, MEMBER_EMAIL);
-  for (const name of LABELS) await ensureLabel(page, name);
+  for (const label of LABELS) await ensureLabel(page, label.name, label.colour);
   for (const task of TASKS) await ensureTask(page, task);
   for (const task of TASKS) await ensureColumn(page, task.title, task.column);
   const taskPath = await taskLink(page, COMMENTED_TITLE).getAttribute("href");
   if (!taskPath) throw new Error(`No link for task "${COMMENTED_TITLE}"`);
   await page.goto(taskPath);
   await ensureComment(page, COMMENT);
-  await ensureTaskLabels(page, LABELS);
+  await ensureTaskLabels(page, LABELS.map((label) => label.name));
   for (const item of CHECKLIST) await ensureChecklistItem(page, item.text, item.done);
   await page.context().close();
 
@@ -108,10 +111,13 @@ async function ensureMember(page: Page, email: string) {
   await member.waitFor();
 }
 
-async function ensureLabel(page: Page, name: string) {
+async function ensureLabel(page: Page, name: string, colour: string) {
   const label = page.getByRole("list", { name: "Labels", exact: true }).getByText(name, { exact: true });
   if ((await label.count()) > 0) return;
   await page.getByLabel("Label name").fill(name);
+  // The select's accessible name also holds the picked option ("Colour Gray"), so find it inside the form.
+  const form = page.locator("form").filter({ has: page.getByRole("button", { name: "Create label" }) });
+  await form.getByLabel("Colour").selectOption({ label: colour });
   await page.getByRole("button", { name: "Create label" }).click();
   await label.waitFor();
 }

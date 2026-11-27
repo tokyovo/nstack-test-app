@@ -1,5 +1,6 @@
 import "server-only";
 import { getDb } from "@/lib/db";
+import type { Label } from "@/lib/labels";
 import { getProject } from "@/lib/projects";
 import type { Status } from "@/lib/statuses";
 
@@ -12,7 +13,7 @@ export type Task = {
   assigneeId: number | null;
   assigneeEmail: string | null;
   /** The task's labels in name order (any case). */
-  labels: { id: number; name: string }[];
+  labels: Label[];
   /** Checklist items ticked, and all items; both 0 for a task without a checklist. */
   checklistDone: number;
   checklistTotal: number;
@@ -29,15 +30,15 @@ const TASK_SELECT = `SELECT tasks.id, tasks.title, tasks.description, tasks.stat
 function withLabels(rows: TaskRow[]): Task[] {
   const labels = getDb()
     .prepare(
-      `SELECT task_labels.task_id AS taskId, labels.id, labels.name
+      `SELECT task_labels.task_id AS taskId, labels.id, labels.name, labels.color
        FROM task_labels JOIN labels ON labels.id = task_labels.label_id
        WHERE task_labels.task_id IN (SELECT value FROM json_each(?))
        ORDER BY labels.name COLLATE NOCASE, labels.id`,
     )
-    .all(JSON.stringify(rows.map((row) => row.id))) as { taskId: number; id: number; name: string }[];
+    .all(JSON.stringify(rows.map((row) => row.id))) as (Label & { taskId: number })[];
   return rows.map((row) => ({
     ...row,
-    labels: labels.filter((label) => label.taskId === row.id).map(({ id, name }) => ({ id, name })),
+    labels: labels.filter((label) => label.taskId === row.id).map(({ id, name, color }) => ({ id, name, color })),
   }));
 }
 

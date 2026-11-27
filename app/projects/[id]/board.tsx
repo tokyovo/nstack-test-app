@@ -8,6 +8,7 @@ import { COLUMN_NAMES, STATUSES, neighborStatus, type Status } from "@/lib/statu
 import type { Member } from "@/lib/projects";
 import type { Label } from "@/lib/labels";
 import type { Task } from "@/lib/tasks";
+import { LabelChip } from "./label-chip";
 
 type Props = {
   projectId: number;
@@ -247,8 +248,8 @@ export function Board({
                     {task.labels.length > 0 && (
                       <ul aria-label="Task labels" className="task-labels">
                         {task.labels.map((label) => (
-                          <li key={label.id} className="label">
-                            {label.name}
+                          <li key={label.id}>
+                            <LabelChip label={label} />
                           </li>
                         ))}
                       </ul>

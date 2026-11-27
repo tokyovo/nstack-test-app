@@ -7,6 +7,7 @@ import { listTasks } from "@/lib/tasks";
 import { createLabelAction, createTaskAction, inviteMemberAction, moveTaskAction } from "../actions";
 import { Board } from "./board";
 import { InviteForm } from "./invite-form";
+import { LabelChip } from "./label-chip";
 import { LabelForm } from "./label-form";
 import { TaskForm } from "./task-form";
 
@@ -66,7 +67,9 @@ export default async function ProjectPage({ params, searchParams }: PageProps<"/
           {labels.length === 0 && <p className="section-empty">No labels yet</p>}
           <ul aria-label="Labels" className="plain-list">
             {labels.map((label) => (
-              <li key={label.id}>{label.name}</li>
+              <li key={label.id}>
+                <LabelChip label={label} />
+              </li>
             ))}
           </ul>
           <LabelForm action={createLabelAction.bind(null, project.id)} />
